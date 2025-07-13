@@ -567,12 +567,14 @@ function App() {
         <Dashboard
           profile={profile}
           user={user}
+          supabase={supabase}
           isAdmin={isAdmin}
           showSettings={showSettings}
           setShowSettings={setShowSettings}
           onShowNotifications={() => setShowNotifications(true)}
           onWalletSave={handleWalletSave}
           onLogout={handleLogout}
+          onProfileUpdate={setProfile}
           message={message}
           onShowSendForm={setShowSendForm}
           onShowReleaseForm={setShowReleaseForm}
