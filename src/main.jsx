@@ -7,6 +7,7 @@ import ReleaseForm from './components/ReleaseForm'
 import NotificationsFeed from './components/NotificationsFeed'
 import ManifestoPopup from './components/ManifestoPopup'
 import FloatingGrailButton from './components/FloatingGrailButton'
+import TarotCupsPage from './components/cupgame' // Add this import
 
 function App() {
   // Core state
@@ -23,6 +24,7 @@ function App() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showManifesto, setShowManifesto] = useState(false)
+  const [showCupGame, setShowCupGame] = useState(false) // Add this state
   
   // Form state
   const [formData, setFormData] = useState({
@@ -118,7 +120,11 @@ function App() {
         email: authUser.email,
         name: authUser.user_metadata?.name || '',
         dov_balance: isAdmin ? 1000000 : 0,
-        djr_balance: isAdmin ? 1000000 : 0
+        djr_balance: isAdmin ? 1000000 : 0,
+        // Add default cup game values for new profiles
+        cup_count: 0,
+        tarot_level: 1,
+        merit_count: 0
       }
 
       const { data: createdProfile, error: createError } = await client
@@ -365,6 +371,7 @@ function App() {
     setShowReleaseForm(null)
     setShowNotifications(false)
     setShowManifesto(false)
+    setShowCupGame(false) // Reset cup game state
     setMessage('')
     setFormData({ email: '', password: '', username: '', name: '' })
     setTransferData({ recipient: '', amount: '' })
@@ -510,6 +517,23 @@ function App() {
 
   const isAdmin = profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com'
 
+  // Add cup game view
+  if (user && showCupGame) {
+    return (
+      <>
+        <TarotCupsPage
+          profile={profile}
+          onBack={() => setShowCupGame(false)}
+          supabase={supabase}
+          user={user}
+          onProfileUpdate={(updatedProfile) => setProfile(updatedProfile)}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+      </>
+    )
+  }
+
   // Render based on current view
   if (user && showNotifications && isAdmin) {
     return (
@@ -572,6 +596,7 @@ function App() {
           showSettings={showSettings}
           setShowSettings={setShowSettings}
           onShowNotifications={() => setShowNotifications(true)}
+          onShowCupGame={() => setShowCupGame(true)} // Add this prop
           onWalletSave={handleWalletSave}
           onLogout={handleLogout}
           onProfileUpdate={setProfile}
