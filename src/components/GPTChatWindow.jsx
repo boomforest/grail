@@ -190,7 +190,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   console.log('Rendering chat window');
 
   return (
-    <div className="fixed bottom-20 right-6 w-80 h-96 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-50" style={{ zIndex: 1000 }}>
+    <div className="fixed bottom-20 left-6 w-80 h-96 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-50" style={{ zIndex: 1000 }}>
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-400 to-purple-500 text-white p-4 rounded-t-lg flex justify-between items-center">
         <div className="flex items-center space-x-2">
@@ -219,8 +219,8 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
                 ? 'bg-gray-100 text-gray-800 rounded-bl-none'
                 : 'bg-gradient-to-r from-blue-400 to-purple-500 text-white rounded-br-none'
             }`}>
-              <p className="text-sm text-right">{message.text}</p>
-              <p className={`text-xs mt-1 text-right ${
+              <p className="text-sm">{message.text}</p>
+              <p className={`text-xs mt-1 ${
                 message.isBot ? 'text-gray-500' : 'text-blue-100'
               }`}>
                 {formatTime(message.timestamp)}
@@ -231,7 +231,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
         {isLoading && (
           <div className="flex justify-start">
             <div className="bg-gray-100 text-gray-800 p-3 rounded-lg rounded-bl-none">
-              <div className="flex space-x-1 justify-end">
+              <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -252,9 +252,8 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your message..."
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             disabled={isLoading}
-            style={{ textAlign: 'right' }}
           />
           <button
             onClick={sendMessage}
