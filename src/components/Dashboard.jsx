@@ -15,6 +15,7 @@ function Dashboard({
   setShowSettings,
   onShowNotifications,
   onShowCupGame, // Add this prop
+  onShowSendMeritsForm,
   onWalletSave,
   onLogout,
   onProfileUpdate,
