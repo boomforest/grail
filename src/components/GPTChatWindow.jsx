@@ -50,22 +50,20 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
     setIsLoading(true);
 
     try {
-      console.log('Sending request to OpenAI...');
+      // Debug: Check what key we're actually using
+      console.log('API Key length:', OPENAI_API_KEY.length);
+      console.log('API Key starts with:', OPENAI_API_KEY.substring(0, 20));
+      console.log('API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
       
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
-          'OpenAI-Beta': 'assistants=v1'
+          'Authorization': `Bearer ${OPENAI_API_KEY.trim()}` // Add trim() to remove any whitespace
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
           messages: [
-            {
-              role: 'system',
-              content: `You are an AI assistant for a crypto/token application. User info: Username: ${profile?.username || 'Unknown'}, DOV: ${profile?.dov_balance || 0}, DJR: ${profile?.djr_balance || 0}, Cups: ${profile?.cup_count || 0}, Merits: ${profile?.merit_count || 0}, Palomas: ${profile?.total_palomas_collected || 0}. Help with account questions and app features.`
-            },
             {
               role: 'user',
               content: currentInput
@@ -77,7 +75,6 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
       });
 
       console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -99,19 +96,9 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
     } catch (error) {
       console.error('Full error details:', error);
       
-      let errorText = "Sorry, I'm having trouble connecting. Please try again.";
-      
-      if (error.message.includes('401')) {
-        errorText = "Authentication issue. Let me check the API key...";
-      } else if (error.message.includes('429')) {
-        errorText = "Too many requests. Please wait a moment.";
-      } else if (error.message.includes('403')) {
-        errorText = "Access denied. Please check permissions.";
-      }
-      
       const errorMessage = {
         id: Date.now() + 1,
-        text: errorText,
+        text: "Still having authentication issues. Let me try a different approach...",
         isBot: true,
         timestamp: new Date()
       };
