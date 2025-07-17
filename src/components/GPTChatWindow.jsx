@@ -49,16 +49,34 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
     setIsLoading(true);
 
     try {
-      console.log('Sending request to Netlify function...');
+      console.log('Sending direct request to OpenAI...');
+      console.log('API Key available:', !!OPENAI_API_KEY);
+      console.log('API Key length:', OPENAI_API_KEY ? OPENAI_API_KEY.length : 'undefined');
       
-      const response = await fetch('/.netlify/functions/chat', {
+      if (!OPENAI_API_KEY) {
+        throw new Error('API key not found in environment variables');
+      }
+      
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
         },
         body: JSON.stringify({
-          message: currentInput,
-          profile: profile
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: `You are an AI assistant for a crypto/token application. User info: Username: ${profile?.username || 'Unknown'}, DOV: ${profile?.dov_balance || 0}, DJR: ${profile?.djr_balance || 0}, Cups: ${profile?.cup_count || 0}, Merits: ${profile?.merit_count || 0}, Palomas: ${profile?.total_palomas_collected || 0}. Help with account questions and app features.`
+            },
+            {
+              role: 'user',
+              content: currentInput
+            }
+          ],
+          max_tokens: 150,
+          temperature: 0.7
         })
       });
 
@@ -66,16 +84,16 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Function Error Response:', errorText);
+        console.error('API Error Response:', errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('Function Response:', data);
+      console.log('API Response success!');
       
       const botMessage = {
         id: Date.now() + 1,
-        text: data.response || "I'm sorry, I couldn't process that request.",
+        text: data.choices[0]?.message?.content || "I'm sorry, I couldn't process that request.",
         isBot: true,
         timestamp: new Date()
       };
@@ -84,9 +102,19 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
     } catch (error) {
       console.error('Full error details:', error);
       
+      let errorText = "Sorry, I'm having trouble connecting. Please try again.";
+      
+      if (error.message.includes('API key not found')) {
+        errorText = "API key not configured. Please check environment variables.";
+      } else if (error.message.includes('401')) {
+        errorText = "Authentication failed. Please check your API key.";
+      } else if (error.message.includes('429')) {
+        errorText = "Rate limit exceeded. Please wait a moment.";
+      }
+      
       const errorMessage = {
         id: Date.now() + 1,
-        text: "Sorry, I'm having trouble connecting to the AI service. Please try again.",
+        text: errorText,
         isBot: true,
         timestamp: new Date()
       };
