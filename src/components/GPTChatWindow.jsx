@@ -142,12 +142,23 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
           console.log('Chat button clicked!');
           onToggle();
         }}
-        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-300 z-50"
-        style={{ zIndex: 1000 }}
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white p-3 rounded-full shadow-lg transition-all duration-300"
+        style={{ 
+          zIndex: 9999,
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          width: '56px',
+          height: '56px',
+          background: 'linear-gradient(135deg, #60a5fa 0%, #a855f7 100%)',
+          border: '2px solid rgba(255,255,255,0.3)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.2), 0 0 20px rgba(168,85,247,0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
+        <span style={{ fontSize: '24px' }}>👼</span>
       </button>
     );
   }
