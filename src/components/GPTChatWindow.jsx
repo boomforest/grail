@@ -18,7 +18,8 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   const inputRef = useRef(null);
 
   // Your OpenAI API key
-  const OPENAI_API_KEY = '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'NEKzpQA
+  const OPENAI_API_KEY = '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';
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -66,7 +67,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
           'Authorization': `Bearer ${OPENAI_API_KEY}`
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo', // or 'gpt-4' if you have access
+          model: 'gpt-3.5-turbo',
           messages: [
             {
               role: 'system',
@@ -168,7 +169,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
           onError={(e) => {
             // Fallback to angel emoji if image doesn't load
             e.target.style.display = 'none';
-            e.target.nextSibling.style.display = 'block';
+            e.target.nextSibling.style.display = 'flex';
           }}
         />
         <span style={{ 
@@ -194,12 +195,12 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
       style={{ 
         zIndex: 9999,
         position: 'fixed',
-        bottom: '90px', // Above the 64px button + some spacing
-        right: '24px',  // Same alignment as button
-        width: '300px', // Smaller width
-        height: '400px', // Fixed height
-        maxWidth: '90vw', // Don't exceed viewport
-        maxHeight: '70vh' // Don't exceed viewport
+        bottom: '90px',
+        right: '24px',
+        width: '300px',
+        height: '400px',
+        maxWidth: '90vw',
+        maxHeight: '70vh'
       }}
     >
       {/* Header */}
