@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
-  // Add debugging
   console.log('GPTChatWindow rendered with:', { isOpen, profile: profile?.username });
 
   const [messages, setMessages] = useState([
@@ -50,7 +49,6 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
     setIsLoading(true);
 
     try {
-      // Debug: Check what key we're actually using
       console.log('API Key length:', OPENAI_API_KEY.length);
       console.log('API Key starts with:', OPENAI_API_KEY.substring(0, 20));
       console.log('API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
@@ -59,11 +57,15 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY.trim()}` // Add trim() to remove any whitespace
+          'Authorization': `Bearer ${OPENAI_API_KEY.trim()}`
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
           messages: [
+            {
+              role: 'system',
+              content: `You are an AI assistant for a crypto/token application. User info: Username: ${profile?.username || 'Unknown'}, DOV: ${profile?.dov_balance || 0}, DJR: ${profile?.djr_balance || 0}, Cups: ${profile?.cup_count || 0}, Merits: ${profile?.merit_count || 0}, Palomas: ${profile?.total_palomas_collected || 0}. Help with account questions and app features.`
+            },
             {
               role: 'user',
               content: currentInput
@@ -98,7 +100,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
       
       const errorMessage = {
         id: Date.now() + 1,
-        text: "Still having authentication issues. Let me try a different approach...",
+        text: "Having authentication issues. The API key might need to be refreshed.",
         isBot: true,
         timestamp: new Date()
       };
@@ -119,7 +121,6 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
     return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Debug the render decision
   console.log('Rendering chat button, isOpen:', isOpen);
 
   if (!isOpen) {
@@ -154,7 +155,6 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
             cursor: 'pointer'
           }}
           onError={(e) => {
-            // Fallback to angel emoji if image doesn't load
             e.target.style.display = 'none';
             e.target.nextSibling.style.display = 'flex';
           }}
