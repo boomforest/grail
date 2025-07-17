@@ -306,7 +306,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           </div>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
             <button
-              onClick={() => awardMerit(profile?.id)}
+              onClick={() => awardMerit(user?.id)}
               disabled={loading}
               style={{
                 background: 'linear-gradient(135deg, #28a745, #20c997)',
