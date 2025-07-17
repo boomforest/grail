@@ -26,13 +26,30 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    // Debug: Check if API key is available
+    const apiKey = process.env.OPENAI_API_KEY;
+    console.log('API Key available:', !!apiKey);
+    console.log('API Key length:', apiKey ? apiKey.length : 'undefined');
+    console.log('API Key starts with:', apiKey ? apiKey.substring(0, 20) : 'undefined');
+    
+    if (!apiKey) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          error: 'OpenAI API key not configured',
+          debug: 'Environment variable OPENAI_API_KEY is missing'
+        })
+      };
+    }
+
     const { message, profile } = JSON.parse(event.body);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
@@ -54,7 +71,14 @@ exports.handler = async (event, context) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI Error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          error: 'OpenAI API error',
+          details: `${response.status}: ${errorText}`
+        })
+      };
     }
 
     const data = await response.json();
