@@ -18,8 +18,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   const inputRef = useRef(null);
 
   // Your OpenAI API key
-  const OPENAI_API_KEY = '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';
-
+  const OPENAI_API_KEY = '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
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -190,31 +189,43 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   console.log('Rendering chat window');
 
   return (
-    <div className="fixed bottom-20 right-6 w-80 h-96 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-50" style={{ zIndex: 1000 }}>
+    <div 
+      className="fixed bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col"
+      style={{ 
+        zIndex: 9999,
+        position: 'fixed',
+        bottom: '90px', // Above the 64px button + some spacing
+        right: '24px',  // Same alignment as button
+        width: '300px', // Smaller width
+        height: '400px', // Fixed height
+        maxWidth: '90vw', // Don't exceed viewport
+        maxHeight: '70vh' // Don't exceed viewport
+      }}
+    >
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-400 to-purple-500 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <div className="bg-gradient-to-r from-blue-400 to-purple-500 text-white p-3 rounded-t-lg flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <span style={{ fontSize: '16px' }}>👼</span>
-          <span className="font-medium">AI Assistant</span>
+          <span style={{ fontSize: '14px' }}>👼</span>
+          <span className="font-medium text-sm">AI Assistant</span>
         </div>
         <button
           onClick={onToggle}
           className="text-white hover:text-gray-200 transition-colors"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}
           >
-            <div className={`max-w-xs p-3 rounded-lg ${
+            <div className={`max-w-[200px] p-2 rounded-lg text-sm ${
               message.isBot
                 ? 'bg-gray-100 text-gray-800 rounded-bl-none'
                 : 'bg-gradient-to-r from-blue-400 to-purple-500 text-white rounded-br-none'
@@ -230,7 +241,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 text-gray-800 p-3 rounded-lg rounded-bl-none">
+            <div className="bg-gray-100 text-gray-800 p-2 rounded-lg rounded-bl-none">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -243,7 +254,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
       </div>
 
       {/* Input */}
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t border-gray-200 p-3">
         <div className="flex space-x-2">
           <input
             ref={inputRef}
@@ -251,14 +262,14 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            placeholder="Type message..."
+            className="flex-1 border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             disabled={isLoading}
           />
           <button
             onClick={sendMessage}
             disabled={!inputMessage.trim() || isLoading}
-            className="bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg transition-colors"
+            className="bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 disabled:bg-gray-300 text-white px-3 py-1 rounded-lg transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
