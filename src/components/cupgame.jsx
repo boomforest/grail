@@ -13,6 +13,51 @@ const getTarotCardName = (level) => {
 function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [allProfiles, setAllProfiles] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [selectedUser, setSelectedUser] = useState(null)
+
+  // Load all profiles for search
+  useEffect(() => {
+    const loadProfiles = async () => {
+      if (!supabase) return
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, username, cup_count, tarot_level, merit_count')
+          .order('username')
+        
+        if (error) throw error
+        setAllProfiles(data || [])
+      } catch (error) {
+        console.error('Error loading profiles:', error)
+      }
+    }
+    
+    loadProfiles()
+  }, [supabase])
+
+  // Search users as they type
+  const handleSearchChange = (value) => {
+    setSearchTerm(value)
+    
+    if (value.length > 0) {
+      const filtered = allProfiles.filter(profile => 
+        profile.username.toLowerCase().includes(value.toLowerCase())
+      ).slice(0, 5) // Show max 5 results
+      setSearchResults(filtered)
+    } else {
+      setSearchResults([])
+    }
+  }
+
+  const selectUser = (profile) => {
+    setSelectedUser(profile)
+    setSearchTerm(profile.username)
+    setSearchResults([])
+  }
 
   // Admin function to award merit
   const awardMerit = async (userId, reason = 'Good community contribution') => {
@@ -24,7 +69,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
       // Get current profile
       const { data: currentProfile, error: fetchError } = await supabase
         .from('profiles')
-        .select('merit_count, tarot_level, cup_count')
+        .select('merit_count, tarot_level, cup_count, username')
         .eq('id', userId)
         .single()
 
@@ -32,7 +77,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
 
       // Can only earn merits if you have at least 1 cup
       if ((currentProfile.cup_count || 0) < 1) {
-        setMessage('Need at least 1 cup to start earning merits!')
+        setMessage('This user needs at least 1 cup to receive merits!')
         return
       }
 
@@ -73,19 +118,28 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           new_tarot_level: newMeritCount >= 3 && (currentProfile.cup_count || 0) >= 1 ? currentTarotLevel + 1 : currentTarotLevel
         }])
 
-      // Update parent component with new profile
-      if (onProfileUpdate) {
+      // Update parent component if it's the current user
+      if (userId === user.id && onProfileUpdate) {
         const updatedProfile = {
-          ...currentProfile,
+          ...profile,
           ...updateData
         }
         onProfileUpdate(updatedProfile)
       }
 
+      // Show success message
+      const recipientName = userId === user.id ? 'You' : currentProfile.username
       if (newMeritCount >= 3 && (currentProfile.cup_count || 0) >= 1) {
-        setMessage(`Merit awarded! Tarot level up to ${getTarotCardName(currentTarotLevel + 1)}! 🎉`)
+        setMessage(`Merit awarded to ${recipientName}! Tarot level up to ${getTarotCardName(currentTarotLevel + 1)}! 🎉`)
       } else {
-        setMessage('Merit awarded! 🌟')
+        setMessage(`Merit awarded to ${recipientName}! 🌟`)
+      }
+
+      // Clear search if awarding to someone else
+      if (userId !== user.id) {
+        setSearchTerm('')
+        setSelectedUser(null)
+        setSearchResults([])
       }
       
     } catch (error) {
@@ -95,6 +149,8 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
       setLoading(false)
     }
   }
+
+  const isAdmin = profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com'
 
   return (
     <div style={{
@@ -136,9 +192,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             color: '#8b5a3c',
             marginBottom: '1rem'
           }}>
-            {(profile?.tarot_level || 1) === 1 ? 
-              getTarotCardName(profile?.tarot_level || 1) : 
-              getTarotCardName(profile?.tarot_level || 1)}
+            {getTarotCardName(profile?.tarot_level || 1)}
           </div>
           <div style={{
             fontSize: '0.9rem',
@@ -289,41 +343,138 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
         )}
 
         {/* Admin Controls Section */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.6)',
-          borderRadius: '16px',
-          padding: '1.5rem',
-          border: '1px solid rgba(210, 105, 30, 0.2)',
-          marginBottom: '2rem'
-        }}>
+        {isAdmin && (
           <div style={{
-            fontSize: '1rem',
-            fontWeight: '500',
-            color: '#8b5a3c',
-            marginBottom: '1rem'
+            background: 'rgba(255, 255, 255, 0.6)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            border: '1px solid rgba(210, 105, 30, 0.2)',
+            marginBottom: '2rem'
           }}>
-            Admin Controls
-          </div>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            <button
-              onClick={() => awardMerit(user?.id)}
-              disabled={loading}
-              style={{
-                background: 'linear-gradient(135deg, #28a745, #20c997)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '0.8rem 1.5rem',
+            <div style={{
+              fontSize: '1rem',
+              fontWeight: '500',
+              color: '#8b5a3c',
+              marginBottom: '1rem'
+            }}>
+              Admin Controls
+            </div>
+            
+            {/* Award Merit to Self */}
+            <div style={{ 
+              display: 'flex', 
+              gap: '1rem', 
+              justifyContent: 'center',
+              marginBottom: '1.5rem'
+            }}>
+              <button
+                onClick={() => awardMerit(user?.id)}
+                disabled={loading}
+                style={{
+                  background: 'linear-gradient(135deg, #28a745, #20c997)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '0.8rem 1.5rem',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  opacity: loading ? 0.5 : 1
+                }}
+              >
+                Award Merit to Self
+              </button>
+            </div>
+
+            {/* Search User to Award Merit */}
+            <div style={{ position: 'relative' }}>
+              <label style={{
+                display: 'block',
+                marginBottom: '0.5rem',
                 fontSize: '0.9rem',
-                cursor: 'pointer',
                 fontWeight: '500',
-                opacity: loading ? 0.5 : 1
-              }}
-            >
-              Award Merit
-            </button>
+                color: '#8b5a3c'
+              }}>
+                Award Merit to User
+              </label>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Search username..."
+                style={{
+                  width: '100%',
+                  padding: '0.8rem',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(210, 105, 30, 0.3)',
+                  fontSize: '1rem',
+                  backgroundColor: 'white',
+                  color: '#8b5a3c',
+                  marginBottom: '1rem'
+                }}
+              />
+              
+              {/* Search Results */}
+              {searchResults.length > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  backgroundColor: 'white',
+                  border: '1px solid rgba(210, 105, 30, 0.3)',
+                  borderRadius: '12px',
+                  marginTop: '-1rem',
+                  marginBottom: '1rem',
+                  boxShadow: '0 4px 20px rgba(139, 90, 60, 0.1)',
+                  zIndex: 1000
+                }}>
+                  {searchResults.map((profile, index) => (
+                    <div
+                      key={profile.id}
+                      onClick={() => selectUser(profile)}
+                      style={{
+                        padding: '0.8rem',
+                        cursor: 'pointer',
+                        borderBottom: index < searchResults.length - 1 ? '1px solid rgba(210, 105, 30, 0.1)' : 'none',
+                        fontSize: '0.9rem',
+                        color: '#8b5a3c'
+                      }}
+                      onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(210, 105, 30, 0.1)'}
+                      onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+                    >
+                      <div style={{ fontWeight: '500' }}>{profile.username}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#a0785a' }}>
+                        {profile.cup_count || 0} cups • Level {profile.tarot_level || 1} • {profile.merit_count || 0} merits
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Award Merit Button */}
+              <button
+                onClick={() => selectedUser && awardMerit(selectedUser.id)}
+                disabled={loading || !selectedUser}
+                style={{
+                  width: '100%',
+                  padding: '0.8rem',
+                  backgroundColor: loading || !selectedUser ? '#cccccc' : '#f39c12',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  fontSize: '0.9rem',
+                  cursor: loading || !selectedUser ? 'not-allowed' : 'pointer',
+                  fontWeight: '500'
+                }}
+              >
+                {loading ? 'Awarding Merit...' : 
+                 selectedUser ? `Award Merit to ${selectedUser.username}` : 
+                 'Select a user to award merit'}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
