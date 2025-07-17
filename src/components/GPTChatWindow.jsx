@@ -142,23 +142,41 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
           console.log('Chat button clicked!');
           onToggle();
         }}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white p-3 rounded-full shadow-lg transition-all duration-300"
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white rounded-full shadow-lg transition-all duration-300"
         style={{ 
           zIndex: 9999,
           position: 'fixed',
           bottom: '24px',
           right: '24px',
-          width: '56px',
-          height: '56px',
+          width: '64px',
+          height: '64px',
           background: 'linear-gradient(135deg, #60a5fa 0%, #a855f7 100%)',
-          border: '2px solid rgba(255,255,255,0.3)',
+          border: '3px solid rgba(255,255,255,0.8)',
           boxShadow: '0 4px 20px rgba(0,0,0,0.2), 0 0 20px rgba(168,85,247,0.3)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          padding: '4px',
+          overflow: 'hidden'
         }}
       >
-        <span style={{ fontSize: '24px' }}>👼</span>
+        <img 
+          src="/virgil.png" 
+          alt="Virgil"
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            objectFit: 'cover',
+            filter: 'grayscale(20%) contrast(110%) brightness(110%)'
+          }}
+          onError={(e) => {
+            // Fallback to angel emoji if image doesn't load
+            e.target.style.display = 'none';
+            e.target.nextSibling.style.display = 'block';
+          }}
+        />
+        <span style={{ fontSize: '28px', display: 'none' }}>👼</span>
       </button>
     );
   }
@@ -166,11 +184,11 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   console.log('Rendering chat window');
 
   return (
-    <div className="fixed bottom-6 right-6 w-80 h-96 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-50" style={{ zIndex: 1000 }}>
+    <div className="fixed bottom-20 right-6 w-80 h-96 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-50" style={{ zIndex: 1000 }}>
       {/* Header */}
-      <div className="bg-blue-600 text-white p-4 rounded-t-lg flex justify-between items-center">
+      <div className="bg-gradient-to-r from-blue-400 to-purple-500 text-white p-4 rounded-t-lg flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+          <span style={{ fontSize: '16px' }}>👼</span>
           <span className="font-medium">AI Assistant</span>
         </div>
         <button
@@ -192,11 +210,11 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
           >
             <div className={`max-w-xs p-3 rounded-lg ${
               message.isBot
-                ? 'bg-gray-100 text-gray-800'
-                : 'bg-blue-600 text-white'
+                ? 'bg-gray-100 text-gray-800 rounded-bl-none'
+                : 'bg-gradient-to-r from-blue-400 to-purple-500 text-white rounded-br-none'
             }`}>
-              <p className="text-sm">{message.text}</p>
-              <p className={`text-xs mt-1 ${
+              <p className="text-sm text-right">{message.text}</p>
+              <p className={`text-xs mt-1 text-right ${
                 message.isBot ? 'text-gray-500' : 'text-blue-100'
               }`}>
                 {formatTime(message.timestamp)}
@@ -206,8 +224,8 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 text-gray-800 p-3 rounded-lg">
-              <div className="flex space-x-1">
+            <div className="bg-gray-100 text-gray-800 p-3 rounded-lg rounded-bl-none">
+              <div className="flex space-x-1 justify-end">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -228,13 +246,14 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your message..."
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
             disabled={isLoading}
+            style={{ textAlign: 'right' }}
           />
           <button
             onClick={sendMessage}
             disabled={!inputMessage.trim() || isLoading}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg transition-colors"
+            className="bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
