@@ -48,6 +48,61 @@ function App() {
   const [isTransferring, setIsTransferring] = useState(false)
   const [isReleasing, setIsReleasing] = useState(false)
 
+  // Sync cups function
+  const syncCupsFromPalomas = async (userId) => {
+    if (!supabase || !userId) return
+
+    try {
+      // Get current profile data
+      const { data: profile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('total_palomas_collected, cup_count')
+        .eq('id', userId)
+        .single()
+
+      if (fetchError) {
+        console.error('Error fetching profile for cup sync:', fetchError)
+        return
+      }
+
+      // Calculate cups earned from total palomas
+      const cupsEarned = Math.floor((profile.total_palomas_collected || 0) / 100)
+      const currentCups = profile.cup_count || 0
+
+      // Only update if there's a difference
+      if (cupsEarned !== currentCups) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            cup_count: cupsEarned,
+            last_status_update: new Date().toISOString()
+          })
+          .eq('id', userId)
+
+        if (updateError) {
+          console.error('Error syncing cups:', updateError)
+        } else {
+          console.log(`Synced cups for user ${userId}: ${currentCups} → ${cupsEarned}`)
+          
+          // Log the cup sync if there was an increase
+          if (cupsEarned > currentCups) {
+            await supabase
+              .from('cup_logs')
+              .insert([{
+                user_id: userId,
+                awarded_by: userId,
+                amount: cupsEarned - currentCups,
+                reason: `Synced cups from ${profile.total_palomas_collected} total Palomas collected`,
+                cup_count_after: cupsEarned
+              }])
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in syncCupsFromPalomas:', error)
+    }
+  }
+
   useEffect(() => {
     const initSupabase = async () => {
       try {
@@ -108,6 +163,8 @@ function App() {
 
       if (existingProfile) {
         setProfile(existingProfile)
+        // Sync cups when user logs in
+        await syncCupsFromPalomas(authUser.id)
         return existingProfile
       }
 
@@ -124,7 +181,8 @@ function App() {
         // Add default cup game values for new profiles
         cup_count: 0,
         tarot_level: 1,
-        merit_count: 0
+        merit_count: 0,
+        total_palomas_collected: isAdmin ? 1000000 : 0
       }
 
       const { data: createdProfile, error: createError } = await client
@@ -140,6 +198,8 @@ function App() {
 
       setProfile(createdProfile)
       setMessage('Profile created successfully!')
+      // Sync cups for new profile
+      await syncCupsFromPalomas(authUser.id)
       return createdProfile
     } catch (error) {
       setMessage('Error creating profile: ' + error.message)
@@ -532,7 +592,11 @@ function App() {
           onBack={() => setShowCupGame(false)}
           supabase={supabase}
           user={user}
-          onProfileUpdate={(updatedProfile) => setProfile(updatedProfile)}
+          onProfileUpdate={(updatedProfile) => {
+            setProfile(updatedProfile)
+            // Sync cups when profile updates in cup game
+            syncCupsFromPalomas(user.id)
+          }}
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
@@ -602,7 +666,11 @@ function App() {
           showSettings={showSettings}
           setShowSettings={setShowSettings}
           onShowNotifications={() => setShowNotifications(true)}
-          onShowCupGame={() => setShowCupGame(true)} // Add this prop
+          onShowCupGame={() => {
+            setShowCupGame(true)
+            // Sync cups when opening cup game
+            syncCupsFromPalomas(user.id)
+          }}
           onWalletSave={handleWalletSave}
           onLogout={handleLogout}
           onProfileUpdate={setProfile}
