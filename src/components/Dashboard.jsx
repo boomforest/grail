@@ -74,17 +74,35 @@ function Dashboard({
               {profile?.username || 'User'}
             </div>
             {isAdmin && (
-              <button
-                onClick={onShowNotifications}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1rem',
-                  cursor: 'pointer'
-                }}
-              >
-                🔔
-              </button>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}>
+                <button
+                  onClick={onShowNotifications}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '1rem',
+                    cursor: 'pointer'
+                  }}
+                >
+                  🔔
+                </button>
+                <button
+                  onClick={onShowSendMeritsForm}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '1rem',
+                    cursor: 'pointer'
+                  }}
+                  title="Send Merits"
+                >
+                  ⭐
+                </button>
+              </div>
             )}
           </div>
 
