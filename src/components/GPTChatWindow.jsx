@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
+  // Add debugging
+  console.log('GPTChatWindow rendered with:', { isOpen, profile: profile?.username });
+
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -129,10 +132,16 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
     return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Debug the render decision
+  console.log('Rendering chat button, isOpen:', isOpen);
+
   if (!isOpen) {
     return (
       <button
-        onClick={onToggle}
+        onClick={() => {
+          console.log('Chat button clicked!');
+          onToggle();
+        }}
         className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-all duration-300 z-50"
         style={{ zIndex: 1000 }}
       >
@@ -142,6 +151,8 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
       </button>
     );
   }
+
+  console.log('Rendering chat window');
 
   return (
     <div className="fixed bottom-6 right-6 w-80 h-96 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-50" style={{ zIndex: 1000 }}>
