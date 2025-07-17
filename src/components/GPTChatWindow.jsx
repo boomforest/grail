@@ -17,7 +17,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   const inputRef = useRef(null);
 
   // Use environment variable for API key (secure approach)
-  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;y4U-AGHcDS23SQ1bSq9qekmxi4jttsSoxf6IxjgDNGwD3gMySSPK8AV8Wcfy2Z3nmagwQA';
+  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
