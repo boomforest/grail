@@ -6,7 +6,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Congratulations! I am Virgil, the in-app guide and philosophical steward of Casa de Copas. How can I assist you today in navigating our creative sanctuary?",
+      text: "Salutations! I am Virgil, the in-app guide and philosophical steward of Casa de Copas. How can I assist you today in navigating our creative sanctuary?",
       isBot: true,
       timestamp: new Date()
     }
@@ -251,7 +251,12 @@ NEVER provide financial, legal, or medical advice.`
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ 
+        maxHeight: '280px', 
+        minHeight: '280px',
+        overflowY: 'auto',
+        scrollBehavior: 'smooth'
+      }}>
         {messages.map((message) => (
           <div
             key={message.id}
