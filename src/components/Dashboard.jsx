@@ -14,6 +14,7 @@ function Dashboard({
   showSettings,
   setShowSettings,
   onShowNotifications,
+  onShowCupGame, // Add this prop
   onWalletSave,
   onLogout,
   onProfileUpdate,
@@ -92,16 +93,53 @@ function Dashboard({
             </div>
           </div>
 
-          {/* Center - Username */}
+          {/* Center - Username AND Trophy Button */}
           <div style={{
-            background: 'rgba(255, 255, 255, 0.9)',
-            borderRadius: '20px',
-            padding: '0.5rem 1rem',
-            fontSize: '0.9rem',
-            fontWeight: '500',
-            color: '#8b4513'
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem'
           }}>
-            {profile?.username || 'User'}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '20px',
+              padding: '0.5rem 1rem',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              color: '#8b4513'
+            }}>
+              {profile?.username || 'User'}
+            </div>
+            
+            {/* Trophy Button */}
+            <button
+              onClick={onShowCupGame}
+              style={{
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: '2px solid #d2691e',
+                borderRadius: '50%',
+                width: '50px',
+                height: '50px',
+                fontSize: '24px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)',
+                transition: 'all 0.3s ease',
+                color: '#d2691e'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'scale(1.1)'
+                e.target.style.boxShadow = '0 6px 20px rgba(210, 105, 30, 0.4)'
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'scale(1)'
+                e.target.style.boxShadow = '0 4px 15px rgba(210, 105, 30, 0.3)'
+              }}
+              title="Cup Game"
+            >
+              🏆
+            </button>
           </div>
 
           {/* Right side - Hanglight link */}
