@@ -142,7 +142,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
           console.log('Chat button clicked!');
           onToggle();
         }}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white rounded-full shadow-lg transition-all duration-300"
+        className="fixed bottom-6 right-6 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl"
         style={{ 
           zIndex: 9999,
           position: 'fixed',
@@ -150,13 +150,9 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
           right: '24px',
           width: '64px',
           height: '64px',
-          background: 'linear-gradient(135deg, #60a5fa 0%, #a855f7 100%)',
-          border: '3px solid rgba(255,255,255,0.8)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.2), 0 0 20px rgba(168,85,247,0.3)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '4px',
+          border: 'none',
+          background: 'none',
+          padding: '0',
           overflow: 'hidden'
         }}
       >
@@ -168,7 +164,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
             height: '100%',
             borderRadius: '50%',
             objectFit: 'cover',
-            filter: 'grayscale(20%) contrast(110%) brightness(110%)'
+            cursor: 'pointer'
           }}
           onError={(e) => {
             // Fallback to angel emoji if image doesn't load
@@ -176,7 +172,17 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
             e.target.nextSibling.style.display = 'block';
           }}
         />
-        <span style={{ fontSize: '28px', display: 'none' }}>👼</span>
+        <span style={{ 
+          fontSize: '28px', 
+          display: 'none',
+          width: '64px',
+          height: '64px',
+          borderRadius: '50%',
+          backgroundColor: '#8b5cf6',
+          color: 'white',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>👼</span>
       </button>
     );
   }
