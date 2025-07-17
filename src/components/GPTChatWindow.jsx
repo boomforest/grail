@@ -6,7 +6,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm your AI assistant. How can I help you today?",
+      text: "Congratulations! I am Virgil, the in-app guide and philosophical steward of Casa de Copas. How can I assist you today in navigating our creative sanctuary?",
       isBot: true,
       timestamp: new Date()
     }
