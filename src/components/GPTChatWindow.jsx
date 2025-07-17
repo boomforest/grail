@@ -16,8 +16,8 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Your OpenAI API key
-  const OPENAI_API_KEY = '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';
+  // Your OpenAI API key from environment variables
+  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
