@@ -190,7 +190,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   console.log('Rendering chat window');
 
   return (
-    <div className="fixed bottom-20 left-6 w-80 h-96 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-50" style={{ zIndex: 1000 }}>
+    <div className="fixed bottom-20 right-6 w-80 h-96 bg-white rounded-lg shadow-xl border border-gray-200 flex flex-col z-50" style={{ zIndex: 1000 }}>
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-400 to-purple-500 text-white p-4 rounded-t-lg flex justify-between items-center">
         <div className="flex items-center space-x-2">
