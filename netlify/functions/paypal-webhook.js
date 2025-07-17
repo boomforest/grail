@@ -1,5 +1,4 @@
 // Save this as: netlify/functions/paypal-webhook.js
-
 import { createClient } from '@supabase/supabase-js'
 
 export const handler = async (event, context) => {
@@ -26,7 +25,7 @@ export const handler = async (event, context) => {
       // Calculate DOV tokens ($1 = 1 DOV)
       const dovTokens = amount
       
-      console.log(`Payment: ${amount} -> ${dovTokens} DOV for user ${userId}`)
+      console.log(`Payment: $${amount} -> ${dovTokens} DOV for user ${userId}`)
       
       if (userId) {
         // Initialize Supabase client
@@ -35,10 +34,10 @@ export const handler = async (event, context) => {
           process.env.SUPABASE_SERVICE_KEY
         )
         
-        // Update user's DOV balance
-        const { data, error } = await supabase
+        // Get current user profile
+        const { data: profile, error } = await supabase
           .from('profiles')
-          .select('dov_balance, username')
+          .select('dov_balance, total_palomas_collected, username')
           .eq('id', userId)
           .single()
         
@@ -50,12 +49,18 @@ export const handler = async (event, context) => {
           }
         }
         
-        // Add tokens to existing balance
-        const newBalance = (data.dov_balance || 0) + dovTokens
+        // Calculate new balances
+        const newDovBalance = (profile.dov_balance || 0) + dovTokens
+        const newTotalPalomas = (profile.total_palomas_collected || 0) + dovTokens
         
+        // Update both DOV balance and total palomas collected
         const { error: updateError } = await supabase
           .from('profiles')
-          .update({ dov_balance: newBalance })
+          .update({ 
+            dov_balance: newDovBalance,
+            total_palomas_collected: newTotalPalomas,
+            last_status_update: new Date().toISOString()
+          })
           .eq('id', userId)
         
         if (updateError) {
@@ -66,32 +71,58 @@ export const handler = async (event, context) => {
           }
         }
         
-        console.log(`SUCCESS: Added ${dovTokens} DOV to ${data.username}. New balance: ${newBalance}`)
+        console.log(`SUCCESS: Added ${dovTokens} DOV to ${profile.username}`)
+        console.log(`New DOV balance: ${newDovBalance}`)
+        console.log(`Total Palomas collected: ${newTotalPalomas}`)
+        console.log(`Cups will be synced automatically: ${Math.floor(newTotalPalomas / 100)}`)
         
-        // Optional: Log the transaction
-        await supabase
-          .from('transactions')
-          .insert([{
-            user_id: userId,
-            type: 'purchase',
-            amount: dovTokens,
-            token_type: 'DOV',
-            paypal_payment_id: payment.id,
-            usd_amount: amount
-          }])
+        // Log the transaction (optional - only if transactions table exists)
+        try {
+          await supabase
+            .from('transactions')
+            .insert([{
+              user_id: userId,
+              type: 'purchase',
+              amount: dovTokens,
+              token_type: 'DOV',
+              paypal_payment_id: payment.id,
+              usd_amount: amount,
+              created_at: new Date().toISOString()
+            }])
+        } catch (transactionError) {
+          // Don't fail the webhook if transaction logging fails
+          console.log('Transaction logging failed (table may not exist):', transactionError)
+        }
+        
+        return {
+          statusCode: 200,
+          body: JSON.stringify({ 
+            success: true, 
+            message: `Added ${dovTokens} DOV tokens`,
+            total_palomas: newTotalPalomas,
+            cups_available: Math.floor(newTotalPalomas / 100)
+          })
+        }
+      } else {
+        console.error('No user ID found in payment.custom_id')
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ error: 'No user ID provided' })
+        }
       }
-    }
-    
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ success: true })
+    } else {
+      console.log(`Ignoring event type: ${payload.event_type}`)
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: 'Event type not handled' })
+      }
     }
     
   } catch (error) {
     console.error('Webhook error:', error)
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Webhook processing failed' })
+      body: JSON.stringify({ error: 'Webhook processing failed', details: error.message })
     }
   }
 }
