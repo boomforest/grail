@@ -4,6 +4,7 @@ import LoginForm from './components/LoginForm'
 import Dashboard from './components/Dashboard'
 import SendForm from './components/SendForm'
 import ReleaseForm from './components/ReleaseForm'
+import SendMeritsForm from './components/SendMeritsForm'
 import NotificationsFeed from './components/NotificationsFeed'
 import ManifestoPopup from './components/ManifestoPopup'
 import FloatingGrailButton from './components/FloatingGrailButton'
@@ -21,6 +22,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('login')
   const [showSendForm, setShowSendForm] = useState(null)
   const [showReleaseForm, setShowReleaseForm] = useState(null)
+  const [showSendMeritsForm, setShowSendMeritsForm] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showManifesto, setShowManifesto] = useState(false)
@@ -429,6 +431,7 @@ function App() {
     setShowSettings(false)
     setShowSendForm(null)
     setShowReleaseForm(null)
+    setShowSendMeritsForm(false)
     setShowNotifications(false)
     setShowManifesto(false)
     setShowCupGame(false) // Reset cup game state
@@ -583,6 +586,23 @@ function App() {
 
   const isAdmin = profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com'
 
+  // Add send merits view
+  if (user && showSendMeritsForm && isAdmin) {
+    return (
+      <>
+        <SendMeritsForm
+          onBack={() => setShowSendMeritsForm(false)}
+          message={message}
+          supabase={supabase}
+          user={user}
+          allProfiles={allProfiles}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+      </>
+    )
+  }
+
   // Add cup game view
   if (user && showCupGame) {
     return (
@@ -675,6 +695,7 @@ function App() {
           onLogout={handleLogout}
           onProfileUpdate={setProfile}
           message={message}
+          onShowSendMeritsForm={() => setShowSendMeritsForm(true)}
           onShowSendForm={setShowSendForm}
           onShowReleaseForm={setShowReleaseForm}
         />
