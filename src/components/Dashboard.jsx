@@ -295,10 +295,28 @@ function Dashboard({
                 fontWeight: '500',
                 cursor: 'pointer',
                 boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)',
-                width: '200px'
+                width: '200px',
+                position: 'relative'
               }}
+              title="Earn 1 cup for every 100 Palomas collected!"
             >
               Collect
+              <div style={{
+                position: 'absolute',
+                top: '-8px',
+                right: '-8px',
+                fontSize: '16px',
+                background: 'rgba(255, 255, 255, 0.9)',
+                borderRadius: '50%',
+                width: '24px',
+                height: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid #d2691e'
+              }}>
+                🏆
+              </div>
             </button>
           </div>
         </div>
