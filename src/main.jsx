@@ -8,7 +8,8 @@ import SendMeritsForm from './components/SendMeritsForm'
 import NotificationsFeed from './components/NotificationsFeed'
 import ManifestoPopup from './components/ManifestoPopup'
 import FloatingGrailButton from './components/FloatingGrailButton'
-import TarotCupsPage from './components/cupgame' // Add this import
+import TarotCupsPage from './components/cupgame'
+import GPTChatWindow from './components/GPTChatWindow' // ADD THIS IMPORT
 
 function App() {
   // Core state
@@ -26,7 +27,8 @@ function App() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showManifesto, setShowManifesto] = useState(false)
-  const [showCupGame, setShowCupGame] = useState(false) // Add this state
+  const [showCupGame, setShowCupGame] = useState(false)
+  const [showGPTChat, setShowGPTChat] = useState(false) // ADD THIS STATE
   
   // Form state
   const [formData, setFormData] = useState({
@@ -49,6 +51,11 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [isTransferring, setIsTransferring] = useState(false)
   const [isReleasing, setIsReleasing] = useState(false)
+
+  // ADD THIS FUNCTION
+  const toggleGPTChat = () => {
+    setShowGPTChat(prev => !prev)
+  }
 
   // Sync cups function
   const syncCupsFromPalomas = async (userId) => {
@@ -434,7 +441,8 @@ function App() {
     setShowSendMeritsForm(false)
     setShowNotifications(false)
     setShowManifesto(false)
-    setShowCupGame(false) // Reset cup game state
+    setShowCupGame(false)
+    setShowGPTChat(false) // ADD THIS LINE
     setMessage('')
     setFormData({ email: '', password: '', username: '', name: '' })
     setTransferData({ recipient: '', amount: '' })
@@ -599,6 +607,11 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        />
       </>
     )
   }
@@ -620,6 +633,11 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        />
       </>
     )
   }
@@ -635,6 +653,11 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        />
       </>
     )
   }
@@ -653,6 +676,11 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        />
       </>
     )
   }
@@ -671,6 +699,11 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        />
       </>
     )
   }
@@ -701,6 +734,11 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        />
       </>
     )
   }
