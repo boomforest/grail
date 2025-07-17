@@ -44,7 +44,7 @@ function Dashboard({
           marginBottom: '1.5rem',
           padding: '0 0.5rem'
         }}>
-          {/* Left side - Profile Picture & Settings */}
+          {/* Left side - Profile Picture (clickable for settings) & Username */}
           <div style={{
             background: 'rgba(255, 255, 255, 0.9)',
             borderRadius: '20px',
@@ -53,21 +53,29 @@ function Dashboard({
             alignItems: 'center',
             gap: '0.8rem'
           }}>
-            <ProfilePicture
-              supabase={supabase}
-              user={user}
-              profile={profile}
-              onProfileUpdate={onProfileUpdate}
-              size="small"
-              showUpload={true}
-            />
+            <div 
+              onClick={() => setShowSettings(!showSettings)}
+              style={{ cursor: 'pointer' }}
+            >
+              <ProfilePicture
+                supabase={supabase}
+                user={user}
+                profile={profile}
+                onProfileUpdate={onProfileUpdate}
+                size="small"
+                showUpload={false}
+              />
+            </div>
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              color: '#8b4513'
             }}>
+              {profile?.username || 'User'}
+            </div>
+            {isAdmin && (
               <button
-                onClick={() => setShowSettings(!showSettings)}
+                onClick={onShowNotifications}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -75,41 +83,17 @@ function Dashboard({
                   cursor: 'pointer'
                 }}
               >
-                ⚙️
+                🔔
               </button>
-              {isAdmin && (
-                <button
-                  onClick={onShowNotifications}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '1rem',
-                    cursor: 'pointer'
-                  }}
-                >
-                  🔔
-                </button>
-              )}
-            </div>
+            )}
           </div>
 
-          {/* Center - Username AND Trophy Button */}
+          {/* Center - Trophy Button */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '1rem'
+            justifyContent: 'center'
           }}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              borderRadius: '20px',
-              padding: '0.5rem 1rem',
-              fontSize: '0.9rem',
-              fontWeight: '500',
-              color: '#8b4513'
-            }}>
-              {profile?.username || 'User'}
-            </div>
-            
             {/* Trophy Button */}
             <button
               onClick={onShowCupGame}
@@ -173,6 +157,22 @@ function Dashboard({
               padding: '1rem',
               zIndex: 1000
             }}>
+              {/* Profile Picture Upload Section */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                marginBottom: '1rem'
+              }}>
+                <ProfilePicture
+                  supabase={supabase}
+                  user={user}
+                  profile={profile}
+                  onProfileUpdate={onProfileUpdate}
+                  size="large"
+                  showUpload={true}
+                />
+              </div>
+              
               <WalletInput 
                 onWalletSave={onWalletSave}
                 currentWallet={profile?.wallet_address}
