@@ -478,12 +478,18 @@ function App() {
       if (tokenType === 'DOV') {
         await supabase
           .from('profiles')
-          .update({ dov_balance: profile.dov_balance - amount })
+          .update({ 
+            dov_balance: profile.dov_balance - amount,
+            last_status_update: new Date().toISOString()
+          })
           .eq('id', user.id)
       } else {
         await supabase
           .from('profiles')
-          .update({ djr_balance: profile.djr_balance - amount })
+          .update({ 
+            djr_balance: profile.djr_balance - amount,
+            last_status_update: new Date().toISOString()
+          })
           .eq('id', user.id)
       }
 
@@ -512,7 +518,7 @@ function App() {
     }
     const paypalUrl = `https://www.paypal.com/ncp/payment/LEWS26K7J8FAC?custom_id=${user.id}`
     window.open(paypalUrl, '_blank')
-    setMessage('Complete your PayPal payment. Tokens will be credited automatically!')
+    setMessage('Complete your PayPal payment. You\'ll earn 1 cup for every 100 Palomas collected! 🏆')
   }
 
   const isAdmin = profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com'
