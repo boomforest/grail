@@ -49,30 +49,16 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
     setIsLoading(true);
 
     try {
-      console.log('API Key length:', OPENAI_API_KEY.length);
-      console.log('API Key starts with:', OPENAI_API_KEY.substring(0, 20));
-      console.log('API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
+      console.log('Sending request to Netlify function...');
       
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch('/.netlify/functions/chat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY.trim()}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: `You are an AI assistant for a crypto/token application. User info: Username: ${profile?.username || 'Unknown'}, DOV: ${profile?.dov_balance || 0}, DJR: ${profile?.djr_balance || 0}, Cups: ${profile?.cup_count || 0}, Merits: ${profile?.merit_count || 0}, Palomas: ${profile?.total_palomas_collected || 0}. Help with account questions and app features.`
-            },
-            {
-              role: 'user',
-              content: currentInput
-            }
-          ],
-          max_tokens: 150,
-          temperature: 0.7
+          message: currentInput,
+          profile: profile
         })
       });
 
@@ -80,16 +66,16 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('API Error Response:', errorText);
+        console.error('Function Error Response:', errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('API Response:', data);
+      console.log('Function Response:', data);
       
       const botMessage = {
         id: Date.now() + 1,
-        text: data.choices[0]?.message?.content || "I'm sorry, I couldn't process that request.",
+        text: data.response || "I'm sorry, I couldn't process that request.",
         isBot: true,
         timestamp: new Date()
       };
@@ -100,7 +86,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
       
       const errorMessage = {
         id: Date.now() + 1,
-        text: "Having authentication issues. The API key might need to be refreshed.",
+        text: "Sorry, I'm having trouble connecting to the AI service. Please try again.",
         isBot: true,
         timestamp: new Date()
       };
