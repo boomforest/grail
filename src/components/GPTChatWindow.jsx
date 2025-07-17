@@ -18,7 +18,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   const inputRef = useRef(null);
 
   // Your OpenAI API key
-  const OPENAI_API_KEY = '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';
+  const OPENAI_API_KEY = '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';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -45,49 +45,48 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputMessage;
     setInputMessage('');
     setIsLoading(true);
 
     try {
-      // Create context about the user for the AI
-      const systemMessage = `You are an AI assistant for a token/crypto application. The user's profile information:
-      - Username: ${profile?.username || 'Unknown'}
-      - DOV Balance: ${profile?.dov_balance || 0}
-      - DJR Balance: ${profile?.djr_balance || 0}
-      - Cup Count: ${profile?.cup_count || 0}
-      - Merit Count: ${profile?.merit_count || 0}
-      - Total Palomas Collected: ${profile?.total_palomas_collected || 0}
+      console.log('Sending request to OpenAI...');
       
-      Help them with questions about their account, the application features, or general assistance.`;
-
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'OpenAI-Beta': 'assistants=v1'
         },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
           messages: [
             {
               role: 'system',
-              content: systemMessage
+              content: `You are an AI assistant for a crypto/token application. User info: Username: ${profile?.username || 'Unknown'}, DOV: ${profile?.dov_balance || 0}, DJR: ${profile?.djr_balance || 0}, Cups: ${profile?.cup_count || 0}, Merits: ${profile?.merit_count || 0}, Palomas: ${profile?.total_palomas_collected || 0}. Help with account questions and app features.`
             },
             {
               role: 'user',
-              content: inputMessage
+              content: currentInput
             }
           ],
-          max_tokens: 500,
+          max_tokens: 150,
           temperature: 0.7
         })
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('API Response:', data);
       
       const botMessage = {
         id: Date.now() + 1,
@@ -98,15 +97,16 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
 
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
-      console.error('Error sending message:', error);
-      let errorText = "Sorry, I'm having trouble connecting right now. Please try again later.";
+      console.error('Full error details:', error);
+      
+      let errorText = "Sorry, I'm having trouble connecting. Please try again.";
       
       if (error.message.includes('401')) {
-        errorText = "API key authentication failed. Please check your OpenAI API key.";
+        errorText = "Authentication issue. Let me check the API key...";
       } else if (error.message.includes('429')) {
-        errorText = "Rate limit exceeded. Please wait a moment before trying again.";
+        errorText = "Too many requests. Please wait a moment.";
       } else if (error.message.includes('403')) {
-        errorText = "Access denied. Please check your API key permissions.";
+        errorText = "Access denied. Please check permissions.";
       }
       
       const errorMessage = {
