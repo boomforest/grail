@@ -14,14 +14,15 @@ function Dashboard({
   showSettings,
   setShowSettings,
   onShowNotifications,
-  onShowCupGame, // Add this prop
+  onShowCupGame,
   onShowSendMeritsForm,
   onWalletSave,
   onLogout,
   onProfileUpdate,
   message,
   onShowSendForm,
-  onShowReleaseForm
+  onShowReleaseForm,
+  onPayPalClick // NEW: Add this prop for PayPal integration
 }) {
   return (
     <div style={{
@@ -113,7 +114,6 @@ function Dashboard({
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            {/* Trophy Button */}
             <button
               onClick={onShowCupGame}
               style={{
@@ -253,6 +253,24 @@ function Dashboard({
           }}>
             {formatNumber(profile?.dov_balance)}
           </div>
+          
+          {/* Show additional stats for context */}
+          {profile && (
+            <div style={{
+              fontSize: '0.85rem',
+              color: '#666',
+              marginBottom: '1rem',
+              background: 'rgba(255, 255, 255, 0.7)',
+              borderRadius: '10px',
+              padding: '0.5rem',
+              display: 'inline-block'
+            }}>
+              <div>Total Collected: {formatNumber(profile.total_palomas_collected || 0)} 🕊️</div>
+              <div>Cups Earned: {formatNumber(profile.cup_count || 0)} 🏆</div>
+              <div>Merits: {formatNumber(profile.merit_count || 0)} ⭐</div>
+            </div>
+          )}
+          
           <br />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center' }}>
             {isAdmin ? (
@@ -293,19 +311,11 @@ function Dashboard({
               </button>
             )}
             
+            {/* UPDATED: New PayPal Button with better styling and webhook integration */}
             <button
-              onClick={() => {
-                if (!user) {
-                  // This should be handled by the parent component
-                  return
-                }
-                // Pass user ID to PayPal so webhook knows who paid
-                const paypalUrl = `https://www.paypal.com/ncp/payment/LEWS26K7J8FAC?custom_id=${user.id}`
-                window.open(paypalUrl, '_blank')
-                // Parent component should handle setting message
-              }}
+              onClick={onPayPalClick}
               style={{
-                background: 'linear-gradient(45deg, #d2691e, #cd853f)',
+                background: 'linear-gradient(45deg, #0070ba, #003087)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '20px',
@@ -313,30 +323,55 @@ function Dashboard({
                 fontSize: '1.1rem',
                 fontWeight: '500',
                 cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)',
+                boxShadow: '0 4px 15px rgba(0, 112, 186, 0.3)',
                 width: '200px',
-                position: 'relative'
+                position: 'relative',
+                transition: 'all 0.3s ease'
               }}
-              title="Earn 1 cup for every 100 Palomas collected!"
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-2px)'
+                e.target.style.boxShadow = '0 6px 20px rgba(0, 112, 186, 0.4)'
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)'
+                e.target.style.boxShadow = '0 4px 15px rgba(0, 112, 186, 0.3)'
+              }}
+              title="Purchase Palomas with PayPal - Automatically credited via webhook!"
             >
-              Collect
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                💳 Purchase
+              </span>
               <div style={{
                 position: 'absolute',
                 top: '-8px',
                 right: '-8px',
-                fontSize: '16px',
-                background: 'rgba(255, 255, 255, 0.9)',
+                fontSize: '14px',
+                background: 'rgba(255, 255, 255, 0.95)',
                 borderRadius: '50%',
                 width: '24px',
                 height: '24px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '2px solid #d2691e'
+                border: '2px solid #0070ba',
+                color: '#0070ba',
+                fontWeight: 'bold'
               }}>
-                🏆
+                ⚡
               </div>
             </button>
+            
+            {/* Info text about PayPal integration */}
+            <div style={{
+              fontSize: '0.75rem',
+              color: '#666',
+              textAlign: 'center',
+              maxWidth: '220px',
+              lineHeight: '1.3',
+              marginTop: '0.5rem'
+            }}>
+              💡 $10 = 10 Palomas • Auto-credited • 1 Cup per 100 Palomas
+            </div>
           </div>
         </div>
 
