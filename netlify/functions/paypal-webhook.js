@@ -1,7 +1,21 @@
-// Save this as: netlify/functions/paypal-webhook.js
-import { createClient } from '@supabase/supabase-js'
+// netlify/functions/paypal-webhook.js
+const { createClient } = require('@supabase/supabase-js')
 
-export const handler = async (event, context) => {
+// PayPal webhook verification function
+async function verifyPayPalWebhook(headers, body, webhookSecret) {
+  // In production, you should verify the webhook signature
+  // For now, we'll do basic verification
+  const paypalSignature = headers['paypal-transmission-sig']
+  const paypalCertId = headers['paypal-cert-id']
+  const paypalTransmissionId = headers['paypal-transmission-id']
+  const paypalTransmissionTime = headers['paypal-transmission-time']
+  
+  // Basic verification - in production, implement full signature verification
+  return paypalSignature && paypalCertId && paypalTransmissionId
+}
+
+// Main webhook handler
+exports.handler = async (event, context) => {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
@@ -11,118 +25,175 @@ export const handler = async (event, context) => {
   }
 
   try {
-    // Parse the PayPal webhook data
-    const payload = JSON.parse(event.body)
+    // Initialize Supabase client
+    const supabase = createClient(
+      process.env.VITE_SUPABASE_URL,
+      process.env.VITE_SUPABASE_ANON_KEY
+    )
+
+    // Parse the webhook body
+    const webhookData = JSON.parse(event.body)
     
-    console.log('PayPal webhook received:', payload.event_type)
-    
-    // Only handle completed payments
-    if (payload.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
-      const payment = payload.resource
-      const amount = parseFloat(payment.amount.value)
-      const userId = payment.custom_id // This will be the user's ID
-      
-      // Calculate DOV tokens ($1 = 1 DOV)
-      const dovTokens = amount
-      
-      console.log(`Payment: $${amount} -> ${dovTokens} DOV for user ${userId}`)
-      
-      if (userId) {
-        // Initialize Supabase client
-        const supabase = createClient(
-          process.env.VITE_SUPABASE_URL,
-          process.env.SUPABASE_SERVICE_KEY
-        )
-        
-        // Get current user profile
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('dov_balance, total_palomas_collected, username')
-          .eq('id', userId)
-          .single()
-        
-        if (error) {
-          console.error('Error finding user:', error)
-          return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'User not found' })
-          }
-        }
-        
-        // Calculate new balances
-        const newDovBalance = (profile.dov_balance || 0) + dovTokens
-        const newTotalPalomas = (profile.total_palomas_collected || 0) + dovTokens
-        
-        // Update both DOV balance and total palomas collected
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ 
-            dov_balance: newDovBalance,
-            total_palomas_collected: newTotalPalomas,
-            last_status_update: new Date().toISOString()
-          })
-          .eq('id', userId)
-        
-        if (updateError) {
-          console.error('Error updating balance:', updateError)
-          return {
-            statusCode: 500,
-            body: JSON.stringify({ error: 'Database update failed' })
-          }
-        }
-        
-        console.log(`SUCCESS: Added ${dovTokens} DOV to ${profile.username}`)
-        console.log(`New DOV balance: ${newDovBalance}`)
-        console.log(`Total Palomas collected: ${newTotalPalomas}`)
-        console.log(`Cups will be synced automatically: ${Math.floor(newTotalPalomas / 100)}`)
-        
-        // Log the transaction (optional - only if transactions table exists)
-        try {
-          await supabase
-            .from('transactions')
-            .insert([{
-              user_id: userId,
-              type: 'purchase',
-              amount: dovTokens,
-              token_type: 'DOV',
-              paypal_payment_id: payment.id,
-              usd_amount: amount,
-              created_at: new Date().toISOString()
-            }])
-        } catch (transactionError) {
-          // Don't fail the webhook if transaction logging fails
-          console.log('Transaction logging failed (table may not exist):', transactionError)
-        }
-        
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ 
-            success: true, 
-            message: `Added ${dovTokens} DOV tokens`,
-            total_palomas: newTotalPalomas,
-            cups_available: Math.floor(newTotalPalomas / 100)
-          })
-        }
-      } else {
-        console.error('No user ID found in payment.custom_id')
-        return {
-          statusCode: 400,
-          body: JSON.stringify({ error: 'No user ID provided' })
-        }
-      }
-    } else {
-      console.log(`Ignoring event type: ${payload.event_type}`)
+    console.log('PayPal Webhook received:', {
+      event_type: webhookData.event_type,
+      resource_type: webhookData.resource_type,
+      summary: webhookData.summary
+    })
+
+    // Verify webhook authenticity
+    const isValid = await verifyPayPalWebhook(
+      event.headers, 
+      event.body, 
+      process.env.PAYPAL_WEBHOOK_SECRET
+    )
+
+    if (!isValid) {
+      console.error('Invalid PayPal webhook signature')
       return {
-        statusCode: 200,
-        body: JSON.stringify({ message: 'Event type not handled' })
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Invalid webhook signature' })
       }
     }
+
+    // Handle payment completion events
+    if (webhookData.event_type === 'PAYMENT.CAPTURE.COMPLETED' || 
+        webhookData.event_type === 'CHECKOUT.ORDER.APPROVED') {
+      
+      const resource = webhookData.resource
+      console.log('Payment resource:', resource)
+
+      // Extract payment details
+      const paymentAmount = parseFloat(resource.amount?.value || resource.purchase_units?.[0]?.amount?.value || 0)
+      
+      // Extract custom_id (user ID) from the payment
+      let userId = null
+      
+      // Try different ways to get custom_id
+      if (resource.custom_id) {
+        userId = resource.custom_id
+      } else if (resource.purchase_units?.[0]?.custom_id) {
+        userId = resource.purchase_units[0].custom_id
+      } else if (resource.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id) {
+        userId = resource.purchase_units[0].payments.captures[0].custom_id
+      }
+
+      if (!userId) {
+        console.error('No user ID found in PayPal payment data')
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ error: 'No user ID found in payment' })
+        }
+      }
+
+      if (paymentAmount <= 0) {
+        console.error('Invalid payment amount:', paymentAmount)
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ error: 'Invalid payment amount' })
+        }
+      }
+
+      console.log(`Processing payment: $${paymentAmount} for user ${userId}`)
+
+      // Calculate Palomas (1 Paloma = $1 USD)
+      const palomasToAdd = Math.floor(paymentAmount)
+
+      // Update user's Paloma balance and total
+      const { data: currentProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('dov_balance, total_palomas_collected')
+        .eq('id', userId)
+        .single()
+
+      if (fetchError) {
+        console.error('Error fetching user profile:', fetchError)
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ error: 'Database error' })
+        }
+      }
+
+      const newDovBalance = (currentProfile.dov_balance || 0) + palomasToAdd
+      const newTotalPalomas = (currentProfile.total_palomas_collected || 0) + palomasToAdd
+
+      // Update the database
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          dov_balance: newDovBalance,
+          total_palomas_collected: newTotalPalomas,
+          last_status_update: new Date().toISOString()
+        })
+        .eq('id', userId)
+
+      if (updateError) {
+        console.error('Error updating user profile:', updateError)
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ error: 'Failed to update user balance' })
+        }
+      }
+
+      // Calculate and update cups (1 cup = 100 Palomas)
+      const cupsEarned = Math.floor(newTotalPalomas / 100)
+      
+      const { error: cupUpdateError } = await supabase
+        .from('profiles')
+        .update({
+          cup_count: cupsEarned
+        })
+        .eq('id', userId)
+
+      if (cupUpdateError) {
+        console.error('Error updating cup count:', cupUpdateError)
+      }
+
+      // Log the cup award if cups increased
+      const previousCups = Math.floor((currentProfile.total_palomas_collected || 0) / 100)
+      if (cupsEarned > previousCups) {
+        await supabase
+          .from('cup_logs')
+          .insert([{
+            user_id: userId,
+            awarded_by: userId,
+            amount: cupsEarned - previousCups,
+            reason: `Earned from PayPal payment of $${paymentAmount} (${palomasToAdd} Palomas)`,
+            cup_count_after: cupsEarned
+          }])
+      }
+
+      console.log(`Successfully processed payment:
+        User: ${userId}
+        Amount: $${paymentAmount}
+        Palomas added: ${palomasToAdd}
+        New DOV balance: ${newDovBalance}
+        New total Palomas: ${newTotalPalomas}
+        Cups earned: ${cupsEarned}`)
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ 
+          success: true,
+          palomasAdded: palomasToAdd,
+          newBalance: newDovBalance,
+          cupsEarned: cupsEarned
+        })
+      }
+    }
+
+    // Handle other webhook events
+    console.log('Unhandled webhook event type:', webhookData.event_type)
     
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'Webhook received but not processed' })
+    }
+
   } catch (error) {
-    console.error('Webhook error:', error)
+    console.error('PayPal webhook error:', error)
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Webhook processing failed', details: error.message })
+      body: JSON.stringify({ error: 'Internal server error' })
     }
   }
 }
