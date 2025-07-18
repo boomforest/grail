@@ -293,13 +293,14 @@ function Dashboard({
               </button>
             )}
             
-            {/* Simple PayPal Button - Opens in new window */}
+            {/* Live PayPal Payment Button */}
             <button
               onClick={() => {
                 if (!user) {
                   return
                 }
-                const paypalUrl = `https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_xclick&business=sb-bgmxl39805435@business.example.com&amount=5.00&currency_code=USD&custom=${user.id}`
+                // Direct PayPal payment URL with user ID automatically included
+                const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=jproney@gmail.com&amount=5.00&currency_code=USD&item_name=Palomas&custom=${user.id}&no_shipping=1&return=https://grail3.netlify.app/&cancel_return=https://grail3.netlify.app/`
                 window.open(paypalUrl, '_blank')
               }}
               style={{
@@ -315,7 +316,7 @@ function Dashboard({
                 width: '200px'
               }}
             >
-              Get
+              Get Palomas ($5)
             </button>
           </div>
         </div>
