@@ -299,7 +299,7 @@ function Dashboard({
                 if (!user) {
                   return
                 }
-                const paypalUrl = `https://sandbox.paypal.com/ncp/payment/J4KSXQUGUBYDJ?custom_id=${user.id}`
+                const paypalUrl = `https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=J4KSXQUGUBYDJ&custom=${user.id}`
                 window.open(paypalUrl, '_blank')
               }}
               style={{
