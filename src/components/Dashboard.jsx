@@ -21,8 +21,8 @@ function Dashboard({
   onProfileUpdate,
   message,
   onShowSendForm,
-  onShowReleaseForm,
-  onPayPalClick // NEW: Add this prop for PayPal integration
+  onShowReleaseForm
+  // Removed onPayPalClick - now handled directly in button
 }) {
   return (
     <div style={{
@@ -293,9 +293,15 @@ function Dashboard({
               </button>
             )}
             
-            {/* Simple PayPal Button - No flourishes */}
+            {/* Simple PayPal Button - Opens in new window */}
             <button
-              onClick={onPayPalClick}
+              onClick={() => {
+                if (!user) {
+                  return
+                }
+                const paypalUrl = `https://www.paypal.com/ncp/payment/LEWS26K7J8FAC?custom_id=${user.id}`
+                window.open(paypalUrl, '_blank')
+              }}
               style={{
                 background: 'linear-gradient(45deg, #0070ba, #003087)',
                 color: 'white',
