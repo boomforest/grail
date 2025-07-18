@@ -250,8 +250,7 @@ NEVER provide financial, legal, or medical advice.`
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-400 to-purple-500 text-white p-3 rounded-t-lg flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <span style={{ fontSize: '14px' }}>👼</span>
-          <span className="font-medium text-sm">AI Assistant</span>
+          <span className="font-medium text-sm">Virgil</span>
         </div>
         <button
           onClick={onToggle}
