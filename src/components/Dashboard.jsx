@@ -336,10 +336,10 @@ function Dashboard({
                 e.target.style.transform = 'translateY(0)'
                 e.target.style.boxShadow = '0 4px 15px rgba(0, 112, 186, 0.3)'
               }}
-              title="Purchase Palomas with PayPal - Automatically credited via webhook!"
+              title="Get Palomas with PayPal - Automatically credited via webhook!"
             >
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                💳 Purchase
+                💳 Get
               </span>
               <div style={{
                 position: 'absolute',
