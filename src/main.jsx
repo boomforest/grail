@@ -294,7 +294,7 @@ function Dashboard({
               </button>
             )}
             
-            {/* UPDATED: Simplified PayPal Button */}
+            {/* Simple PayPal Button - No flourishes */}
             <button
               onClick={onPayPalClick}
               style={{
@@ -307,16 +307,7 @@ function Dashboard({
                 fontWeight: '500',
                 cursor: 'pointer',
                 boxShadow: '0 4px 15px rgba(0, 112, 186, 0.3)',
-                width: '200px',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'translateY(-2px)'
-                e.target.style.boxShadow = '0 6px 20px rgba(0, 112, 186, 0.4)'
-              }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'translateY(0)'
-                e.target.style.boxShadow = '0 4px 15px rgba(0, 112, 186, 0.3)'
+                width: '200px'
               }}
             >
               Get
