@@ -2,7 +2,7 @@
 const { createClient } = require('@supabase/supabase-js')
 
 // PayPal API endpoints - SANDBOX for testing
-const PAYPAL_API_BASE = 'https://api-m.paypal.com
+const PAYPAL_API_BASE = 'https://api-m.paypal.com'
 // PayPal webhook verification function
 async function verifyPayPalWebhook(headers, body, webhookId) {
   try {
