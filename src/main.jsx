@@ -9,7 +9,197 @@ import NotificationsFeed from './components/NotificationsFeed'
 import ManifestoPopup from './components/ManifestoPopup'
 import FloatingGrailButton from './components/FloatingGrailButton'
 import TarotCupsPage from './components/cupgame'
-import GPTChatWindow from './components/GPTChatWindow' // ADD THIS IMPORT
+import GPTChatWindow from './components/GPTChatWindow'
+
+// NEW: PayPal Button Component
+const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }) => {
+  const [isLoading, setIsLoading] = useState(false)
+  const [paypalLoaded, setPaypalLoaded] = useState(false)
+
+  useEffect(() => {
+    // Check if PayPal SDK is loaded
+    if (window.paypal) {
+      setPaypalLoaded(true)
+      renderPayPalButton()
+    } else {
+      // Load PayPal SDK dynamically
+      const script = document.createElement('script')
+      script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}&currency=USD`
+      script.onload = () => {
+        setPaypalLoaded(true)
+        renderPayPalButton()
+      }
+      script.onerror = () => {
+        console.error('Failed to load PayPal SDK')
+        onError && onError(new Error('Failed to load PayPal SDK'))
+      }
+      document.head.appendChild(script)
+      
+      return () => {
+        document.head.removeChild(script)
+      }
+    }
+  }, [user])
+
+  const renderPayPalButton = () => {
+    if (!window.paypal || !user || !paypalLoaded) return
+
+    // Clear any existing PayPal buttons
+    const container = document.getElementById('paypal-button-container')
+    if (container) container.innerHTML = ''
+
+    // Render PayPal button
+    window.paypal.Buttons({
+      // Create order on PayPal
+      createOrder: (data, actions) => {
+        setIsLoading(true)
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: '10.00', // $10 = 10 Palomas
+              currency_code: 'USD'
+            },
+            description: 'Casa de Copas Palomas - DOV Tokens',
+            custom_id: user.id, // This is crucial for the webhook!
+            invoice_id: `palomas-${user.id}-${Date.now()}`
+          }],
+          application_context: {
+            brand_name: 'Casa de Copas',
+            locale: 'en-US',
+            landing_page: 'BILLING',
+            user_action: 'PAY_NOW'
+          }
+        })
+      },
+
+      // Handle successful payment
+      onApprove: async (data, actions) => {
+        try {
+          const order = await actions.order.capture()
+          console.log('Payment successful:', order)
+          
+          setIsLoading(false)
+          
+          // The webhook will handle adding Palomas automatically
+          onSuccess && onSuccess(order)
+          
+          // Sync cups after payment
+          if (syncCupsFromPalomas) {
+            setTimeout(() => syncCupsFromPalomas(user.id), 2000)
+          }
+          
+          // Show success message
+          alert(`Payment successful! Your Palomas will be credited shortly. Order ID: ${order.id}`)
+          
+        } catch (error) {
+          console.error('Payment capture error:', error)
+          setIsLoading(false)
+          onError && onError(error)
+        }
+      },
+
+      // Handle payment errors
+      onError: (err) => {
+        console.error('PayPal error:', err)
+        setIsLoading(false)
+        onError && onError(err)
+        alert('Payment failed. Please try again.')
+      },
+
+      // Handle cancelled payments
+      onCancel: (data) => {
+        console.log('Payment cancelled:', data)
+        setIsLoading(false)
+        alert('Payment cancelled.')
+      },
+
+      // Button styling
+      style: {
+        color: 'gold',
+        shape: 'rect',
+        label: 'paypal',
+        layout: 'vertical',
+        height: 40,
+        tagline: false
+      }
+    }).render('#paypal-button-container')
+  }
+
+  if (!user) {
+    return (
+      <div style={{
+        textAlign: 'center',
+        padding: '20px',
+        background: '#f8d7da',
+        border: '1px solid #f5c6cb',
+        borderRadius: '4px',
+        color: '#721c24',
+        margin: '20px 0'
+      }}>
+        <p>Please log in to purchase Palomas</p>
+      </div>
+    )
+  }
+
+  if (!paypalLoaded) {
+    return (
+      <div style={{ textAlign: 'center', padding: '20px' }}>
+        <p>Loading PayPal...</p>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{
+      maxWidth: '400px',
+      margin: '20px auto',
+      padding: '20px',
+      border: '1px solid #ddd',
+      borderRadius: '8px',
+      background: '#f9f9f9'
+    }}>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h3 style={{ color: '#003087', marginBottom: '10px' }}>Purchase Palomas</h3>
+        <p>$10 = 10 Palomas (DOV Tokens)</p>
+        <p>Earn 1 Cup for every 100 Palomas! 🏆</p>
+        {profile && (
+          <div style={{ fontSize: '14px', color: '#666', marginTop: '10px' }}>
+            <p>Current Balance: {Math.floor(profile.dov_balance || 0)} Palomas</p>
+            <p>Total Collected: {Math.floor(profile.total_palomas_collected || 0)} Palomas</p>
+            <p>Cups Earned: {Math.floor(profile.cup_count || 0)} 🏆</p>
+          </div>
+        )}
+      </div>
+      
+      {isLoading && (
+        <div style={{
+          textAlign: 'center',
+          padding: '10px',
+          background: '#fff3cd',
+          border: '1px solid #ffeaa7',
+          borderRadius: '4px',
+          marginBottom: '15px'
+        }}>
+          <p>Processing payment...</p>
+        </div>
+      )}
+      
+      <div id="paypal-button-container"></div>
+      
+      <div style={{ 
+        fontSize: '12px', 
+        color: '#666', 
+        textAlign: 'center', 
+        marginTop: '15px',
+        lineHeight: '1.4'
+      }}>
+        <p>🔒 Secure payment processing by PayPal</p>
+        <p>⚡ Palomas credited automatically via webhook</p>
+        <p>🏆 Automatic cup calculation (100 Palomas = 1 Cup)</p>
+      </div>
+    </div>
+  )
+}
 
 function App() {
   // Core state
@@ -28,7 +218,8 @@ function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [showManifesto, setShowManifesto] = useState(false)
   const [showCupGame, setShowCupGame] = useState(false)
-  const [showGPTChat, setShowGPTChat] = useState(false) // ADD THIS STATE
+  const [showGPTChat, setShowGPTChat] = useState(false)
+  const [showPayPal, setShowPayPal] = useState(false) // NEW: PayPal modal state
   
   // Form state
   const [formData, setFormData] = useState({
@@ -52,7 +243,6 @@ function App() {
   const [isTransferring, setIsTransferring] = useState(false)
   const [isReleasing, setIsReleasing] = useState(false)
 
-  // ADD THIS FUNCTION
   const toggleGPTChat = () => {
     setShowGPTChat(prev => !prev)
   }
@@ -92,6 +282,9 @@ function App() {
           console.error('Error syncing cups:', updateError)
         } else {
           console.log(`Synced cups for user ${userId}: ${currentCups} → ${cupsEarned}`)
+          
+          // Refresh profile data
+          await ensureProfileExists({ id: userId })
           
           // Log the cup sync if there was an increase
           if (cupsEarned > currentCups) {
@@ -442,7 +635,8 @@ function App() {
     setShowNotifications(false)
     setShowManifesto(false)
     setShowCupGame(false)
-    setShowGPTChat(false) // ADD THIS LINE
+    setShowGPTChat(false)
+    setShowPayPal(false) // NEW: Reset PayPal modal
     setMessage('')
     setFormData({ email: '', password: '', username: '', name: '' })
     setTransferData({ recipient: '', amount: '' })
@@ -582,17 +776,112 @@ function App() {
     }
   }
 
+  // UPDATED: New PayPal handler
   const handlePayPalClick = () => {
     if (!user) {
-      setMessage('Please log in to collect tokens')
+      setMessage('Please log in to purchase Palomas')
       return
     }
-    const paypalUrl = `https://www.paypal.com/ncp/payment/LEWS26K7J8FAC?custom_id=${user.id}`
-    window.open(paypalUrl, '_blank')
-    setMessage('Complete your PayPal payment. You\'ll earn 1 cup for every 100 Palomas collected! 🏆')
+    setShowPayPal(true)
+    setMessage('Use the PayPal checkout below to purchase Palomas. Your tokens will be credited automatically! 🎯')
   }
 
   const isAdmin = profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com'
+
+  // NEW: PayPal Modal View
+  if (user && showPayPal) {
+    return (
+      <>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '20px',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '90%',
+            overflow: 'auto',
+            position: 'relative'
+          }}>
+            <button 
+              onClick={() => setShowPayPal(false)}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#999'
+              }}
+            >
+              ×
+            </button>
+            
+            <PayPalButton
+              user={user}
+              profile={profile}
+              syncCupsFromPalomas={syncCupsFromPalomas}
+              onSuccess={(order) => {
+                console.log('Payment completed:', order)
+                setMessage(`Payment successful! Palomas will be credited shortly. 🎉`)
+                // Refresh user data after a short delay
+                setTimeout(async () => {
+                  await ensureProfileExists(user)
+                  await syncCupsFromPalomas(user.id)
+                }, 3000)
+              }}
+              onError={(error) => {
+                console.error('Payment failed:', error)
+                setMessage('Payment failed. Please try again.')
+              }}
+            />
+          </div>
+        </div>
+
+        <Dashboard
+          profile={profile}
+          user={user}
+          supabase={supabase}
+          isAdmin={isAdmin}
+          showSettings={showSettings}
+          setShowSettings={setShowSettings}
+          onShowNotifications={() => setShowNotifications(true)}
+          onShowCupGame={() => {
+            setShowCupGame(true)
+            syncCupsFromPalomas(user.id)
+          }}
+          onWalletSave={handleWalletSave}
+          onLogout={handleLogout}
+          onProfileUpdate={setProfile}
+          message={message}
+          onShowSendMeritsForm={() => setShowSendMeritsForm(true)}
+          onShowSendForm={setShowSendForm}
+          onShowReleaseForm={setShowReleaseForm}
+          onPayPalClick={handlePayPalClick} // Pass the PayPal handler
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        />
+      </>
+    )
+  }
 
   // Add send merits view
   if (user && showSendMeritsForm && isAdmin) {
@@ -731,6 +1020,7 @@ function App() {
           onShowSendMeritsForm={() => setShowSendMeritsForm(true)}
           onShowSendForm={setShowSendForm}
           onShowReleaseForm={setShowReleaseForm}
+          onPayPalClick={handlePayPalClick} // Pass the PayPal handler
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
