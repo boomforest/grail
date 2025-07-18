@@ -1,11 +1,14 @@
 // netlify/functions/paypal-webhook.js
 const { createClient } = require('@supabase/supabase-js')
 
+// PayPal API endpoints - SANDBOX for testing
+const PAYPAL_API_BASE = 'https://api-m.sandbox.paypal.com'
+
 // PayPal webhook verification function
 async function verifyPayPalWebhook(headers, body, webhookId) {
   try {
-    // Get PayPal access token (LIVE)
-    const authResponse = await fetch('https://api-m.paypal.com/v1/oauth2/token', {
+    // Get PayPal access token (SANDBOX)
+    const authResponse = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -18,8 +21,8 @@ async function verifyPayPalWebhook(headers, body, webhookId) {
     const authData = await authResponse.json()
     const accessToken = authData.access_token
 
-    // Verify webhook signature (LIVE)
-    const verifyResponse = await fetch('https://api-m.paypal.com/v1/notifications/verify-webhook-signature', {
+    // Verify webhook signature (SANDBOX)
+    const verifyResponse = await fetch(`${PAYPAL_API_BASE}/v1/notifications/verify-webhook-signature`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -68,7 +71,8 @@ exports.handler = async (event, context) => {
     console.log('PayPal Webhook received:', {
       event_type: webhookData.event_type,
       resource_type: webhookData.resource_type,
-      summary: webhookData.summary
+      summary: webhookData.summary,
+      full_payload: webhookData
     })
 
     // Verify webhook authenticity (temporarily disabled for testing)
@@ -87,27 +91,39 @@ exports.handler = async (event, context) => {
       // }
     }
 
-    // Handle payment completion events
-    if (webhookData.event_type === 'PAYMENT.CAPTURE.COMPLETED' || 
+    // Handle payment completion events - updated for your test payload
+    if (webhookData.event_type === 'PAYMENT.SALE.COMPLETED' ||
+        webhookData.event_type === 'PAYMENT.CAPTURE.COMPLETED' || 
         webhookData.event_type === 'CHECKOUT.ORDER.APPROVED') {
       
       const resource = webhookData.resource
       console.log('Payment resource:', resource)
 
-      // Extract payment details
-      const paymentAmount = parseFloat(resource.amount?.value || resource.purchase_units?.[0]?.amount?.value || 0)
+      // Extract payment details - handle test payload format
+      let paymentAmount = 0
+      if (resource.amount?.total) {
+        paymentAmount = parseFloat(resource.amount.total)
+      } else if (resource.amount?.value) {
+        paymentAmount = parseFloat(resource.amount.value)
+      } else if (resource.purchase_units?.[0]?.amount?.value) {
+        paymentAmount = parseFloat(resource.purchase_units[0].amount.value)
+      }
       
-      // Extract custom_id (user ID) from the payment
+      // Extract custom_id (user ID) from the payment - handle test payload
       let userId = null
       
-      // Try different ways to get custom_id
-      if (resource.custom_id) {
+      // Try different ways to get custom_id/custom
+      if (resource.custom) {
+        userId = resource.custom  // Your test payload uses 'custom'
+      } else if (resource.custom_id) {
         userId = resource.custom_id
       } else if (resource.purchase_units?.[0]?.custom_id) {
         userId = resource.purchase_units[0].custom_id
       } else if (resource.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id) {
         userId = resource.purchase_units[0].payments.captures[0].custom_id
       }
+
+      console.log('Extracted values:', { paymentAmount, userId })
 
       if (!userId) {
         console.error('No user ID found in PayPal payment data')
@@ -225,7 +241,10 @@ exports.handler = async (event, context) => {
     console.error('PayPal webhook error:', error)
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Internal server error' })
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message 
+      })
     }
   }
 }
