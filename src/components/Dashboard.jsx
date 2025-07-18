@@ -254,7 +254,7 @@ function Dashboard({
             {formatNumber(profile?.dov_balance)}
           </div>
           <br />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center' }}>>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', alignItems: 'center' }}>
             {isAdmin ? (
               <button
                 onClick={() => onShowSendForm('DOV')}
