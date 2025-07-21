@@ -305,8 +305,8 @@ function Dashboard({
                 console.log('User object:', user)
                 console.log('User ID being sent to PayPal:', user.id)
                 
-                // PayPal variable amount URL - using invoice parameter
-                const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=jproney@gmail.com&currency_code=USD&item_name=Palomas/Doves&invoice=${user.id}&no_shipping=1&return=https://grail3.netlify.app/&cancel_return=https://grail3.netlify.app/`
+                // PayPal variable amount URL - using custom parameter
+                const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=jproney@gmail.com&currency_code=USD&item_name=Palomas/Doves&custom=${user.id}&no_shipping=1&return=https://grail3.netlify.app/&cancel_return=https://grail3.netlify.app/`
                 
                 console.log('PayPal URL:', paypalUrl)
                 window.open(paypalUrl, '_blank')
