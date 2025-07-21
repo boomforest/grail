@@ -239,7 +239,7 @@ function Dashboard({
             margin: '0 0 0.5rem 0',
             fontWeight: 'normal'
           }}>
-            Palomas
+            Palomas/Doves
           </h2>
           <div style={{
             background: 'rgba(255, 255, 255, 0.9)',
@@ -293,14 +293,22 @@ function Dashboard({
               </button>
             )}
             
-            {/* Live PayPal Payment Button */}
+            {/* Live PayPal Payment Button with Debug Logging */}
             <button
               onClick={() => {
                 if (!user) {
+                  alert('No user logged in!')
                   return
                 }
-                // PayPal variable amount URL - users can choose how much to spend
-                const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=jproney@gmail.com&currency_code=USD&item_name=Palomas&custom=${user.id}&no_shipping=1&return=https://grail3.netlify.app/&cancel_return=https://grail3.netlify.app/`
+                
+                // Debug: Let's see what user.id actually is
+                console.log('User object:', user)
+                console.log('User ID being sent to PayPal:', user.id)
+                
+                // PayPal variable amount URL - using invoice parameter
+                const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=jproney@gmail.com&currency_code=USD&item_name=Palomas/Doves&invoice=${user.id}&no_shipping=1&return=https://grail3.netlify.app/&cancel_return=https://grail3.netlify.app/`
+                
+                console.log('PayPal URL:', paypalUrl)
                 window.open(paypalUrl, '_blank')
               }}
               style={{
@@ -316,7 +324,7 @@ function Dashboard({
                 width: '200px'
               }}
             >
-              Get Palomas
+              Get Palomas/Doves
             </button>
           </div>
         </div>
@@ -328,9 +336,9 @@ function Dashboard({
             margin: '0 0 0.5rem 0',
             fontWeight: 'normal'
           }}>
-            Palomitas
+            Tiempo/Time
           </h2>
-          <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🕊️</div>
+          <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
           <div style={{
             background: 'rgba(255, 255, 255, 0.9)',
             borderRadius: '20px',
