@@ -1,12 +1,13 @@
 // netlify/functions/paypal-webhook.js
 const { createClient } = require('@supabase/supabase-js')
 
-// PayPal API endpoints - SANDBOX for testing
+// PayPal API endpoints - LIVE
 const PAYPAL_API_BASE = 'https://api-m.paypal.com'
+
 // PayPal webhook verification function
 async function verifyPayPalWebhook(headers, body, webhookId) {
   try {
-    // Get PayPal access token (SANDBOX)
+    // Get PayPal access token (LIVE)
     const authResponse = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
       method: 'POST',
       headers: {
@@ -20,7 +21,7 @@ async function verifyPayPalWebhook(headers, body, webhookId) {
     const authData = await authResponse.json()
     const accessToken = authData.access_token
 
-    // Verify webhook signature (SANDBOX)
+    // Verify webhook signature (LIVE)
     const verifyResponse = await fetch(`${PAYPAL_API_BASE}/v1/notifications/verify-webhook-signature`, {
       method: 'POST',
       headers: {
@@ -58,10 +59,10 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // Initialize Supabase client
+    // Initialize Supabase client with SERVICE ROLE KEY (has full permissions)
     const supabase = createClient(
       process.env.VITE_SUPABASE_URL,
-      process.env.VITE_SUPABASE_ANON_KEY
+      process.env.SUPABASE_SERVICE_ROLE_KEY  // Changed from ANON key to SERVICE ROLE key
     )
 
     // Parse the webhook body
@@ -90,7 +91,7 @@ exports.handler = async (event, context) => {
       // }
     }
 
-    // Handle payment completion events - updated for your test payload
+    // Handle payment completion events
     if (webhookData.event_type === 'PAYMENT.SALE.COMPLETED' ||
         webhookData.event_type === 'PAYMENT.CAPTURE.COMPLETED' || 
         webhookData.event_type === 'CHECKOUT.ORDER.APPROVED') {
@@ -98,7 +99,7 @@ exports.handler = async (event, context) => {
       const resource = webhookData.resource
       console.log('Payment resource:', resource)
 
-      // Extract payment details - handle test payload format
+      // Extract payment details
       let paymentAmount = 0
       if (resource.amount?.total) {
         paymentAmount = parseFloat(resource.amount.total)
@@ -108,24 +109,32 @@ exports.handler = async (event, context) => {
         paymentAmount = parseFloat(resource.purchase_units[0].amount.value)
       }
       
-      // Extract custom_id (user ID) from the payment - handle test payload
+      // Extract custom_id (user ID) from the payment - prioritize custom_id field
       let userId = null
       
-      // Try different ways to get custom_id/custom
-      if (resource.custom) {
-        userId = resource.custom  // Your test payload uses 'custom'
-      } else if (resource.custom_id) {
+      // Check in order of most likely location for live payments
+      if (resource.custom_id) {
         userId = resource.custom_id
+        console.log('Found user ID in resource.custom_id:', userId)
+      } else if (resource.custom) {
+        userId = resource.custom
+        console.log('Found user ID in resource.custom:', userId)
+      } else if (resource.invoice_id) {
+        userId = resource.invoice_id
+        console.log('Found user ID in resource.invoice_id:', userId)
       } else if (resource.purchase_units?.[0]?.custom_id) {
         userId = resource.purchase_units[0].custom_id
+        console.log('Found user ID in resource.purchase_units[0].custom_id:', userId)
       } else if (resource.purchase_units?.[0]?.payments?.captures?.[0]?.custom_id) {
         userId = resource.purchase_units[0].payments.captures[0].custom_id
+        console.log('Found user ID in resource.purchase_units[0].payments.captures[0].custom_id:', userId)
       }
 
       console.log('Extracted values:', { paymentAmount, userId })
 
       if (!userId) {
         console.error('No user ID found in PayPal payment data')
+        console.log('Full resource object for debugging:', JSON.stringify(resource, null, 2))
         return {
           statusCode: 400,
           body: JSON.stringify({ error: 'No user ID found in payment' })
@@ -142,29 +151,44 @@ exports.handler = async (event, context) => {
 
       console.log(`Processing payment: $${paymentAmount} for user ${userId}`)
 
-      // Calculate Palomas (1 Paloma = $1 USD)
+      // Calculate Palomas/Doves (1 Paloma = $1 USD)
       const palomasToAdd = Math.floor(paymentAmount)
 
-      // Update user's Paloma balance and total
+      // Enhanced logging for debugging
+      console.log(`Looking up user: ${userId}`)
+
+      // Update user's Paloma balance and total - with enhanced logging
       const { data: currentProfile, error: fetchError } = await supabase
         .from('profiles')
-        .select('dov_balance, total_palomas_collected')
+        .select('dov_balance, total_palomas_collected, id, username')
         .eq('id', userId)
         .single()
 
       if (fetchError) {
         console.error('Error fetching user profile:', fetchError)
+        console.log('Fetch error details:', JSON.stringify(fetchError, null, 2))
+        console.log('User ID that failed lookup:', userId)
         return {
           statusCode: 500,
-          body: JSON.stringify({ error: 'Database error' })
+          body: JSON.stringify({ error: 'Database error - user not found' })
         }
       }
+
+      // Log what we found
+      console.log('Current profile found:', JSON.stringify(currentProfile, null, 2))
 
       const newDovBalance = (currentProfile.dov_balance || 0) + palomasToAdd
       const newTotalPalomas = (currentProfile.total_palomas_collected || 0) + palomasToAdd
 
-      // Update the database
-      const { error: updateError } = await supabase
+      console.log(`Calculating update:`)
+      console.log(`- Current DOV balance: ${currentProfile.dov_balance}`)
+      console.log(`- Palomas to add: ${palomasToAdd}`)
+      console.log(`- New DOV balance will be: ${newDovBalance}`)
+      console.log(`- New total palomas will be: ${newTotalPalomas}`)
+
+      // Update the database with enhanced logging
+      console.log('About to update database...')
+      const { data: updateResult, error: updateError } = await supabase
         .from('profiles')
         .update({
           dov_balance: newDovBalance,
@@ -172,14 +196,30 @@ exports.handler = async (event, context) => {
           last_status_update: new Date().toISOString()
         })
         .eq('id', userId)
+        .select()  // Return the updated data
+
+      console.log('Update result:', updateResult)
+      console.log('Update error:', updateError)
 
       if (updateError) {
         console.error('Error updating user profile:', updateError)
+        console.log('Update error details:', JSON.stringify(updateError, null, 2))
         return {
           statusCode: 500,
           body: JSON.stringify({ error: 'Failed to update user balance' })
         }
       }
+
+      // Verify the update worked by fetching again
+      console.log('Verifying update by fetching user again...')
+      const { data: verifyProfile, error: verifyError } = await supabase
+        .from('profiles')
+        .select('dov_balance, total_palomas_collected')
+        .eq('id', userId)
+        .single()
+
+      console.log('Verification fetch result:', verifyProfile)
+      console.log('Verification fetch error:', verifyError)
 
       // Calculate and update cups (1 cup = 100 Palomas)
       const cupsEarned = Math.floor(newTotalPalomas / 100)
@@ -204,7 +244,7 @@ exports.handler = async (event, context) => {
             user_id: userId,
             awarded_by: userId,
             amount: cupsEarned - previousCups,
-            reason: `Earned from PayPal payment of $${paymentAmount} (${palomasToAdd} Palomas)`,
+            reason: `Earned from PayPal payment of $${paymentAmount} (${palomasToAdd} Palomas/Doves)`,
             cup_count_after: cupsEarned
           }])
       }
