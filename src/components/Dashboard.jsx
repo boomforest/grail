@@ -239,7 +239,7 @@ function Dashboard({
             margin: '0 0 0.5rem 0',
             fontWeight: 'normal'
           }}>
-            Palomas/Doves
+            Palomas
           </h2>
           <div style={{
             background: 'rgba(255, 255, 255, 0.9)',
@@ -293,7 +293,7 @@ function Dashboard({
               </button>
             )}
             
-            {/* Live PayPal Payment Button with Debug Logging */}
+            {/* PayPal Payment Button with quantity selection */}
             <button
               onClick={() => {
                 if (!user) {
@@ -301,12 +301,25 @@ function Dashboard({
                   return
                 }
                 
-                // Debug: Let's see what user.id actually is
+                // Prompt user for quantity (groups of 10)
+                const quantity = prompt('How many groups of 10 Palomas would you like to buy? (Each group costs $10)', '1')
+                
+                if (!quantity || isNaN(quantity) || quantity < 1) {
+                  alert('Please enter a valid number of groups (minimum 1)')
+                  return
+                }
+                
+                const numGroups = parseInt(quantity)
+                const totalAmount = (numGroups * 10).toFixed(2)
+                const totalPalomas = numGroups * 10
+                
+                // Debug logging
                 console.log('User object:', user)
                 console.log('User ID being sent to PayPal:', user.id)
+                console.log('Groups:', numGroups, 'Total Amount:', totalAmount, 'Total Palomas:', totalPalomas)
                 
-                // PayPal variable amount URL - using custom parameter
-                const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=jproney@gmail.com&currency_code=USD&item_name=Palomas/Doves&custom=${user.id}&no_shipping=1&return=https://grail3.netlify.app/&cancel_return=https://grail3.netlify.app/`
+                // PayPal URL with calculated amount
+                const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=jproney@gmail.com&currency_code=USD&amount=${totalAmount}&item_name=${totalPalomas} Palomas&custom=${user.id}&no_shipping=1&return=https://grail3.netlify.app/&cancel_return=https://grail3.netlify.app/`
                 
                 console.log('PayPal URL:', paypalUrl)
                 window.open(paypalUrl, '_blank')
@@ -324,7 +337,7 @@ function Dashboard({
                 width: '200px'
               }}
             >
-              Get Palomas/Doves
+              Get Palomas
             </button>
           </div>
         </div>
@@ -336,7 +349,7 @@ function Dashboard({
             margin: '0 0 0.5rem 0',
             fontWeight: 'normal'
           }}>
-            Tiempo/Time
+            Tiempo
           </h2>
           <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
           <div style={{
