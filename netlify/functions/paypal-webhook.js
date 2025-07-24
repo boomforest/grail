@@ -151,8 +151,19 @@ exports.handler = async (event, context) => {
 
       console.log(`Processing payment: $${paymentAmount} for user ${userId}`)
 
-      // Calculate Palomas/Doves (1 Paloma = $1 USD)
-      const palomasToAdd = Math.floor(paymentAmount)
+      // Calculate Palomas based on new pricing: 10 Palomas per $10 USD
+      // This means $1 = 1 Paloma, but only in groups of 10
+      const palomasToAdd = Math.floor(paymentAmount / 10) * 10
+      
+      // Validate that the payment is in valid increments of $10
+      if (paymentAmount % 10 !== 0) {
+        console.warn(`Payment amount $${paymentAmount} is not in $10 increments. Rounding down to $${Math.floor(paymentAmount / 10) * 10}`)
+      }
+
+      console.log(`Payment calculation:
+        - Payment amount: $${paymentAmount}
+        - Groups of $10: ${Math.floor(paymentAmount / 10)}
+        - Palomas to add: ${palomasToAdd}`)
 
       // Enhanced logging for debugging
       console.log(`Looking up user: ${userId}`)
@@ -244,14 +255,14 @@ exports.handler = async (event, context) => {
             user_id: userId,
             awarded_by: userId,
             amount: cupsEarned - previousCups,
-            reason: `Earned from PayPal payment of $${paymentAmount} (${palomasToAdd} Palomas/Doves)`,
+            reason: `Earned from PayPal payment of $${paymentAmount} (${palomasToAdd} Palomas)`,
             cup_count_after: cupsEarned
           }])
       }
 
       console.log(`Successfully processed payment:
         User: ${userId}
-        Amount: $${paymentAmount}
+        Payment Amount: $${paymentAmount}
         Palomas added: ${palomasToAdd}
         New DOV balance: ${newDovBalance}
         New total Palomas: ${newTotalPalomas}
@@ -261,6 +272,7 @@ exports.handler = async (event, context) => {
         statusCode: 200,
         body: JSON.stringify({ 
           success: true,
+          paymentAmount: paymentAmount,
           palomasAdded: palomasToAdd,
           newBalance: newDovBalance,
           cupsEarned: cupsEarned
