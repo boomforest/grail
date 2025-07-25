@@ -20,32 +20,53 @@ function ResetPassword({ supabase, onPasswordReset }) {
       }
 
       try {
-        // Get URL parameters
+        // Get URL parameters from both query string and hash fragment
         const urlParams = new URLSearchParams(window.location.search);
-        const accessToken = urlParams.get('access_token');
-        const refreshToken = urlParams.get('refresh_token');
-        const type = urlParams.get('type');
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        
+        // Try to get tokens from either location
+        const accessToken = urlParams.get('access_token') || hashParams.get('access_token');
+        const refreshToken = urlParams.get('refresh_token') || hashParams.get('refresh_token');
+        const type = urlParams.get('type') || hashParams.get('type');
+
+        console.log('Reset URL params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
 
         // Check if this is a password recovery link
-        if (type !== 'recovery' || !accessToken || !refreshToken) {
-          setMessage('Invalid or expired reset link. Please request a new password reset.');
+        if (type !== 'recovery') {
+          setMessage('Invalid reset link. Please request a new password reset.');
           setIsCheckingSession(false);
           return;
         }
 
-        // Set the session with the tokens from the email link
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken
-        });
+        // If we have tokens, set the session
+        if (accessToken && refreshToken) {
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
 
-        if (error) {
-          setMessage('Invalid or expired reset link. Please request a new password reset.');
-        } else if (data.session) {
-          setIsValidSession(true);
-          setMessage('You can now set your new password.');
+          if (error) {
+            console.error('Session error:', error);
+            setMessage('Invalid or expired reset link. Please request a new password reset.');
+          } else if (data.session) {
+            console.log('Reset session established:', data.session.user.email);
+            setIsValidSession(true);
+            setMessage('You can now set your new password.');
+          }
+        } else {
+          // Check if user is already signed in from the reset link
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session) {
+            console.log('User already signed in from reset link:', session.user.email);
+            setIsValidSession(true);
+            setMessage('You can now set your new password.');
+          } else {
+            setMessage('Invalid reset link. Please request a new password reset.');
+          }
         }
       } catch (error) {
+        console.error('Reset session error:', error);
         setMessage('An error occurred while validating your reset link.');
       } finally {
         setIsCheckingSession(false);
