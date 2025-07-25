@@ -1,5 +1,132 @@
 import React from 'react'
 
+// Username component with two separate fields
+function UsernameInput({ username, onUsernameChange }) {
+  const letters = username.replace(/[^A-Za-z]/g, '').slice(0, 3);
+  const numbers = username.replace(/[^0-9]/g, '').slice(0, 3);
+
+  const handleLettersChange = (e) => {
+    const value = e.target.value.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase();
+    const newUsername = value + numbers;
+    onUsernameChange(newUsername);
+  };
+
+  const handleNumbersChange = (e) => {
+    const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 3);
+    const newUsername = letters + value;
+    onUsernameChange(newUsername);
+  };
+
+  return (
+    <div style={{ marginBottom: '1rem' }}>
+      <div style={{ marginBottom: '0.5rem' }}>
+        <p style={{ 
+          fontSize: '0.9rem', 
+          color: '#8b4513', 
+          margin: '0 0 0.5rem 0',
+          textAlign: 'left'
+        }}>
+          Your username will be: <span style={{ 
+            fontFamily: 'monospace', 
+            fontWeight: 'bold', 
+            color: '#d2691e',
+            fontSize: '1.1rem'
+          }}>
+            {letters || 'ABC'}{numbers || '123'}
+          </span>
+        </p>
+      </div>
+      
+      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+        <div style={{ flex: 1 }}>
+          <label style={{ 
+            display: 'block', 
+            fontSize: '0.8rem', 
+            fontWeight: '500', 
+            color: '#8b4513', 
+            marginBottom: '0.25rem',
+            textAlign: 'left'
+          }}>
+            3 Letters
+          </label>
+          <input
+            type="text"
+            value={letters}
+            onChange={handleLettersChange}
+            placeholder="ABC"
+            maxLength={3}
+            style={{
+              width: '100%',
+              padding: '1rem',
+              border: '2px solid #e0e0e0',
+              borderRadius: '15px',
+              boxSizing: 'border-box',
+              fontSize: '1.2rem',
+              outline: 'none',
+              textAlign: 'center',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              backgroundColor: letters.length === 3 ? '#f0f8f0' : 'white'
+            }}
+          />
+        </div>
+        
+        <div style={{ 
+          fontSize: '1.5rem', 
+          fontWeight: 'bold', 
+          color: '#d2691e', 
+          padding: '0 0.5rem',
+          marginBottom: '1rem'
+        }}>
+          +
+        </div>
+        
+        <div style={{ flex: 1 }}>
+          <label style={{ 
+            display: 'block', 
+            fontSize: '0.8rem', 
+            fontWeight: '500', 
+            color: '#8b4513', 
+            marginBottom: '0.25rem',
+            textAlign: 'left'
+          }}>
+            3 Numbers
+          </label>
+          <input
+            type="text"
+            value={numbers}
+            onChange={handleNumbersChange}
+            placeholder="123"
+            maxLength={3}
+            style={{
+              width: '100%',
+              padding: '1rem',
+              border: '2px solid #e0e0e0',
+              borderRadius: '15px',
+              boxSizing: 'border-box',
+              fontSize: '1.2rem',
+              outline: 'none',
+              textAlign: 'center',
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              backgroundColor: numbers.length === 3 ? '#f0f8f0' : 'white'
+            }}
+          />
+        </div>
+      </div>
+      
+      <div style={{ 
+        fontSize: '0.75rem', 
+        color: '#8b4513', 
+        marginTop: '0.5rem',
+        textAlign: 'left'
+      }}>
+        ✓ Letters only (A-Z) • ✓ Numbers only (0-9) • ✓ Exactly 3 of each
+      </div>
+    </div>
+  );
+}
+
 function LoginForm({ 
   activeTab, 
   setActiveTab, 
@@ -138,35 +265,18 @@ function LoginForm({
                 outline: 'none'
               }}
             />
-            <input
-              type="text"
-              value={formData.username}
-              onChange={(e) => {
-                // Allow only alphanumeric characters and convert letters to uppercase
-                const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-                setFormData({ ...formData, username: value });
-              }}
-              placeholder="Username (ABC123)"
-              maxLength={6}
-              inputMode="text"
-              autoComplete="username"
-              style={{
-                width: '100%',
-                padding: '1rem',
-                border: '2px solid #e0e0e0',
-                borderRadius: '15px',
-                marginBottom: '1rem',
-                boxSizing: 'border-box',
-                fontSize: '1rem',
-                outline: 'none'
-              }}
+            
+            {/* New Username Component */}
+            <UsernameInput 
+              username={formData.username || ''}
+              onUsernameChange={(newUsername) => setFormData({ ...formData, username: newUsername })}
             />
           </>
         )}
 
         <button 
           onClick={activeTab === 'login' ? onLogin : onRegister}
-          disabled={loading || !supabase}
+          disabled={loading || !supabase || (activeTab === 'register' && (!formData.username || formData.username.length !== 6))}
           style={{
             width: '100%',
             padding: '1rem',
@@ -177,7 +287,7 @@ function LoginForm({
             cursor: 'pointer',
             fontWeight: '600',
             fontSize: '1rem',
-            opacity: (loading || !supabase) ? 0.5 : 1,
+            opacity: (loading || !supabase || (activeTab === 'register' && (!formData.username || formData.username.length !== 6))) ? 0.5 : 1,
             boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)'
           }}
         >
