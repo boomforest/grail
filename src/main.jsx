@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import LoginForm from './components/LoginForm'
+import ResetPassword from './components/ResetPassword'
 import Dashboard from './components/Dashboard'
 import SendForm from './components/SendForm'
 import ReleaseForm from './components/ReleaseForm'
@@ -179,8 +180,8 @@ function App() {
   const [showCupGame, setShowCupGame] = useState(false)
   const [showGPTChat, setShowGPTChat] = useState(false)
   const [showPayPal, setShowPayPal] = useState(false) // PayPal modal state
-  const [showResetPassword, setShowResetPassword] = useState(false)
-
+  const [showResetPassword, setShowResetPassword] = useState(false) // Reset password state
+  
   // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
     recipient: '',
@@ -257,18 +258,17 @@ function App() {
       console.error('Error in syncCupsFromPalomas:', error)
     }
   }
-  useEffect(() => {
-    // Check if this is a password reset URL
-    const urlParams = new URLSearchParams(window.location.search)
-    const type = urlParams.get('type')
-    if (type === 'recovery') {
-      setShowResetPassword(true)
-    }
-  }, [])
-  
+
   useEffect(() => {
     const initSupabase = async () => {
       try {
+        // Check if this is a password reset URL first
+        const urlParams = new URLSearchParams(window.location.search)
+        const type = urlParams.get('type')
+        if (type === 'recovery') {
+          setShowResetPassword(true)
+        }
+
         const { createClient } = await import('@supabase/supabase-js')
         const client = createClient(
           import.meta.env.VITE_SUPABASE_URL,
@@ -315,13 +315,6 @@ function App() {
       }
     }
   }, [])
-
-
-  const handlePasswordResetComplete = () => {
-    setShowResetPassword(false)
-    // Clear URL parameters
-    window.history.replaceState({}, document.title, window.location.pathname)
-  }
 
   const ensureProfileExists = async (authUser, client = supabase) => {
     try {
@@ -505,6 +498,14 @@ function App() {
     await loadNotifications()
   }
 
+  // Handle password reset completion
+  const handlePasswordResetComplete = () => {
+    setShowResetPassword(false)
+    // Clear URL parameters
+    window.history.replaceState({}, document.title, window.location.pathname)
+    setMessage('Password reset complete! Please log in with your new password.')
+  }
+
   const handleLogout = async () => {
     if (supabase?.notificationSubscription) {
       supabase.notificationSubscription.unsubscribe()
@@ -675,6 +676,8 @@ function App() {
   }
 
   const isAdmin = profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com'
+
+  // Reset Password View - Show this first if we're on a reset URL
   if (showResetPassword) {
     return (
       <>
@@ -687,6 +690,7 @@ function App() {
       </>
     )
   }
+
   // PayPal Modal View
   if (user && showPayPal) {
     return (
