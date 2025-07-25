@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 // Username component with two separate fields
 function UsernameInput({ username, onUsernameChange }) {
@@ -127,18 +127,109 @@ function UsernameInput({ username, onUsernameChange }) {
   );
 }
 
-function LoginForm({ 
-  activeTab, 
-  setActiveTab, 
-  formData, 
-  setFormData, 
-  message, 
-  loading, 
-  supabase, 
-  onLogin, 
-  onRegister,
-  onForgotPassword // New prop for forgot password handler
-}) {
+function LoginForm({ supabase, onLogin, onRegister }) {
+  // All state managed internally
+  const [activeTab, setActiveTab] = useState('login');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    username: ''
+  });
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Handle forgot password functionality
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      setMessage('Please enter your email address');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email);
+
+      if (error) {
+        setMessage(`Reset failed: ${error.message}`);
+      } else {
+        setMessage('Password reset email sent! Check your inbox.');
+        // Switch back to login tab after successful email send
+        setTimeout(() => {
+          setActiveTab('login');
+        }, 2000);
+      }
+    } catch (error) {
+      setMessage('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle login
+  const handleLogin = async () => {
+    if (!formData.email || !formData.password) {
+      setMessage('Please fill in all fields.');
+      return;
+    }
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        setMessage(`Login failed: ${error.message}`);
+      } else {
+        setMessage('Login successful!');
+        if (onLogin) onLogin(data);
+      }
+    } catch (error) {
+      setMessage('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle registration
+  const handleRegister = async () => {
+    if (!formData.email || !formData.password || !formData.username || formData.username.length !== 6) {
+      setMessage('Please fill in all required fields and ensure username is 6 characters.');
+      return;
+    }
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            display_name: formData.name || null,
+            username: formData.username
+          }
+        }
+      });
+
+      if (error) {
+        setMessage(`Registration failed: ${error.message}`);
+      } else {
+        setMessage('Registration successful! Please check your email to verify your account.');
+        if (onRegister) onRegister(data);
+      }
+    } catch (error) {
+      setMessage('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -339,7 +430,7 @@ function LoginForm({
             </div>
 
             <button 
-              onClick={onLogin}
+              onClick={handleLogin}
               disabled={loading || !supabase}
               style={{
                 width: '100%',
@@ -421,7 +512,7 @@ function LoginForm({
             />
 
             <button 
-              onClick={onRegister}
+              onClick={handleRegister}
               disabled={loading || !supabase || (!formData.username || formData.username.length !== 6)}
               style={{
                 width: '100%',
