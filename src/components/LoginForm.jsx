@@ -204,24 +204,9 @@ function LoginForm({
             padding: '1rem',
             borderRadius: '15px',
             marginBottom: '1rem',
-            backgroundColor: message.includes('successful') ? '#d4edda' : 
+            backgroundColor: message.includes('successful') || message.includes('sent') ? '#d4edda' : 
                            message.includes('failed') ? '#f8d7da' : '#fff3cd',
-            color: message.includes('successful') ? '#155724' : 
-                   message.includes('failed') ? '#721c24' : '#856404',
-            fontSize: '0.9rem'
-          }}>
-            {message}
-          </div>
-        )}
-
-        {message && (
-          <div style={{
-            padding: '1rem',
-            borderRadius: '15px',
-            marginBottom: '1rem',
-            backgroundColor: message.includes('successful') ? '#d4edda' : 
-                           message.includes('failed') ? '#f8d7da' : '#fff3cd',
-            color: message.includes('successful') ? '#155724' : 
+            color: message.includes('successful') || message.includes('sent') ? '#155724' : 
                    message.includes('failed') ? '#721c24' : '#856404',
             fontSize: '0.9rem'
           }}>
@@ -259,7 +244,7 @@ function LoginForm({
             />
 
             <button 
-              onClick={onForgotPassword}
+              onClick={handleForgotPassword}
               disabled={loading || !supabase || !formData.email}
               style={{
                 width: '100%',
