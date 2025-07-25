@@ -264,7 +264,9 @@ function App() {
       try {
         // Check if this is a password reset URL first
         const urlParams = new URLSearchParams(window.location.search)
-        const type = urlParams.get('type')
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        const type = urlParams.get('type') || hashParams.get('type')
+        
         if (type === 'recovery') {
           setShowResetPassword(true)
         }
@@ -277,29 +279,32 @@ function App() {
         setSupabase(client)
         setMessage('')
 
-        const { data: { session } } = await client.auth.getSession()
-        if (session?.user) {
-          setUser(session.user)
-          await ensureProfileExists(session.user, client)
-          await loadAllProfiles(client)
-          await loadNotifications(client)
-          
-          // Set up real-time subscription for notifications
-          try {
-            const notificationSubscription = client
-              .channel('release_notifications')
-              .on('postgres_changes', 
-                { event: 'INSERT', schema: 'public', table: 'release_notifications' },
-                (payload) => {
-                  console.log('New notification received:', payload)
-                  loadNotifications(client)
-                }
-              )
-              .subscribe()
+        // Only auto-login if NOT on a reset password page
+        if (type !== 'recovery') {
+          const { data: { session } } = await client.auth.getSession()
+          if (session?.user) {
+            setUser(session.user)
+            await ensureProfileExists(session.user, client)
+            await loadAllProfiles(client)
+            await loadNotifications(client)
+            
+            // Set up real-time subscription for notifications
+            try {
+              const notificationSubscription = client
+                .channel('release_notifications')
+                .on('postgres_changes', 
+                  { event: 'INSERT', schema: 'public', table: 'release_notifications' },
+                  (payload) => {
+                    console.log('New notification received:', payload)
+                    loadNotifications(client)
+                  }
+                )
+                .subscribe()
 
-            client.notificationSubscription = notificationSubscription
-          } catch (subscriptionError) {
-            console.warn('Could not set up real-time notifications:', subscriptionError)
+              client.notificationSubscription = notificationSubscription
+            } catch (subscriptionError) {
+              console.warn('Could not set up real-time notifications:', subscriptionError)
+            }
           }
         }
       } catch (error) {
@@ -499,8 +504,16 @@ function App() {
   }
 
   // Handle password reset completion
-  const handlePasswordResetComplete = () => {
+  const handlePasswordResetComplete = async () => {
+    // Sign out the user after password reset
+    if (supabase) {
+      await supabase.auth.signOut()
+    }
+    
     setShowResetPassword(false)
+    setUser(null)
+    setProfile(null)
+    
     // Clear URL parameters
     window.history.replaceState({}, document.title, window.location.pathname)
     setMessage('Password reset complete! Please log in with your new password.')
