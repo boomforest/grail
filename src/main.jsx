@@ -170,7 +170,6 @@ function App() {
   const [notifications, setNotifications] = useState([])
   
   // UI state
-  const [activeTab, setActiveTab] = useState('login')
   const [showSendForm, setShowSendForm] = useState(null)
   const [showReleaseForm, setShowReleaseForm] = useState(null)
   const [showSendMeritsForm, setShowSendMeritsForm] = useState(false)
@@ -181,13 +180,7 @@ function App() {
   const [showGPTChat, setShowGPTChat] = useState(false)
   const [showPayPal, setShowPayPal] = useState(false) // PayPal modal state
   
-  // Form state
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    username: '',
-    name: ''
-  })
+  // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
     recipient: '',
     amount: ''
@@ -199,7 +192,6 @@ function App() {
   
   // Loading states
   const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(false)
   const [isTransferring, setIsTransferring] = useState(false)
   const [isReleasing, setIsReleasing] = useState(false)
 
@@ -478,102 +470,23 @@ function App() {
     }
   }
 
-  const handleRegister = async () => {
-    if (!supabase) {
-      setMessage('Please wait for connection...')
-      return
-    }
-
-    if (!formData.email || !formData.password || !formData.username) {
-      setMessage('Please fill in all required fields')
-      return
-    }
-
-    if (!/^[A-Z]{3}[0-9]{3}$/.test(formData.username)) {
-      setMessage('Username must be 3 letters + 3 numbers (e.g., ABC123)')
-      return
-    }
-
-    try {
-      setLoading(true)
-      setMessage('Creating account...')
-
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            username: formData.username,
-            name: formData.name
-          }
-        }
-      })
-
-      if (authError) {
-        setMessage('Registration failed: ' + authError.message)
-        return
-      }
-
-      if (!authData.user) {
-        setMessage('Registration failed: No user returned')
-        return
-      }
-
-      setMessage('Account created, setting up profile...')
-      const profile = await ensureProfileExists(authData.user)
-      
-      if (profile) {
-        setUser(authData.user)
-        await loadAllProfiles()
-        await loadNotifications()
-        setMessage('Registration successful!')
-        setFormData({ email: '', password: '', username: '', name: '' })
-      } else {
-        setMessage('Account created but profile setup failed. Please try logging in.')
-      }
-    } catch (err) {
-      setMessage('Registration error: ' + err.message)
-    } finally {
-      setLoading(false)
-    }
+  // Success handlers for LoginForm
+  const handleSuccessfulLogin = async (data) => {
+    console.log('Login successful:', data.user)
+    setUser(data.user)
+    setMessage('Login successful!')
+    await ensureProfileExists(data.user)
+    await loadAllProfiles()
+    await loadNotifications()
   }
 
-  const handleLogin = async () => {
-    if (!supabase) {
-      setMessage('Please wait for connection...')
-      return
-    }
-
-    if (!formData.email || !formData.password) {
-      setMessage('Please fill in email and password')
-      return
-    }
-
-    try {
-      setLoading(true)
-      setMessage('Logging in...')
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password
-      })
-
-      if (error) {
-        setMessage('Login failed: ' + error.message)
-        return
-      }
-
-      setMessage('Login successful, checking profile...')
-      setUser(data.user)
-      await ensureProfileExists(data.user)
-      await loadAllProfiles()
-      await loadNotifications()
-      setFormData({ email: '', password: '', username: '', name: '' })
-    } catch (err) {
-      setMessage('Login error: ' + err.message)
-    } finally {
-      setLoading(false)
-    }
+  const handleSuccessfulRegister = async (data) => {
+    console.log('Registration successful:', data.user)
+    setUser(data.user)
+    setMessage('Registration successful!')
+    await ensureProfileExists(data.user)
+    await loadAllProfiles()
+    await loadNotifications()
   }
 
   const handleLogout = async () => {
@@ -598,7 +511,6 @@ function App() {
     setShowGPTChat(false)
     setShowPayPal(false) // Reset PayPal modal
     setMessage('')
-    setFormData({ email: '', password: '', username: '', name: '' })
     setTransferData({ recipient: '', amount: '' })
     setReleaseData({ amount: '', reason: '' })
   }
@@ -996,15 +908,9 @@ function App() {
   return (
     <>
       <LoginForm
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        formData={formData}
-        setFormData={setFormData}
-        message={message}
-        loading={loading}
         supabase={supabase}
-        onLogin={handleLogin}
-        onRegister={handleRegister}
+        onLogin={handleSuccessfulLogin}
+        onRegister={handleSuccessfulRegister}
       />
       <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
       {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
