@@ -179,7 +179,8 @@ function App() {
   const [showCupGame, setShowCupGame] = useState(false)
   const [showGPTChat, setShowGPTChat] = useState(false)
   const [showPayPal, setShowPayPal] = useState(false) // PayPal modal state
-  
+  const [showResetPassword, setShowResetPassword] = useState(false)
+
   // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
     recipient: '',
@@ -256,7 +257,15 @@ function App() {
       console.error('Error in syncCupsFromPalomas:', error)
     }
   }
-
+  useEffect(() => {
+    // Check if this is a password reset URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const type = urlParams.get('type')
+    if (type === 'recovery') {
+      setShowResetPassword(true)
+    }
+  }, [])
+  
   useEffect(() => {
     const initSupabase = async () => {
       try {
@@ -306,6 +315,13 @@ function App() {
       }
     }
   }, [])
+
+
+  const handlePasswordResetComplete = () => {
+    setShowResetPassword(false)
+    // Clear URL parameters
+    window.history.replaceState({}, document.title, window.location.pathname)
+  }
 
   const ensureProfileExists = async (authUser, client = supabase) => {
     try {
@@ -659,7 +675,18 @@ function App() {
   }
 
   const isAdmin = profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com'
-
+  if (showResetPassword) {
+    return (
+      <>
+        <ResetPassword
+          supabase={supabase}
+          onPasswordReset={handlePasswordResetComplete}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+      </>
+    )
+  }
   // PayPal Modal View
   if (user && showPayPal) {
     return (
