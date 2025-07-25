@@ -17,6 +17,13 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
+  const [showWelcome, setShowWelcome] = useState(false)
+
+  // Check if user should see welcome window
+  useEffect(() => {
+    // Show welcome window for testing - change this condition back to (profile.cup_count || 0) === 0 in production
+    setShowWelcome(true)
+  }, [profile])
 
   // Load all profiles for search
   useEffect(() => {
@@ -158,8 +165,120 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
       backgroundColor: '#f5f1e8',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       padding: '2rem 1rem',
-      color: '#8b5a3c'
+      color: '#8b5a3c',
+      position: 'relative'
     }}>
+      {/* Welcome Window for New Users */}
+      {showWelcome && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '2rem'
+        }}>
+          <div style={{
+            backgroundColor: '#faf8f3',
+            borderRadius: '24px',
+            padding: '3rem 2.5rem',
+            maxWidth: '500px',
+            width: '100%',
+            boxShadow: '0 20px 60px rgba(139, 90, 60, 0.3)',
+            border: '2px solid rgba(210, 105, 30, 0.2)',
+            position: 'relative',
+            textAlign: 'center'
+          }}>
+            {/* Close button */}
+            <button
+              onClick={() => setShowWelcome(false)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                color: '#8b5a3c',
+                opacity: 0.6,
+                padding: '0.5rem'
+              }}
+            >
+              ×
+            </button>
+
+            <div style={{
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              color: '#d2691e',
+              marginBottom: '2rem',
+              fontStyle: 'italic'
+            }}>
+              Welcome to the Game of Cups
+            </div>
+
+            {/* Explanation text */}
+            <div style={{
+              fontSize: '1rem',
+              lineHeight: '1.6',
+              color: '#8b5a3c',
+              fontStyle: 'italic',
+              marginBottom: '2.5rem',
+              textAlign: 'left'
+            }}>
+              <p style={{ marginBottom: '1rem' }}>
+                <em>The game of belonging to Casa de Copas...</em>
+              </p>
+              
+              <p style={{ marginBottom: '1rem' }}>
+                <em>Earn cups by using palomas (50 palomas = 1 cup during beta testing) and level up your cups to tarot cards with merits, earned by volunteering or bringing something extra to the project.</em>
+              </p>
+              
+              <p style={{ marginBottom: '1rem' }}>
+                <em>A full cup → Ace of Cups → second full cup → Two of Cups... when you reach the King of Cups you can choose your own identifying tarot card and you are officially a member.</em>
+              </p>
+              
+              <p style={{ marginBottom: '0' }}>
+                <em>Our most exclusive events will always have 55 slots reserved: 33 for the highest ranking members, 22 for the users with the most cups. This means we want to build a community on giving but with more focus on giving and participation.</em>
+              </p>
+            </div>
+
+            {/* Got it button */}
+            <button
+              onClick={() => setShowWelcome(false)}
+              style={{
+                background: 'linear-gradient(135deg, #d2691e, #cd853f)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '16px',
+                padding: '1rem 2rem',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                fontWeight: '500',
+                boxShadow: '0 4px 20px rgba(210, 105, 30, 0.3)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'translateY(-2px)'
+                e.target.style.boxShadow = '0 6px 25px rgba(210, 105, 30, 0.4)'
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)'
+                e.target.style.boxShadow = '0 4px 20px rgba(210, 105, 30, 0.3)'
+              }}
+            >
+              Begin Your Journey
+            </button>
+          </div>
+        </div>
+      )}
+
       <div style={{
         maxWidth: '400px',
         margin: '0 auto',
