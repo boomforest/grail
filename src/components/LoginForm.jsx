@@ -136,7 +136,8 @@ function LoginForm({
   loading, 
   supabase, 
   onLogin, 
-  onRegister 
+  onRegister,
+  onForgotPassword // New prop for forgot password handler
 }) {
   return (
     <div style={{
@@ -213,42 +214,204 @@ function LoginForm({
           </div>
         )}
 
-        <input
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          placeholder="Email"
-          style={{
-            width: '100%',
+        {message && (
+          <div style={{
             padding: '1rem',
-            border: '2px solid #e0e0e0',
             borderRadius: '15px',
             marginBottom: '1rem',
-            boxSizing: 'border-box',
-            fontSize: '1rem',
-            outline: 'none'
-          }}
-        />
+            backgroundColor: message.includes('successful') ? '#d4edda' : 
+                           message.includes('failed') ? '#f8d7da' : '#fff3cd',
+            color: message.includes('successful') ? '#155724' : 
+                   message.includes('failed') ? '#721c24' : '#856404',
+            fontSize: '0.9rem'
+          }}>
+            {message}
+          </div>
+        )}
 
-        <input
-          type="password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          placeholder="Password"
-          style={{
-            width: '100%',
-            padding: '1rem',
-            border: '2px solid #e0e0e0',
-            borderRadius: '15px',
-            marginBottom: '1rem',
-            boxSizing: 'border-box',
-            fontSize: '1rem',
-            outline: 'none'
-          }}
-        />
+        {/* Forgot Password Tab */}
+        {activeTab === 'forgot' && (
+          <>
+            <div style={{ marginBottom: '1.5rem', textAlign: 'left' }}>
+              <h2 style={{ fontSize: '1.5rem', color: '#8b4513', margin: '0 0 0.5rem 0' }}>
+                Reset Password
+              </h2>
+              <p style={{ fontSize: '0.9rem', color: '#8b4513', margin: 0 }}>
+                Enter your email address and we'll send you a link to reset your password.
+              </p>
+            </div>
 
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="Enter your email address"
+              style={{
+                width: '100%',
+                padding: '1rem',
+                border: '2px solid #e0e0e0',
+                borderRadius: '15px',
+                marginBottom: '1rem',
+                boxSizing: 'border-box',
+                fontSize: '1rem',
+                outline: 'none'
+              }}
+            />
+
+            <button 
+              onClick={onForgotPassword}
+              disabled={loading || !supabase || !formData.email}
+              style={{
+                width: '100%',
+                padding: '1rem',
+                background: 'linear-gradient(45deg, #d2691e, #cd853f)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '15px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '1rem',
+                opacity: (loading || !supabase || !formData.email) ? 0.5 : 1,
+                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)',
+                marginBottom: '1rem'
+              }}
+            >
+              {loading ? 'Sending...' : 'Send Reset Link'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('login')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#d2691e',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                padding: 0
+              }}
+            >
+              ← Back to Login
+            </button>
+          </>
+        )}
+
+        {/* Login Tab */}
+        {activeTab === 'login' && (
+          <>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="Email"
+              style={{
+                width: '100%',
+                padding: '1rem',
+                border: '2px solid #e0e0e0',
+                borderRadius: '15px',
+                marginBottom: '1rem',
+                boxSizing: 'border-box',
+                fontSize: '1rem',
+                outline: 'none'
+              }}
+            />
+
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              placeholder="Password"
+              style={{
+                width: '100%',
+                padding: '1rem',
+                border: '2px solid #e0e0e0',
+                borderRadius: '15px',
+                marginBottom: '0.5rem',
+                boxSizing: 'border-box',
+                fontSize: '1rem',
+                outline: 'none'
+              }}
+            />
+
+            {/* Forgot Password Link */}
+            <div style={{ marginBottom: '1rem', textAlign: 'right' }}>
+              <button
+                type="button"
+                onClick={() => setActiveTab('forgot')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#d2691e',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  padding: 0
+                }}
+              >
+                Forgot Password?
+              </button>
+            </div>
+
+            <button 
+              onClick={onLogin}
+              disabled={loading || !supabase}
+              style={{
+                width: '100%',
+                padding: '1rem',
+                background: 'linear-gradient(45deg, #d2691e, #cd853f)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '15px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '1rem',
+                opacity: (loading || !supabase) ? 0.5 : 1,
+                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)'
+              }}
+            >
+              {loading ? 'Loading...' : 'Login'}
+            </button>
+          </>
+        )}
+
+        {/* Register Tab */}
         {activeTab === 'register' && (
           <>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="Email"
+              style={{
+                width: '100%',
+                padding: '1rem',
+                border: '2px solid #e0e0e0',
+                borderRadius: '15px',
+                marginBottom: '1rem',
+                boxSizing: 'border-box',
+                fontSize: '1rem',
+                outline: 'none'
+              }}
+            />
+
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              placeholder="Password"
+              style={{
+                width: '100%',
+                padding: '1rem',
+                border: '2px solid #e0e0e0',
+                borderRadius: '15px',
+                marginBottom: '1rem',
+                boxSizing: 'border-box',
+                fontSize: '1rem',
+                outline: 'none'
+              }}
+            />
+
             <input
               type="text"
               value={formData.name}
@@ -266,33 +429,33 @@ function LoginForm({
               }}
             />
             
-            {/* New Username Component */}
+            {/* Username Component */}
             <UsernameInput 
               username={formData.username || ''}
               onUsernameChange={(newUsername) => setFormData({ ...formData, username: newUsername })}
             />
+
+            <button 
+              onClick={onRegister}
+              disabled={loading || !supabase || (!formData.username || formData.username.length !== 6)}
+              style={{
+                width: '100%',
+                padding: '1rem',
+                background: 'linear-gradient(45deg, #d2691e, #cd853f)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '15px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                fontSize: '1rem',
+                opacity: (loading || !supabase || (!formData.username || formData.username.length !== 6)) ? 0.5 : 1,
+                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)'
+              }}
+            >
+              {loading ? 'Loading...' : 'Register'}
+            </button>
           </>
         )}
-
-        <button 
-          onClick={activeTab === 'login' ? onLogin : onRegister}
-          disabled={loading || !supabase || (activeTab === 'register' && (!formData.username || formData.username.length !== 6))}
-          style={{
-            width: '100%',
-            padding: '1rem',
-            background: 'linear-gradient(45deg, #d2691e, #cd853f)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '15px',
-            cursor: 'pointer',
-            fontWeight: '600',
-            fontSize: '1rem',
-            opacity: (loading || !supabase || (activeTab === 'register' && (!formData.username || formData.username.length !== 6))) ? 0.5 : 1,
-            boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)'
-          }}
-        >
-          {loading ? 'Loading...' : (activeTab === 'login' ? 'Login' : 'Register')}
-        </button>
       </div>
     </div>
   )
