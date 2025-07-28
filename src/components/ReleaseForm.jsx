@@ -15,96 +15,69 @@ const ReleaseForm = ({
   const [claiming, setClaiming] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState('All')
 
-  // Sample gift data - you can move this to a database later
-  const availableGifts = [
-    {
-      id: 'coffee-americano',
-      name: 'Americano Coffee',
-      description: 'Fresh brewed americano, ready when you arrive',
-      category: 'Coffee',
-      palomas: 8,
-      emoji: '☕',
-      available: true
-    },
-    {
-      id: 'coffee-latte',
-      name: 'Casa Latte',
-      description: 'Our signature latte with local beans',
-      category: 'Coffee',
-      palomas: 12,
-      emoji: '🥛',
-      available: true
-    },
-    {
-      id: 'tshirt-casa',
-      name: 'Casa de Copas T-Shirt',
-      description: 'Limited edition Casa tee, various sizes',
-      category: 'Merch',
-      palomas: 45,
-      emoji: '👕',
-      available: true
-    },
-    {
-      id: 'class-pottery',
-      name: 'Pottery Workshop',
-      description: '2-hour pottery class with local artist',
-      category: 'Classes',
-      palomas: 80,
-      emoji: '🏺',
-      available: true
-    },
-    {
-      id: 'studio-time',
-      name: 'Studio Time (1 hour)',
-      description: 'Private studio access for your creative work',
-      category: 'Studio',
-      palomas: 25,
-      emoji: '🎨',
-      available: true
-    },
-    {
-      id: 'pastry-croissant',
-      name: 'Fresh Croissant',
-      description: 'Buttery croissant baked fresh daily',
-      category: 'Food',
-      palomas: 6,
-      emoji: '🥐',
-      available: true
-    },
-    {
-      id: 'class-guitar',
-      name: 'Guitar Lesson',
-      description: '45-minute one-on-one guitar session',
-      category: 'Classes',
-      palomas: 60,
-      emoji: '🎸',
-      available: true
-    },
-    {
-      id: 'notebook-casa',
-      name: 'Casa Notebook',
-      description: 'Hand-bound notebook with Casa logo',
-      category: 'Merch',
-      palomas: 20,
-      emoji: '📖',
-      available: true
-    }
-  ]
+  const [gifts, setGifts] = useState([])
 
-  const categories = ['All', 'Coffee', 'Food', 'Merch', 'Classes', 'Studio']
+  // Load gifts from database
+  useEffect(() => {
+    loadGifts()
+  }, [])
+
+  const loadGifts = async () => {
+    if (!supabase) return
+
+    try {
+      const { data, error } = await supabase
+        .from('casa_products')
+        .select('*')
+        .eq('active', true)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error loading gifts:', error)
+        // Fallback to sample data if table doesn't exist yet
+        setGifts([{
+          id: 'coffee-simple',
+          name: 'Coffee',
+          description: 'Fresh brewed coffee',
+          category: 'Coffee',
+          price: 2,
+          image_url: null,
+          active: true
+        }])
+        return
+      }
+
+      setGifts(data || [])
+    } catch (error) {
+      console.error('Error loading gifts:', error)
+      // Fallback to sample data
+      setGifts([{
+        id: 'coffee-simple',
+        name: 'Coffee',
+        description: 'Fresh brewed coffee',
+        category: 'Coffee',
+        price: 2,
+        image_url: null,
+        active: true
+      }])
+    }
+  }
+
+  // Extract unique categories from gifts
+  const categories = ['All', ...new Set(gifts.map(gift => gift.category))]
   
   const filteredGifts = selectedCategory === 'All' 
-    ? availableGifts 
-    : availableGifts.filter(gift => gift.category === selectedCategory)
+    ? gifts 
+    : gifts.filter(gift => gift.category === selectedCategory)
 
   const claimGift = async (gift) => {
-    if (!profile || profile.total_palomas_collected < gift.palomas) {
-      alert(`Insufficient Palomas! You need ${gift.palomas} but only have ${profile.total_palomas_collected || 0}`)
+    if (!profile || profile.total_palomas_collected < gift.price) {
+      alert(`Insufficient Palomas! You need ${gift.price} but only have ${profile.total_palomas_collected || 0}`)
       return
     }
 
     const confirmClaim = window.confirm(
-      `Claim ${gift.name} for ${gift.palomas} Palomas?\n\nThis will send a receipt to Casa staff to prepare your item for pickup.`
+      `Claim ${gift.name} for ${gift.price} Palomas?\n\nThis will send a receipt to Casa staff to prepare your item for pickup.`
     )
 
     if (!confirmClaim) return
@@ -120,7 +93,7 @@ const ReleaseForm = ({
         gift_id: gift.id,
         gift_name: gift.name,
         gift_category: gift.category,
-        palomas_burned: gift.palomas,
+        palomas_burned: gift.price,
         status: 'claimed',
         claim_time: new Date().toISOString()
       }
@@ -137,7 +110,7 @@ const ReleaseForm = ({
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          total_palomas_collected: profile.total_palomas_collected - gift.palomas,
+          total_palomas_collected: profile.total_palomas_collected - gift.price,
           last_status_update: new Date().toISOString()
         })
         .eq('id', user.id)
@@ -150,7 +123,7 @@ const ReleaseForm = ({
         .insert([{
           type: 'gift_claim',
           title: `🎁 ${profile.username} claimed ${gift.name}`,
-          message: `User: ${profile.username} (${user.email})\nItem: ${gift.name}\nPalomas: ${gift.palomas}\nClaim ID: ${claim.id}`,
+          message: `User: ${profile.username} (${user.email})\nItem: ${gift.name}\nPalomas: ${gift.price}\nClaim ID: ${claim.id}`,
           user_id: user.id,
           data: JSON.stringify(claimData)
         }])
@@ -159,7 +132,7 @@ const ReleaseForm = ({
         console.error('Failed to send notification:', notificationError)
       }
 
-      alert(`🎉 Gift claimed successfully!\n\n${gift.emoji} ${gift.name}\nClaim ID: ${claim.id}\n\nCasa staff has been notified to prepare your item for pickup!`)
+      alert(`🎉 Gift claimed successfully!\n\n${gift.name}\nClaim ID: ${claim.id}\n\nCasa staff has been notified to prepare your item for pickup!`)
       
       // Refresh to update balance
       window.location.reload()
@@ -421,7 +394,7 @@ const ReleaseForm = ({
           {filteredGifts.length === 0 && (
             <div style={{ textAlign: 'center', padding: '2rem' }}>
               <p style={{ fontSize: '1rem', color: '#64748b' }}>
-                No gifts available in this category right now. Check back soon! 🎁
+                No gifts available yet. Ask an admin to add some items! 🎁
               </p>
             </div>
           )}
@@ -457,8 +430,8 @@ const ReleaseForm = ({
 
 // Gift Card Component
 const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
-  const canAfford = userBalance >= gift.palomas
-  const isAvailable = gift.available
+  const canAfford = userBalance >= gift.price
+  const isAvailable = gift.active
 
   return (
     <div style={{
@@ -481,17 +454,40 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
       e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'
     }}>
       
-      {/* Gift Header */}
+      {/* Gift Image or Placeholder */}
       <div style={{
         textAlign: 'center',
         marginBottom: '1rem'
       }}>
-        <div style={{
-          fontSize: '2rem',
-          marginBottom: '0.5rem'
-        }}>
-          {gift.emoji}
-        </div>
+        {gift.image_url ? (
+          <img
+            src={gift.image_url}
+            alt={gift.name}
+            style={{
+              width: '100%',
+              height: '120px',
+              objectFit: 'cover',
+              borderRadius: '8px',
+              marginBottom: '0.5rem'
+            }}
+          />
+        ) : (
+          <div style={{
+            width: '100%',
+            height: '120px',
+            backgroundColor: '#f1f5f9',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '0.5rem',
+            fontSize: '2rem',
+            color: '#64748b'
+          }}>
+            📦
+          </div>
+        )}
+        
         <div style={{
           display: 'inline-block',
           background: gift.category === 'Coffee' ? '#fef3c7' :
@@ -552,7 +548,7 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
             fontWeight: 'bold',
             color: '#7c3aed'
           }}>
-            🪙 {gift.palomas}
+            🪙 {gift.price}
           </span>
           {!canAfford && (
             <span style={{
@@ -560,7 +556,7 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
               color: '#dc2626',
               marginTop: '0.125rem'
             }}>
-              Need {gift.palomas - userBalance} more
+              Need {gift.price - userBalance} more
             </span>
           )}
         </div>
