@@ -34,7 +34,6 @@ const AdminGiftClaims = ({ supabase, onBack }) => {
 
       if (error) throw error
       
-      // Refresh claims
       await loadClaims()
     } catch (error) {
       console.error('Error updating claim:', error)
@@ -71,37 +70,24 @@ const AdminGiftClaims = ({ supabase, onBack }) => {
               <div style={{ fontSize: '14px', color: '#64748b' }}>
                 🪙 {claim.palomas_burned} Palomas • {new Date(claim.claim_time).toLocaleString()}
               </div>
-              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
-                ID: {claim.id.slice(0, 8)}...
-              </div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <span style={{
                 padding: '4px 8px',
                 borderRadius: '4px',
                 fontSize: '12px',
-                background: claim.status === 'claimed' ? '#fef3c7' :
-                           claim.status === 'prepared' ? '#dbeafe' :
-                           claim.status === 'fulfilled' ? '#dcfce7' : '#fee2e2',
-                color: claim.status === 'claimed' ? '#92400e' :
-                       claim.status === 'prepared' ? '#1e40af' :
-                       claim.status === 'fulfilled' ? '#166534' : '#991b1b'
+                background: claim.status === 'claimed' ? '#fef3c7' : claim.status === 'prepared' ? '#dbeafe' : '#dcfce7',
+                color: claim.status === 'claimed' ? '#92400e' : claim.status === 'prepared' ? '#1e40af' : '#166534'
               }}>
                 {claim.status}
               </span>
               {claim.status === 'claimed' && (
-                <button
-                  onClick={() => updateClaimStatus(claim.id, 'prepared')}
-                  style={{ padding: '4px 8px', fontSize: '12px', borderRadius: '4px', background: '#dbeafe', border: 'none' }}
-                >
+                <button onClick={() => updateClaimStatus(claim.id, 'prepared')} style={{ padding: '4px 8px', fontSize: '12px', borderRadius: '4px', background: '#dbeafe', border: 'none' }}>
                   Mark Prepared
                 </button>
               )}
               {claim.status === 'prepared' && (
-                <button
-                  onClick={() => updateClaimStatus(claim.id, 'fulfilled')}
-                  style={{ padding: '4px 8px', fontSize: '12px', borderRadius: '4px', background: '#dcfce7', border: 'none' }}
-                >
+                <button onClick={() => updateClaimStatus(claim.id, 'fulfilled')} style={{ padding: '4px 8px', fontSize: '12px', borderRadius: '4px', background: '#dcfce7', border: 'none' }}>
                   Mark Fulfilled
                 </button>
               )}
