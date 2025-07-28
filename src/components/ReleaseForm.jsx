@@ -116,6 +116,33 @@ const ReleaseForm = ({
 
       if (updateError) throw updateError
 
+      // 🆕 CREATE PURCHASE HISTORY RECORD
+      console.log('🎯 Creating purchase record for:', gift.name)
+      
+      const purchaseRecord = {
+        user_id: user.id,
+        username: profile.username,
+        item_name: gift.name,
+        item_category: gift.category,
+        palomas_spent: gift.price,
+        claim_id: claim.id,
+        status: 'purchased'
+      }
+
+      console.log('📝 Purchase record:', purchaseRecord)
+
+      const { data: purchaseData, error: purchaseError } = await supabase
+        .from('user_purchase_history')
+        .insert([purchaseRecord])
+        .select()
+
+      if (purchaseError) {
+        console.error('❌ Failed to create purchase record:', purchaseError)
+        // Don't fail the whole transaction for this
+      } else {
+        console.log('✅ Purchase history record created:', purchaseData)
+      }
+
       // Send admin notification
       const { error: notificationError } = await supabase
         .from('admin_notifications')
@@ -131,7 +158,7 @@ const ReleaseForm = ({
         console.error('Failed to send notification:', notificationError)
       }
 
-      alert(`🎉 Gift claimed successfully!\n\n${gift.name}\nClaim ID: ${claim.id}\n\nCasa staff has been notified to prepare your item for pickup!`)
+      alert(`🎉 Gift claimed successfully!\n\n${gift.name}\nClaim ID: ${claim.id}\n\nCasa staff has been notified to prepare your item for pickup!\n\n📋 Check your Purchase History for the receipt.`)
       
       // Refresh to update balance
       window.location.reload()
