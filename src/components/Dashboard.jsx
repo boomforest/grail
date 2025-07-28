@@ -1,10 +1,464 @@
 import React, { useState, useEffect } from 'react'
-import { Upload, Plus, Edit, Trash2, Save, X, Coffee } from 'lucide-react'
+import { Upload, Plus, Edit, Trash2, Save, X, Coffee, ArrowLeft, Receipt, Calendar, Package } from 'lucide-react'
 import WalletInput from './WalletInput'
 import ProfilePicture from './ProfilePicture'
 
 const formatNumber = (num) => {
   return new Intl.NumberFormat().format(num || 0)
+}
+
+// Purchase History Component
+const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
+  const [purchases, setPurchases] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selectedPurchase, setSelectedPurchase] = useState(null)
+
+  useEffect(() => {
+    if (user && supabase) {
+      loadPurchaseHistory()
+    }
+  }, [user, supabase])
+
+  const loadPurchaseHistory = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_purchase_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('purchase_date', { ascending: false })
+
+      if (error) {
+        console.error('Error loading purchase history:', error)
+        return
+      }
+
+      setPurchases(data || [])
+    } catch (error) {
+      console.error('Error loading purchase history:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'purchased': return '#f59e0b'
+      case 'fulfilled': return '#10b981'
+      case 'cancelled': return '#ef4444'
+      default: return '#6b7280'
+    }
+  }
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'purchased': return 'Ready for Pickup'
+      case 'fulfilled': return 'Completed'
+      case 'cancelled': return 'Cancelled'
+      default: return status
+    }
+  }
+
+  const getCategoryIcon = (category) => {
+    switch (category.toLowerCase()) {
+      case 'beverages': return '☕'
+      case 'food': return '🍕'
+      case 'merchandise': return '👕'
+      case 'experiences': return '🎨'
+      default: return '🎁'
+    }
+  }
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#f5f5dc',
+        padding: '2rem 1rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            border: '3px solid #f3f3f3',
+            borderTop: '3px solid #d2691e',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1rem'
+          }}></div>
+          <span>Loading purchase history...</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Receipt Detail Modal
+  if (selectedPurchase) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#f5f5dc',
+        padding: '2rem 1rem'
+      }}>
+        <div style={{
+          maxWidth: '400px',
+          margin: '0 auto'
+        }}>
+          {/* Header */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: '2rem'
+          }}>
+            <button
+              onClick={() => setSelectedPurchase(null)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.9)',
+                border: 'none',
+                borderRadius: '20px',
+                padding: '0.5rem 1rem',
+                fontSize: '1rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+          </div>
+
+          {/* Receipt */}
+          <div style={{
+            background: 'white',
+            borderRadius: '20px',
+            padding: '2rem',
+            boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)',
+            border: '2px solid #d2691e'
+          }}>
+            {/* Receipt Header */}
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '2rem',
+              borderBottom: '2px dashed #d2691e',
+              paddingBottom: '1rem'
+            }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🏠</div>
+              <h2 style={{
+                margin: '0 0 0.5rem',
+                color: '#8b4513',
+                fontSize: '1.5rem'
+              }}>
+                Casa de Copas
+              </h2>
+              <p style={{
+                margin: 0,
+                color: '#666',
+                fontSize: '0.9rem',
+                fontStyle: 'italic'
+              }}>
+                Gift Store Receipt
+              </p>
+            </div>
+
+            {/* Receipt Details */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '0.5rem'
+              }}>
+                <span style={{ color: '#666' }}>Receipt #:</span>
+                <span style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
+                  {selectedPurchase.receipt_number}
+                </span>
+              </div>
+              
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '0.5rem'
+              }}>
+                <span style={{ color: '#666' }}>Date:</span>
+                <span>{formatDate(selectedPurchase.purchase_date)}</span>
+              </div>
+              
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '0.5rem'
+              }}>
+                <span style={{ color: '#666' }}>Customer:</span>
+                <span>{selectedPurchase.username}</span>
+              </div>
+            </div>
+
+            {/* Item Details */}
+            <div style={{
+              border: '1px solid #e2e8f0',
+              borderRadius: '10px',
+              padding: '1rem',
+              marginBottom: '1.5rem'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginBottom: '0.5rem'
+              }}>
+                <span style={{ fontSize: '1.5rem' }}>
+                  {getCategoryIcon(selectedPurchase.item_category)}
+                </span>
+                <h3 style={{
+                  margin: 0,
+                  color: '#8b4513',
+                  fontSize: '1.1rem'
+                }}>
+                  {selectedPurchase.item_name}
+                </h3>
+              </div>
+              
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span style={{
+                  fontSize: '0.8rem',
+                  color: '#666',
+                  textTransform: 'capitalize'
+                }}>
+                  {selectedPurchase.item_category}
+                </span>
+                <span style={{
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  color: '#d2691e'
+                }}>
+                  🪙 {selectedPurchase.palomas_spent}
+                </span>
+              </div>
+            </div>
+
+            {/* Status */}
+            <div style={{
+              textAlign: 'center',
+              padding: '1rem',
+              borderRadius: '10px',
+              backgroundColor: `${getStatusColor(selectedPurchase.status)}20`,
+              border: `2px solid ${getStatusColor(selectedPurchase.status)}40`
+            }}>
+              <div style={{
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                color: getStatusColor(selectedPurchase.status),
+                marginBottom: '0.25rem'
+              }}>
+                {getStatusText(selectedPurchase.status)}
+              </div>
+              {selectedPurchase.status === 'purchased' && (
+                <div style={{
+                  fontSize: '0.8rem',
+                  color: '#666',
+                  fontStyle: 'italic'
+                }}>
+                  Show this receipt at Casa for pickup
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div style={{
+              textAlign: 'center',
+              marginTop: '2rem',
+              paddingTop: '1rem',
+              borderTop: '2px dashed #d2691e',
+              color: '#666',
+              fontSize: '0.8rem',
+              fontStyle: 'italic'
+            }}>
+              Thank you for supporting Casa de Copas! 🎨
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#f5f5dc',
+      padding: '2rem 1rem'
+    }}>
+      <div style={{
+        maxWidth: '500px',
+        margin: '0 auto'
+      }}>
+        {/* Header */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '2rem'
+        }}>
+          <button
+            onClick={onBack}
+            style={{
+              background: 'rgba(255, 255, 255, 0.9)',
+              border: 'none',
+              borderRadius: '20px',
+              padding: '0.5rem 1rem',
+              fontSize: '1rem',
+              cursor: 'pointer'
+            }}
+          >
+            ← Back
+          </button>
+          
+          <h1 style={{
+            fontSize: '2rem',
+            color: '#d2691e',
+            margin: 0,
+            fontWeight: 'normal'
+          }}>
+            Purchase History
+          </h1>
+          
+          <div style={{ width: '80px' }} />
+        </div>
+
+        {/* Purchase List */}
+        {purchases.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '3rem 1rem',
+            background: 'rgba(255, 255, 255, 0.9)',
+            borderRadius: '20px',
+            border: '2px solid #d2691e'
+          }}>
+            <Package size={48} style={{ color: '#ccc', marginBottom: '1rem' }} />
+            <h3 style={{ color: '#8b4513', marginBottom: '0.5rem' }}>No Purchases Yet</h3>
+            <p style={{ color: '#666', margin: 0 }}>
+              Your gift store purchases will appear here
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {purchases.map((purchase) => (
+              <div
+                key={purchase.id}
+                onClick={() => setSelectedPurchase(purchase)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  borderRadius: '20px',
+                  padding: '1.5rem',
+                  border: '2px solid #d2691e',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(210, 105, 30, 0.2)'
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(210, 105, 30, 0.1)'
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  marginBottom: '1rem'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '1.5rem' }}>
+                      {getCategoryIcon(purchase.item_category)}
+                    </span>
+                    <div>
+                      <h3 style={{
+                        margin: '0 0 0.25rem',
+                        color: '#8b4513',
+                        fontSize: '1.1rem'
+                      }}>
+                        {purchase.item_name}
+                      </h3>
+                      <p style={{
+                        margin: 0,
+                        fontSize: '0.8rem',
+                        color: '#666',
+                        textTransform: 'capitalize'
+                      }}>
+                        {purchase.item_category}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{
+                      fontSize: '1rem',
+                      fontWeight: 'bold',
+                      color: '#d2691e',
+                      marginBottom: '0.25rem'
+                    }}>
+                      🪙 {purchase.palomas_spent}
+                    </div>
+                    <div style={{
+                      fontSize: '0.8rem',
+                      color: getStatusColor(purchase.status),
+                      fontWeight: '500'
+                    }}>
+                      {getStatusText(purchase.status)}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '0.8rem',
+                  color: '#666'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Calendar size={14} />
+                    {formatDate(purchase.purchase_date)}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Receipt size={14} />
+                    {purchase.receipt_number}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  )
 }
 
 // Admin Product Manager Component
@@ -677,6 +1131,19 @@ function Dashboard({
   onPayPalClick
 }) {
   const [showProductManager, setShowProductManager] = useState(false);
+  const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
+
+  // If showing purchase history, render that instead
+  if (showPurchaseHistory) {
+    return (
+      <PurchaseHistory 
+        user={user}
+        profile={profile}
+        supabase={supabase}
+        onBack={() => setShowPurchaseHistory(false)}
+      />
+    );
+  }
 
   // If showing product manager, render that instead
   if (showProductManager) {
@@ -914,6 +1381,27 @@ function Dashboard({
                 onWalletSave={onWalletSave}
                 currentWallet={profile?.wallet_address}
               />
+
+              {/* Purchase History Button */}
+              <button
+                onClick={() => {
+                  setShowSettings(false);
+                  setShowPurchaseHistory(true);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  backgroundColor: '#7c3aed',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  marginBottom: '0.5rem'
+                }}
+              >
+                📋 Purchase History
+              </button>
 
               {/* Admin Product Management Button */}
               {isAdmin && (
