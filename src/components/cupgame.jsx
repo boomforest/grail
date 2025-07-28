@@ -2,12 +2,21 @@ import React, { useState, useEffect } from 'react'
 
 // Helper functions for tarot system
 const getTarotCardName = (level) => {
-  const cards = [
-    'Ace of Cups', 'Two of Cups', 'Three of Cups', 'Four of Cups', 'Five of Cups',
-    'Six of Cups', 'Seven of Cups', 'Eight of Cups', 'Nine of Cups', 'Ten of Cups',
-    'Page of Cups', 'Knight of Cups', 'Queen of Cups', 'King of Cups'
+  const swordCards = [
+    'King of Swords', 'Queen of Swords', 'Knight of Swords', 'Page of Swords',
+    'Ten of Swords', 'Nine of Swords', 'Eight of Swords', 'Seven of Swords',
+    'Six of Swords', 'Five of Swords', 'Four of Swords', 'Three of Swords',
+    'Two of Swords', 'Ace of Swords'
   ]
-  return cards[Math.min(level - 1, cards.length - 1)] || 'Ace of Cups'
+  const cupCards = [
+    'Ace of Cups', 'Two of Cups', 'Three of Cups', 'Four of Cups',
+    'Five of Cups', 'Six of Cups', 'Seven of Cups', 'Eight of Cups',
+    'Nine of Cups', 'Ten of Cups', 'Page of Cups', 'Knight of Cups'
+  ]
+  
+  if (level <= 14) return swordCards[level - 1]      // Levels 1-14
+  if (level <= 26) return cupCards[level - 15]       // Levels 15-26
+  return 'Knight of Cups' // Max level
 }
 
 function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
@@ -18,12 +27,56 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   const [searchResults, setSearchResults] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
   const [showWelcome, setShowWelcome] = useState(false)
+  const [currentTransformationCost, setCurrentTransformationCost] = useState(50)
 
   // Check if user should see welcome window
   useEffect(() => {
-    // Show welcome window for testing - change this condition back to (profile.cup_count || 0) === 0 in production
-    setShowWelcome(true)
+    // Show welcome window for new users (tarot_level 1 = King of Swords start)
+    setShowWelcome((profile?.tarot_level || 1) === 1 && (profile?.merit_count || 0) === 0)
   }, [profile])
+
+  // Load current transformation cost for user's next level
+  useEffect(() => {
+    const loadTransformationCost = async () => {
+      if (!supabase || !profile) return
+      
+      try {
+        const nextLevel = (profile.tarot_level || 1) + 1
+        if (nextLevel > 26) {
+          setCurrentTransformationCost(0) // Max level reached
+          return
+        }
+
+        const { data, error } = await supabase
+          .from('tarot_transformations')
+          .select('current_cost')
+          .eq('card_level', nextLevel)
+          .single()
+        
+        if (error) {
+          // If no record exists, create it with base cost
+          const { error: insertError } = await supabase
+            .from('tarot_transformations')
+            .insert([{ 
+              card_level: nextLevel, 
+              transformation_count: 0, 
+              current_cost: 50 
+            }])
+          
+          if (!insertError) {
+            setCurrentTransformationCost(50)
+          }
+        } else {
+          setCurrentTransformationCost(data.current_cost)
+        }
+      } catch (error) {
+        console.error('Error loading transformation cost:', error)
+        setCurrentTransformationCost(50) // Fallback
+      }
+    }
+    
+    loadTransformationCost()
+  }, [supabase, profile?.tarot_level])
 
   // Load all profiles for search
   useEffect(() => {
@@ -33,7 +86,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('id, username, cup_count, tarot_level, merit_count')
+          .select('id, username, cup_count, tarot_level, merit_count, palomas_purchased')
           .order('username')
         
         if (error) throw error
@@ -45,6 +98,42 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     
     loadProfiles()
   }, [supabase])
+
+  // Calculate merit percentage based on palomas purchased and current transformation cost
+  const calculateMeritPercentage = () => {
+    if (!profile || currentTransformationCost === 0) return 0
+    
+    const palomasNeeded = currentTransformationCost
+    const palomasPurchased = profile.palomas_purchased || 0
+    const percentage = Math.min((palomasPurchased / palomasNeeded) * 100, 100)
+    
+    return Math.round(percentage * 10) / 10 // Round to 1 decimal place
+  }
+
+  // Calculate how many merit circles should be filled
+  const getMeritCircleStates = () => {
+    const totalPercentage = calculateMeritPercentage()
+    const meritCount = profile?.merit_count || 0
+    
+    // Each merit circle represents 33.33% progress
+    const circles = []
+    for (let i = 0; i < 3; i++) {
+      const circleStartPercent = i * 33.33
+      const circleEndPercent = (i + 1) * 33.33
+      
+      let circlePercent = 0
+      if (totalPercentage > circleStartPercent) {
+        circlePercent = Math.min(totalPercentage - circleStartPercent, 33.33)
+      }
+      
+      circles.push({
+        filled: circlePercent >= 33.33,
+        percentage: Math.round((circlePercent / 33.33) * 100)
+      })
+    }
+    
+    return circles
+  }
 
   // Search users as they type
   const handleSearchChange = (value) => {
@@ -76,70 +165,133 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
       // Get current profile
       const { data: currentProfile, error: fetchError } = await supabase
         .from('profiles')
-        .select('merit_count, tarot_level, cup_count, username')
+        .select('merit_count, tarot_level, cup_count, username, palomas_purchased, transformation_numbers')
         .eq('id', userId)
         .single()
 
       if (fetchError) throw fetchError
 
-      // Can only earn merits if you have at least 1 cup
-      if ((currentProfile.cup_count || 0) < 1) {
-        setMessage('This user needs at least 1 cup to receive merits!')
+      // Check if ready to level up (100% progress from palomas purchased)
+      const nextLevel = (currentProfile.tarot_level || 1) + 1
+      if (nextLevel > 26) {
+        setMessage('This user has reached maximum level (Knight of Cups)!')
         return
       }
 
-      const newMeritCount = (currentProfile.merit_count || 0) + 1
-      let updateData = {
-        merit_count: newMeritCount,
-        last_status_update: new Date().toISOString()
+      // Get transformation cost for next level
+      const { data: transformData, error: transformError } = await supabase
+        .from('tarot_transformations')
+        .select('current_cost, transformation_count')
+        .eq('card_level', nextLevel)
+        .single()
+
+      if (transformError) {
+        // Create new transformation record if doesn't exist
+        const { data: newTransform, error: insertError } = await supabase
+          .from('tarot_transformations')
+          .insert([{ 
+            card_level: nextLevel, 
+            transformation_count: 0, 
+            current_cost: 50 
+          }])
+          .select()
+          .single()
+        
+        if (insertError) throw insertError
+        transformData = newTransform
       }
 
-      // Check if they can level up: need 3 merits AND at least 1 cup
-      const currentTarotLevel = currentProfile.tarot_level || 1
-      
-      if (newMeritCount >= 3 && (currentProfile.cup_count || 0) >= 1) {
-        updateData = {
-          ...updateData,
-          merit_count: 0, // Reset merits after leveling up
-          tarot_level: currentTarotLevel + 1,
-          cup_count: (currentProfile.cup_count || 0) - 1 // Consume 1 cup
+      const requiredPalomas = transformData.current_cost
+      const currentPalomas = currentProfile.palomas_purchased || 0
+      const progressPercentage = (currentPalomas / requiredPalomas) * 100
+
+      // Check if user can level up (has 100% progress)
+      if (progressPercentage >= 100) {
+        // Level up the user
+        const newTransformationNumbers = {
+          ...(currentProfile.transformation_numbers || {}),
+          [nextLevel]: (transformData.transformation_count || 0) + 1
         }
-      }
 
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('id', userId)
+        // Update user's level and reset palomas_purchased
+        const { error: updateUserError } = await supabase
+          .from('profiles')
+          .update({
+            tarot_level: nextLevel,
+            palomas_purchased: currentPalomas - requiredPalomas, // Subtract used palomas
+            transformation_numbers: newTransformationNumbers,
+            last_status_update: new Date().toISOString()
+          })
+          .eq('id', userId)
 
-      if (updateError) throw updateError
+        if (updateUserError) throw updateUserError
 
-      // Log the merit award
-      await supabase
-        .from('merit_logs')
-        .insert([{
-          user_id: userId,
-          awarded_by: user.id,
-          reason: reason,
-          merit_count_after: newMeritCount >= 3 ? 0 : newMeritCount,
-          leveled_up: newMeritCount >= 3 && (currentProfile.cup_count || 0) >= 1,
-          new_tarot_level: newMeritCount >= 3 && (currentProfile.cup_count || 0) >= 1 ? currentTarotLevel + 1 : currentTarotLevel
-        }])
+        // Update transformation count and cost for next person
+        const { error: updateTransformError } = await supabase
+          .from('tarot_transformations')
+          .update({ 
+            transformation_count: (transformData.transformation_count || 0) + 1,
+            current_cost: requiredPalomas + 1 // Increase cost for next person
+          })
+          .eq('card_level', nextLevel)
 
-      // Update parent component if it's the current user
-      if (userId === user.id && onProfileUpdate) {
-        const updatedProfile = {
-          ...profile,
-          ...updateData
+        if (updateTransformError) throw updateTransformError
+
+        // Log the level up
+        await supabase
+          .from('merit_logs')
+          .insert([{
+            user_id: userId,
+            awarded_by: user.id,
+            reason: `Level up to ${getTarotCardName(nextLevel)}`,
+            merit_count_after: 0,
+            leveled_up: true,
+            new_tarot_level: nextLevel
+          }])
+
+        // Update parent component if it's the current user
+        if (userId === user.id && onProfileUpdate) {
+          const updatedProfile = {
+            ...profile,
+            tarot_level: nextLevel,
+            palomas_purchased: currentPalomas - requiredPalomas,
+            transformation_numbers: newTransformationNumbers
+          }
+          onProfileUpdate(updatedProfile)
         }
-        onProfileUpdate(updatedProfile)
-      }
 
-      // Show success message
-      const recipientName = userId === user.id ? 'You' : currentProfile.username
-      if (newMeritCount >= 3 && (currentProfile.cup_count || 0) >= 1) {
-        setMessage(`Merit awarded to ${recipientName}! Tarot level up to ${getTarotCardName(currentTarotLevel + 1)}! 🎉`)
+        const recipientName = userId === user.id ? 'You' : currentProfile.username
+        const transformationNumber = (transformData.transformation_count || 0) + 1
+        setMessage(`🎉 ${recipientName} leveled up to ${getTarotCardName(nextLevel)} #${transformationNumber}!`)
       } else {
-        setMessage(`Merit awarded to ${recipientName}! 🌟`)
+        // Just award merit without leveling up
+        const newMeritCount = (currentProfile.merit_count || 0) + 1
+
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            merit_count: newMeritCount,
+            last_status_update: new Date().toISOString()
+          })
+          .eq('id', userId)
+
+        if (updateError) throw updateError
+
+        // Log the merit award
+        await supabase
+          .from('merit_logs')
+          .insert([{
+            user_id: userId,
+            awarded_by: user.id,
+            reason: reason,
+            merit_count_after: newMeritCount,
+            leveled_up: false,
+            new_tarot_level: currentProfile.tarot_level || 1
+          }])
+
+        const recipientName = userId === user.id ? 'You' : currentProfile.username
+        const progressNeeded = Math.max(0, 100 - progressPercentage)
+        setMessage(`Merit awarded to ${recipientName}! 🌟 (${progressNeeded.toFixed(1)}% more progress needed to level up)`)
       }
 
       // Clear search if awarding to someone else
@@ -158,6 +310,9 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   }
 
   const isAdmin = profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com'
+  const meritCircles = getMeritCircleStates()
+  const overallProgress = calculateMeritPercentage()
+  const isMaxLevel = (profile?.tarot_level || 1) >= 26
 
   return (
     <div style={{
@@ -237,15 +392,15 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
               </p>
               
               <p style={{ marginBottom: '1rem' }}>
-                <em>Earn cups by using palomas (50 palomas = 1 cup during beta testing) and level up your cups to tarot cards with merits, earned by volunteering or bringing something extra to the project.</em>
+                <em>Purchase Palomas to progress through your Tarot journey. Earn merits through community contributions and volunteering to unlock your next card transformation.</em>
               </p>
               
               <p style={{ marginBottom: '1rem' }}>
-                <em>A full cup → Ace of Cups → second full cup → Two of Cups... when you reach the King of Cups you can choose your own identifying tarot card and you are officially a member.</em>
+                <em>Your journey: King of Swords → ... → Ace of Swords → Ace of Cups → ... → Knight of Cups (the ultimate achievement).</em>
               </p>
               
               <p style={{ marginBottom: '0' }}>
-                <em>Our most exclusive events will always have 55 slots reserved: 33 for the highest ranking members, 22 for the users with the most cups. This means we want to build a community on giving but with more focus on giving and participation.</em>
+                <em>The earlier you begin your journey, the more meaningful your contributions become to the House.</em>
               </p>
             </div>
 
@@ -312,12 +467,21 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             marginBottom: '1rem'
           }}>
             {getTarotCardName(profile?.tarot_level || 1)}
+            {profile?.transformation_numbers && profile.transformation_numbers[profile.tarot_level] && (
+              <span style={{ 
+                fontSize: '0.9rem', 
+                color: '#d2691e',
+                marginLeft: '0.5rem'
+              }}>
+                #{profile.transformation_numbers[profile.tarot_level]}
+              </span>
+            )}
           </div>
           <div style={{
             fontSize: '0.9rem',
             color: '#a0785a'
           }}>
-            Level {profile?.tarot_level || 1}
+            Level {profile?.tarot_level || 1} {isMaxLevel && '• MAX LEVEL ACHIEVED'}
           </div>
         </div>
 
@@ -338,7 +502,9 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             boxShadow: '0 4px 20px rgba(139, 90, 60, 0.1)',
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🏆</div>
+            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>
+              {(profile?.tarot_level || 1) >= 15 ? '🏆' : '🏆'}
+            </div>
             <div style={{
               fontSize: '1.8rem',
               fontWeight: '600',
@@ -351,11 +517,11 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
               fontSize: '0.9rem',
               color: '#a0785a'
             }}>
-              Cups
+              {(profile?.tarot_level || 1) >= 15 ? 'Grails' : 'Cups'}
             </div>
           </div>
 
-          {/* Merit Display - Vertical Orange Circles */}
+          {/* Merit Display - Vertical Circles with Percentages */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -367,44 +533,47 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
               color: '#a0785a',
               marginBottom: '0.5rem'
             }}>
-              Merits
+              Transformation Progress
             </div>
             
-            {/* Merit Circles - 3 circles stacked vertically */}
-            {[2, 1, 0].map((index) => (
-              <div
-                key={index}
-                style={{
-                  width: '50px',
-                  height: '50px',
-                  borderRadius: '50%',
-                  border: '3px solid #d2691e',
-                  backgroundColor: (profile?.merit_count || 0) > index ? '#d2691e' : 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                  fontWeight: '600',
-                  color: (profile?.merit_count || 0) > index ? 'white' : '#d2691e',
-                  boxShadow: (profile?.merit_count || 0) > index ? '0 0 20px rgba(210, 105, 30, 0.4)' : 'none',
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                {(profile?.merit_count || 0) > index ? '⭐' : ''}
-              </div>
-            ))}
+            {/* Merit Circles - 3 circles stacked vertically (top to bottom: 2, 1, 0) */}
+            {[2, 1, 0].map((index) => {
+              const circle = meritCircles[index]
+              return (
+                <div
+                  key={index}
+                  style={{
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    border: '3px solid #d2691e',
+                    backgroundColor: circle.filled ? '#d2691e' : 'rgba(210, 105, 30, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.8rem',
+                    fontWeight: '600',
+                    color: circle.filled ? 'white' : '#d2691e',
+                    boxShadow: circle.filled ? '0 0 20px rgba(210, 105, 30, 0.4)' : 'none',
+                    transition: 'all 0.3s ease',
+                    position: 'relative'
+                  }}
+                >
+                  {circle.filled ? '⭐' : `${circle.percentage}%`}
+                </div>
+              )
+            })}
             
-            {/* Merit overflow indicator */}
-            {(profile?.merit_count || 0) >= 3 && (
-              <div style={{
-                fontSize: '0.8rem',
-                color: '#d2691e',
-                fontWeight: '600',
-                marginTop: '0.5rem'
-              }}>
-                Ready to level up!
-              </div>
-            )}
+            {/* Overall progress display */}
+            <div style={{
+              fontSize: '0.8rem',
+              color: '#d2691e',
+              fontWeight: '600',
+              marginTop: '0.5rem'
+            }}>
+              {isMaxLevel ? 'Journey Complete!' : 
+               overallProgress >= 100 ? 'Ready to Transform!' : `${overallProgress.toFixed(1)}% Complete`}
+            </div>
           </div>
         </div>
 
@@ -422,28 +591,29 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             color: '#8b5a3c',
             marginBottom: '0.5rem'
           }}>
-            {(profile?.cup_count || 0) < 1 ? 'Need 1 cup to start earning merits' : 
-             'Progress to next tarot level'}
+            {isMaxLevel ? 'Maximum Level Achieved' : 
+             overallProgress >= 100 ? 'Ready for Next Transformation!' :
+             'Progress to Next Transformation'}
           </div>
           <div style={{
             fontSize: '0.9rem',
             color: '#a0785a',
             marginBottom: '1rem'
           }}>
-            {(profile?.cup_count || 0) < 1 ? 
-              'Collect Palomas to earn cups automatically' :
-              `${profile?.merit_count || 0} / 3 merits earned`}
+            {isMaxLevel ? 
+              'You have reached Knight of Cups - the highest achievement in Casa de Copas' :
+              overallProgress >= 100 ?
+                `You can transform to ${getTarotCardName((profile?.tarot_level || 1) + 1)}` :
+                `${overallProgress.toFixed(1)}% progress from Paloma purchases`}
           </div>
           <div style={{
             fontSize: '0.85rem',
             color: '#c4a373',
             lineHeight: '1.4'
           }}>
-            {(profile?.cup_count || 0) < 1 ? 
-              'Once you have a cup, you can start earning merits through positive community contributions.' :
-              (profile?.merit_count || 0) >= 3 ? 
-                'You have enough merits! Next tarot level will consume 1 cup and reset merits.' :
-                `Need ${3 - (profile?.merit_count || 0)} more merits to advance to ${getTarotCardName((profile?.tarot_level || 1) + 1)}.`}
+            {isMaxLevel ? 
+              'Welcome to the inner circle of Casa de Copas. Your journey through the Tarot is complete.' :
+              'Purchase Palomas to advance your transformation progress. Community contributions and volunteering earn you recognition when you reach 100%.'}
           </div>
         </div>
 
@@ -564,7 +734,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                     >
                       <div style={{ fontWeight: '500' }}>{profile.username}</div>
                       <div style={{ fontSize: '0.8rem', color: '#a0785a' }}>
-                        {profile.cup_count || 0} cups • Level {profile.tarot_level || 1} • {profile.merit_count || 0} merits
+                        {profile.cup_count || 0} cups • {getTarotCardName(profile.tarot_level || 1)} • {profile.merit_count || 0} merits
                       </div>
                     </div>
                   ))}
@@ -587,7 +757,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                   fontWeight: '500'
                 }}
               >
-                {loading ? 'Awarding Merit...' : 
+                {loading ? 'Processing...' : 
                  selectedUser ? `Award Merit to ${selectedUser.username}` : 
                  'Select a user to award merit'}
               </button>
