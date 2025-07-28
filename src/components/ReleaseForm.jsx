@@ -209,43 +209,61 @@ const ReleaseForm = ({
         )}
 
         {/* Simple Release Section */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.9)',
-          borderRadius: '20px',
-          padding: '2rem',
-          marginBottom: '2rem'
-        }}>
+        <div style={{ marginBottom: '2rem' }}>
           <div style={{ marginBottom: '1.5rem' }}>
-            <input
-              type="number"
-              placeholder="Amount"
-              value={releaseData.amount}
-              onChange={(e) => setReleaseData(prev => ({ ...prev, amount: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '1rem',
-                fontSize: '1.1rem',
-                border: '2px solid #ddd',
-                borderRadius: '15px',
-                textAlign: 'center',
-                marginBottom: '1rem'
-              }}
-            />
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '20px',
+              padding: '1rem',
+              marginBottom: '1rem',
+              border: '2px solid #d2691e',
+              boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
+            }}>
+              <input
+                type="number"
+                placeholder="Amount"
+                value={releaseData.amount}
+                onChange={(e) => setReleaseData(prev => ({ ...prev, amount: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  fontSize: '1.1rem',
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  textAlign: 'left',
+                  color: '#8b4513',
+                  fontStyle: 'italic'
+                }}
+              />
+            </div>
             
-            <textarea
-              placeholder="Reason (optional)"
-              value={releaseData.reason}
-              onChange={(e) => setReleaseData(prev => ({ ...prev, reason: e.target.value }))}
-              style={{
-                width: '100%',
-                padding: '1rem',
-                fontSize: '1rem',
-                border: '2px solid #ddd',
-                borderRadius: '15px',
-                minHeight: '80px',
-                resize: 'vertical'
-              }}
-            />
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '20px',
+              padding: '1rem',
+              border: '2px solid #d2691e',
+              boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
+            }}>
+              <textarea
+                placeholder="Reason (optional)"
+                value={releaseData.reason}
+                onChange={(e) => setReleaseData(prev => ({ ...prev, reason: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  fontSize: '1rem',
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  minHeight: '60px',
+                  resize: 'vertical',
+                  textAlign: 'left',
+                  color: '#8b4513',
+                  fontStyle: 'italic'
+                }}
+              />
+            </div>
           </div>
 
           <button
@@ -256,12 +274,24 @@ const ReleaseForm = ({
               padding: '1rem 2rem',
               fontSize: '1.1rem',
               fontWeight: '500',
-              backgroundColor: isReleasing || !releaseData.amount ? '#ccc' : '#8b4513',
+              background: isReleasing || !releaseData.amount ? '#ccc' : 'linear-gradient(45deg, #8b4513, #a0522d)',
               color: 'white',
               border: 'none',
-              borderRadius: '15px',
+              borderRadius: '20px',
               cursor: isReleasing || !releaseData.amount ? 'not-allowed' : 'pointer',
-              fontStyle: 'italic'
+              fontStyle: 'italic',
+              boxShadow: isReleasing || !releaseData.amount ? 'none' : '0 4px 15px rgba(139, 69, 19, 0.3)',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => {
+              if (!isReleasing && releaseData.amount) {
+                e.target.style.transform = 'translateY(-2px)'
+                e.target.style.boxShadow = '0 6px 20px rgba(139, 69, 19, 0.4)'
+              }
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)'
+              e.target.style.boxShadow = isReleasing || !releaseData.amount ? 'none' : '0 4px 15px rgba(139, 69, 19, 0.3)'
             }}
           >
             {isReleasing ? 'Releasing...' : 'Release'}
@@ -282,16 +312,34 @@ const ReleaseForm = ({
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 style={{
-                  background: selectedCategory === category ? '#7c3aed' : 'white',
-                  color: selectedCategory === category ? 'white' : '#64748b',
-                  border: '1px solid #e2e8f0',
+                  background: selectedCategory === category ? 
+                    'linear-gradient(45deg, #7c3aed, #a855f7)' : 
+                    'rgba(255, 255, 255, 0.9)',
+                  color: selectedCategory === category ? 'white' : '#8b4513',
+                  border: selectedCategory === category ? 'none' : '2px solid #d2691e',
                   borderRadius: '20px',
                   padding: '0.5rem 1rem',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
                   fontWeight: '500',
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.3s ease',
+                  fontStyle: 'italic',
+                  boxShadow: selectedCategory === category ? 
+                    '0 4px 15px rgba(124, 58, 237, 0.3)' : 
+                    '0 2px 8px rgba(210, 105, 30, 0.1)'
+                }}
+                onMouseOver={(e) => {
+                  if (selectedCategory !== category) {
+                    e.target.style.transform = 'translateY(-1px)'
+                    e.target.style.boxShadow = '0 4px 12px rgba(210, 105, 30, 0.2)'
+                  }
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.boxShadow = selectedCategory === category ? 
+                    '0 4px 15px rgba(124, 58, 237, 0.3)' : 
+                    '0 2px 8px rgba(210, 105, 30, 0.1)'
                 }}
               >
                 {category}
@@ -328,25 +376,25 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
 
   return (
     <div style={{
-      backgroundColor: 'white',
-      borderRadius: '15px',
+      background: 'rgba(255, 255, 255, 0.9)',
+      borderRadius: '20px',
       padding: '1rem',
-      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-      transition: 'transform 0.2s ease',
+      boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)',
+      transition: 'all 0.3s ease',
       opacity: isAvailable ? 1 : 0.6,
-      border: '2px solid #e2e8f0',
+      border: '2px solid #d2691e',
       cursor: canAfford && isAvailable ? 'pointer' : 'default'
     }}
     onClick={() => canAfford && isAvailable && !claiming ? onClaim(gift) : null}
     onMouseOver={(e) => {
       if (isAvailable && canAfford) {
-        e.currentTarget.style.transform = 'translateY(-2px)'
-        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.15)'
+        e.currentTarget.style.transform = 'translateY(-4px)'
+        e.currentTarget.style.boxShadow = '0 8px 25px rgba(210, 105, 30, 0.2)'
       }
     }}
     onMouseOut={(e) => {
       e.currentTarget.style.transform = 'translateY(0)'
-      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
+      e.currentTarget.style.boxShadow = '0 4px 15px rgba(210, 105, 30, 0.1)'
     }}>
       
       {/* Gift Image or Placeholder */}
@@ -362,20 +410,20 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
               width: '100%',
               height: '100px',
               objectFit: 'cover',
-              borderRadius: '10px'
+              borderRadius: '15px'
             }}
           />
         ) : (
           <div style={{
             width: '100%',
             height: '100px',
-            backgroundColor: '#f8fafc',
-            borderRadius: '10px',
+            background: 'rgba(139, 69, 19, 0.1)',
+            borderRadius: '15px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '2rem',
-            color: '#64748b'
+            color: '#8b4513'
           }}>
             🎁
           </div>
@@ -386,9 +434,10 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
       <h4 style={{
         margin: '0 0 0.5rem 0',
         fontSize: '1rem',
-        color: '#1e293b',
+        color: '#8b4513',
         fontWeight: '600',
-        textAlign: 'center'
+        textAlign: 'center',
+        fontStyle: 'italic'
       }}>
         {gift.name}
       </h4>
@@ -398,8 +447,9 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
         textAlign: 'center',
         fontSize: '1.125rem',
         fontWeight: 'bold',
-        color: canAfford ? '#7c3aed' : '#dc2626',
-        marginBottom: '0.5rem'
+        color: canAfford ? '#d2691e' : '#dc2626',
+        marginBottom: '0.5rem',
+        fontStyle: 'italic'
       }}>
         🪙 {gift.price}
       </div>
@@ -410,8 +460,9 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
         fontSize: '0.8rem',
         color: claiming ? '#f59e0b' : 
                !canAfford ? '#dc2626' : 
-               '#10b981',
-        fontWeight: '500'
+               '#8b4513',
+        fontWeight: '500',
+        fontStyle: 'italic'
       }}>
         {claiming ? 'Claiming...' : 
          !isAvailable ? 'Unavailable' :
