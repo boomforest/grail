@@ -11,6 +11,8 @@ import ManifestoPopup from './components/ManifestoPopup'
 import FloatingGrailButton from './components/FloatingGrailButton'
 import TarotCupsPage from './components/cupgame'
 import GPTChatWindow from './components/GPTChatWindow'
+import CasaGiftStore from './components/CasaGiftStore'
+import AdminGiftClaims from './components/AdminGiftClaims'
 
 // Welcome Modal Component
 const WelcomeModal = ({ onClose, onBuyPalomas }) => {
@@ -426,6 +428,8 @@ function App() {
   const [showResetPassword, setShowResetPassword] = useState(false) // Reset password state
   const [showWelcome, setShowWelcome] = useState(false) // Welcome modal state
   const [hasSeenWelcome, setHasSeenWelcome] = useState(false) // Track if user has seen welcome
+  const [showGiftStore, setShowGiftStore] = useState(false) // Gift store state
+  const [showGiftClaims, setShowGiftClaims] = useState(false) // Admin gift claims state
   
   // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
@@ -808,6 +812,8 @@ function App() {
     setShowPayPal(false) // Reset PayPal modal
     setShowWelcome(false) // Reset welcome modal
     setHasSeenWelcome(false) // Reset welcome state
+    setShowGiftStore(false) // Reset gift store
+    setShowGiftClaims(false) // Reset gift claims
     setMessage('')
     setTransferData({ recipient: '', amount: '' })
     setReleaseData({ amount: '', reason: '' })
@@ -990,6 +996,8 @@ function App() {
           onShowSendForm={setShowSendForm}
           onShowReleaseForm={setShowReleaseForm}
           onPayPalClick={handlePayPalClick}
+          onShowGiftStore={() => setShowGiftStore(true)}
+          onShowGiftClaims={() => setShowGiftClaims(true)}
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
@@ -1012,6 +1020,46 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+      </>
+    )
+  }
+
+  // Gift Store View
+  if (user && showGiftStore) {
+    return (
+      <>
+        <CasaGiftStore
+          user={user}
+          profile={profile}
+          supabase={supabase}
+          onBack={() => setShowGiftStore(false)}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        />
+      </>
+    )
+  }
+
+  // Admin Gift Claims View
+  if (user && showGiftClaims && isAdmin) {
+    return (
+      <>
+        <AdminGiftClaims
+          supabase={supabase}
+          onBack={() => setShowGiftClaims(false)}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        />
       </>
     )
   }
@@ -1099,6 +1147,8 @@ function App() {
           onShowSendForm={setShowSendForm}
           onShowReleaseForm={setShowReleaseForm}
           onPayPalClick={handlePayPalClick}
+          onShowGiftStore={() => setShowGiftStore(true)}
+          onShowGiftClaims={() => setShowGiftClaims(true)}
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
@@ -1249,6 +1299,8 @@ function App() {
           onShowSendForm={setShowSendForm}
           onShowReleaseForm={setShowReleaseForm}
           onPayPalClick={handlePayPalClick}
+          onShowGiftStore={() => setShowGiftStore(true)}
+          onShowGiftClaims={() => setShowGiftClaims(true)}
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
