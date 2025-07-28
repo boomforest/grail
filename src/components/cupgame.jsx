@@ -19,6 +19,144 @@ const getTarotCardName = (level) => {
   return 'Knight of Cups' // Max level
 }
 
+const getCardASCII = (level) => {
+  const isSword = level <= 14
+  const isAce = (level === 14 || level === 15) // Ace of Swords or Ace of Cups
+  const displayNumber = isSword ? (15 - level) : (level - 14) // Reverse for swords, forward for cups
+  
+  if (isSword) {
+    // Swords - symbols of shame and complicity
+    if (level === 1) { // King of Swords
+      return `┌─────────┐
+│    K    │
+│   ⚔️    │
+│ ♠ ⚔️ ♠  │
+│   ⚔️    │
+│    K    │
+└─────────┘`
+    } else if (level === 2) { // Queen of Swords  
+      return `┌─────────┐
+│    Q    │
+│   ⚔️    │
+│ ♠ ⚔️ ♠  │
+│   ⚔️    │
+│    Q    │
+└─────────┘`
+    } else if (level === 3) { // Knight of Swords
+      return `┌─────────┐
+│   Kt    │
+│   ⚔️    │
+│ ♠ ⚔️ ♠  │
+│   ⚔️    │
+│   Kt    │
+└─────────┘`
+    } else if (level === 4) { // Page of Swords
+      return `┌─────────┐
+│    P    │
+│   ⚔️    │
+│ ♠ ⚔️ ♠  │
+│   ⚔️    │
+│    P    │
+└─────────┘`
+    } else if (level === 14) { // Ace of Swords
+      return `┌─────────┐
+│    A    │
+│   👑    │
+│   ⚔️    │
+│   👑    │
+│    A    │
+└─────────┘`
+    } else {
+      // Numbered sword cards (10-2)
+      const num = 15 - level
+      return `┌─────────┐
+│   ${num.toString().padStart(2)}    │
+│  ⚔️ ⚔️   │
+│ ♠ ⚔️ ♠  │
+│  ⚔️ ⚔️   │
+│   ${num.toString().padStart(2)}    │
+└─────────┘`
+    }
+  } else {
+    // Cups - symbols of pride and compassionate giving
+    if (level === 15) { // Ace of Cups
+      return `┌─────────┐
+│    A    │
+│   ✨    │
+│   🏆    │
+│   ✨    │
+│    A    │
+└─────────┘`
+    } else if (level === 25) { // Page of Cups
+      return `┌─────────┐
+│    P    │
+│   🏆    │
+│ ♥ 🏆 ♥  │
+│   🏆    │
+│    P    │
+└─────────┘`
+    } else if (level === 26) { // Knight of Cups - MAX LEVEL
+      return `┌─────────┐
+│   Kt    │
+│   👑    │
+│ ♥ 🏆 ♥  │
+│   👑    │
+│   Kt    │
+└─────────┘`
+    } else {
+      // Numbered cup cards (2-10)
+      const num = level - 14
+      return `┌─────────┐
+│   ${num.toString().padStart(2)}    │
+│  🏆 🏆   │
+│ ♥ 🏆 ♥  │
+│  🏆 🏆   │
+│   ${num.toString().padStart(2)}    │
+└─────────┘`
+    }
+  }
+}
+
+const getCardMeaning = (level) => {
+  if (level <= 14) {
+    // Swords - The Path of Shame and Recognition
+    const meanings = [
+      "The pinnacle of extractive success - wealth built on others' suffering, yet haunted by the knowledge of what it cost.",
+      "Power wielded through manipulation and extraction, with growing awareness of the hollow victory.",
+      "The warrior of a corrupted system, fighting battles that serve only to perpetuate harm.",
+      "The student of extraction, learning to take without giving, yet sensing something is wrong.",
+      "Ten wounds of realization - the full weight of participating in systems of harm.",
+      "Nine sleepless nights, tortured by the knowledge of complicity in suffering.",
+      "Eight chains of the system that binds both oppressor and oppressed.",
+      "Seven stolen victories, each one leaving a deeper mark on the soul.",
+      "Six crossings toward truth, beginning to see the damage done.",
+      "Five defeats that teach - losses that crack open the hardened heart.",
+      "Four meditations on harm - stillness that allows guilt to surface.",
+      "Three heartbreaks of recognition - seeing clearly what you've become.",
+      "Two choices before you - continue the harm or choose transformation.",
+      "One moment of surrender - laying down the sword of extraction forever."
+    ]
+    return meanings[level - 1]
+  } else {
+    // Cups - The Path of Pride and Compassionate Transformation
+    const meanings = [
+      "First overflow of grace - the moment you choose to give rather than take.",
+      "Two hearts connecting - learning that joy multiplies when shared.",
+      "Three celebrations of community - finding family in fellow givers.",
+      "Four offerings received - abundance flows to those who serve others.",
+      "Five sources of renewal - discovering infinite wells of compassion.",
+      "Six gifts freely given - the joy of generosity without expectation.",
+      "Seven visions of possibility - seeing the world that could be.",
+      "Eight depths of understanding - wisdom that comes from serving others.",
+      "Nine fulfillments complete - the near-perfect satisfaction of a giving heart.",
+      "Ten blessings overflowing - a life so full it cannot help but spill over.",
+      "The student of love - humble in service, eager to learn compassion.",
+      "The master of giving - one who has reversed the heart completely, finding pride in service to others."
+    ]
+    return meanings[level - 15]
+  }
+}
+
 function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -47,6 +185,9 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           return
         }
 
+        // Special case: Ace of Swords (level 14) → Ace of Cups (level 15)
+        const isAceTransformation = (profile.tarot_level || 1) === 14 && nextLevel === 15
+        
         const { data, error } = await supabase
           .from('tarot_transformations')
           .select('current_cost')
@@ -54,24 +195,27 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           .single()
         
         if (error) {
-          // If no record exists, create it with base cost
+          // If no record exists, create it with appropriate base cost
+          const baseCost = isAceTransformation ? 500 : 50 // 500 for Ace transformation, 50 for others
           const { error: insertError } = await supabase
             .from('tarot_transformations')
             .insert([{ 
               card_level: nextLevel, 
               transformation_count: 0, 
-              current_cost: 50 
+              current_cost: baseCost 
             }])
           
           if (!insertError) {
-            setCurrentTransformationCost(50)
+            setCurrentTransformationCost(baseCost)
           }
         } else {
           setCurrentTransformationCost(data.current_cost)
         }
       } catch (error) {
         console.error('Error loading transformation cost:', error)
-        setCurrentTransformationCost(50) // Fallback
+        // Fallback costs
+        const isAceTransformation = (profile.tarot_level || 1) === 14
+        setCurrentTransformationCost(isAceTransformation ? 500 : 50)
       }
     }
     
@@ -187,12 +331,15 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
 
       if (transformError) {
         // Create new transformation record if doesn't exist
+        const isAceTransformation = nextLevel === 15 // Ace of Swords → Ace of Cups
+        const baseCost = isAceTransformation ? 500 : 50
+        
         const { data: newTransform, error: insertError } = await supabase
           .from('tarot_transformations')
           .insert([{ 
             card_level: nextLevel, 
             transformation_count: 0, 
-            current_cost: 50 
+            current_cost: baseCost 
           }])
           .select()
           .single()
@@ -231,7 +378,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           .from('tarot_transformations')
           .update({ 
             transformation_count: (transformData.transformation_count || 0) + 1,
-            current_cost: requiredPalomas + 1 // Increase cost for next person
+            current_cost: requiredPalomas + (nextLevel === 15 ? 10 : 1) // +10 for Ace transformation, +1 for others
           })
           .eq('card_level', nextLevel)
 
@@ -461,10 +608,29 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
 
         {/* Current Tarot Card Display */}
         <div style={{ marginTop: '2rem', marginBottom: '3rem' }}>
+          {/* ASCII Card */}
+          <div style={{
+            fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+            fontSize: '0.7rem',
+            lineHeight: '1',
+            color: '#8b5a3c',
+            backgroundColor: '#faf8f3',
+            padding: '1rem',
+            borderRadius: '12px',
+            border: '2px solid rgba(210, 105, 30, 0.3)',
+            marginBottom: '1rem',
+            whiteSpace: 'pre',
+            display: 'inline-block',
+            boxShadow: '0 4px 15px rgba(139, 90, 60, 0.2)'
+          }}>
+            {getCardASCII(profile?.tarot_level || 1)}
+          </div>
+          
           <div style={{
             fontSize: '1.2rem',
             color: '#8b5a3c',
-            marginBottom: '1rem'
+            marginBottom: '0.5rem',
+            fontWeight: '600'
           }}>
             {getTarotCardName(profile?.tarot_level || 1)}
             {profile?.transformation_numbers && profile.transformation_numbers[profile.tarot_level] && (
@@ -479,10 +645,37 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           </div>
           <div style={{
             fontSize: '0.9rem',
-            color: '#a0785a'
+            color: '#a0785a',
+            marginBottom: '1rem'
           }}>
-            Level {profile?.tarot_level || 1} {isMaxLevel && '• MAX LEVEL ACHIEVED'}
+            Level {profile?.tarot_level || 1} {isMaxLevel && '• JOURNEY COMPLETE'}
           </div>
+          
+          {/* Card Meaning - Expandable */}
+          <details style={{
+            fontSize: '0.85rem',
+            color: '#8b5a3c',
+            backgroundColor: 'rgba(255, 255, 255, 0.6)',
+            borderRadius: '8px',
+            padding: '0.8rem',
+            border: '1px solid rgba(210, 105, 30, 0.2)',
+            cursor: 'pointer'
+          }}>
+            <summary style={{
+              fontWeight: '500',
+              color: '#d2691e',
+              marginBottom: '0.5rem'
+            }}>
+              Card Meaning
+            </summary>
+            <div style={{
+              fontStyle: 'italic',
+              lineHeight: '1.4',
+              color: '#8b5a3c'
+            }}>
+              {getCardMeaning(profile?.tarot_level || 1)}
+            </div>
+          </details>
         </div>
 
         {/* Main Content - Cup and Merit Display */}
@@ -613,7 +806,9 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           }}>
             {isMaxLevel ? 
               'Welcome to the inner circle of Casa de Copas. Your journey through the Tarot is complete.' :
-              'Purchase Palomas to advance your transformation progress. Community contributions and volunteering earn you recognition when you reach 100%.'}
+              (profile?.tarot_level || 1) === 14 ?
+                'The Great Transformation awaits - lay down your sword and take up the cup. This threshold requires a deeper commitment.' :
+                'Purchase Palomas to advance your transformation progress. Community contributions and volunteering earn you recognition when you reach 100%.'}
           </div>
         </div>
 
