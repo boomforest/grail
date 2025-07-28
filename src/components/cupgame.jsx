@@ -224,6 +224,38 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     loadTransformationCost()
   }, [supabase, profile?.tarot_level])
 
+  // Load leaderboard data
+  const loadLeaderboard = async () => {
+    if (!supabase) return
+    
+    try {
+      // Get top 10 by Tarot level (highest first, then by transformation number)
+      const { data: tarotData, error: tarotError } = await supabase
+        .from('profiles')
+        .select('username, tarot_level, transformation_numbers, cup_count')
+        .order('tarot_level', { ascending: false })
+        .limit(10)
+      
+      if (tarotError) throw tarotError
+
+      // Get top 10 by cup count
+      const { data: cupData, error: cupError } = await supabase
+        .from('profiles')
+        .select('username, cup_count, tarot_level')
+        .order('cup_count', { ascending: false })
+        .limit(10)
+      
+      if (cupError) throw cupError
+
+      setLeaderboardData({
+        tarotLeaders: tarotData || [],
+        cupLeaders: cupData || []
+      })
+    } catch (error) {
+      console.error('Error loading leaderboard:', error)
+    }
+  }
+
   // Load all profiles for search
   useEffect(() => {
     const loadProfiles = async () => {
