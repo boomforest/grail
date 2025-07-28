@@ -21,7 +21,8 @@ function Dashboard({
   onProfileUpdate,
   message,
   onShowSendForm,
-  onShowReleaseForm
+  onShowReleaseForm,
+  onPayPalClick
 }) {
   return (
     <div style={{
@@ -308,7 +309,7 @@ function Dashboard({
             marginBottom: '1.2rem',
             fontStyle: 'italic'
           }}>
-            {formatNumber(profile?.dov_balance)}
+            {formatNumber(profile?.total_palomas_collected)}
           </div>
           <br />
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', alignItems: 'center' }}>
@@ -354,32 +355,7 @@ function Dashboard({
             
             {/* Get Palomas Button */}
             <button
-              onClick={() => {
-                if (!user) {
-                  alert('No user logged in!')
-                  return
-                }
-                
-                const quantity = prompt('How many groups of 10 Palomas would you like to buy? (Each group costs $10)', '1')
-                
-                if (!quantity || isNaN(quantity) || quantity < 1) {
-                  alert('Please enter a valid number of groups (minimum 1)')
-                  return
-                }
-                
-                const numGroups = parseInt(quantity)
-                const totalAmount = (numGroups * 10).toFixed(2)
-                const totalPalomas = numGroups * 10
-                
-                console.log('User object:', user)
-                console.log('User ID being sent to PayPal:', user.id)
-                console.log('Groups:', numGroups, 'Total Amount:', totalAmount, 'Total Palomas:', totalPalomas)
-                
-                const paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=jproney@gmail.com&currency_code=USD&amount=${totalAmount}&item_name=${totalPalomas} Palomas&custom=${user.id}&no_shipping=1&return=https://grail3.netlify.app/&cancel_return=https://grail3.netlify.app/`
-                
-                console.log('PayPal URL:', paypalUrl)
-                window.open(paypalUrl, '_blank')
-              }}
+              onClick={onPayPalClick}
               style={{
                 background: 'linear-gradient(45deg, #0070ba, #003087)',
                 color: 'white',
