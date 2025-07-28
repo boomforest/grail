@@ -813,6 +813,78 @@ function App() {
     setReleaseData({ amount: '', reason: '' })
   }
 
+  // NEW: Handle Palomas Transfer Function
+  const handlePalomasTransfer = async () => {
+    if (!supabase || !profile) {
+      setMessage('Please wait for connection...')
+      return
+    }
+
+    const recipient = transferData.recipient.trim().toUpperCase()
+    const amount = parseFloat(transferData.amount)
+
+    if (!recipient || !amount) {
+      setMessage('Please fill in recipient and amount')
+      return
+    }
+
+    try {
+      setIsTransferring(true)
+
+      // Find recipient
+      const { data: recipientProfile, error: findError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('username', recipient)
+        .single()
+
+      if (findError || !recipientProfile) {
+        setMessage('Recipient not found')
+        return
+      }
+
+      if (recipientProfile.id === user.id) {
+        setMessage('Cannot send to yourself')
+        return
+      }
+
+      // Check sender has enough Palomas
+      if (profile.total_palomas_collected < amount) {
+        setMessage('Insufficient Palomas')
+        return
+      }
+
+      // Transfer Palomas
+      await supabase
+        .from('profiles')
+        .update({ 
+          total_palomas_collected: profile.total_palomas_collected - amount,
+          last_status_update: new Date().toISOString()
+        })
+        .eq('id', user.id)
+
+      await supabase
+        .from('profiles')
+        .update({ 
+          total_palomas_collected: recipientProfile.total_palomas_collected + amount,
+          last_status_update: new Date().toISOString()
+        })
+        .eq('id', recipientProfile.id)
+
+      setMessage(`Sent ${amount} Palomas to ${recipient}!`)
+      setTransferData({ recipient: '', amount: '' })
+      setShowSendForm(null)
+      
+      await ensureProfileExists(user)
+      await loadAllProfiles()
+    } catch (err) {
+      setMessage('Transfer failed: ' + err.message)
+    } finally {
+      setIsTransferring(false)
+    }
+  }
+
+  // EXISTING: Admin Transfer Function (for DOV/DJR tokens)
   const handleAdminTransfer = async (tokenType) => {
     if (!supabase || !profile) {
       setMessage('Please wait for connection...')
@@ -901,7 +973,8 @@ function App() {
       return
     }
 
-    const currentBalance = tokenType === 'DOV' ? profile.dov_balance : profile.djr_balance
+    // For Palomas (DOV), check total_palomas_collected instead of dov_balance
+    const currentBalance = tokenType === 'DOV' ? profile.total_palomas_collected : profile.djr_balance
     if (currentBalance < amount) {
       setMessage('Insufficient tokens')
       return
@@ -911,10 +984,11 @@ function App() {
       setIsReleasing(true)
 
       if (tokenType === 'DOV') {
+        // Release Palomas from total_palomas_collected
         await supabase
           .from('profiles')
           .update({ 
-            dov_balance: profile.dov_balance - amount,
+            total_palomas_collected: profile.total_palomas_collected - amount,
             last_status_update: new Date().toISOString()
           })
           .eq('id', user.id)
@@ -1189,7 +1263,7 @@ function App() {
           transferData={transferData}
           setTransferData={setTransferData}
           isTransferring={isTransferring}
-          onSend={handleAdminTransfer}
+          onSend={showSendForm === 'DOV' ? handlePalomasTransfer : handleAdminTransfer} // FIXED: Use Palomas transfer for DOV
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
