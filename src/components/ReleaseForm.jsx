@@ -149,227 +149,191 @@ const ReleaseForm = ({
       minHeight: '100vh',
       backgroundColor: '#f5f5dc',
       fontFamily: 'system-ui, -apple-system, sans-serif',
-      padding: '1rem'
+      padding: '2rem 1rem'
     }}>
       <div style={{
-        maxWidth: '500px',
+        maxWidth: '400px',
         margin: '0 auto',
         textAlign: 'center'
       }}>
-        {/* Header */}
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between',
-          marginBottom: '2rem'
+        <button
+          onClick={onBack}
+          style={{
+            position: 'absolute',
+            top: '2rem',
+            left: '2rem',
+            background: 'rgba(255, 255, 255, 0.9)',
+            border: 'none',
+            borderRadius: '20px',
+            padding: '0.5rem 1rem',
+            fontSize: '1rem',
+            cursor: 'pointer'
+          }}
+        >
+          ← Back
+        </button>
+
+        <h1 style={{
+          fontSize: '3rem',
+          color: '#d2691e',
+          marginBottom: '2rem',
+          fontWeight: 'normal'
         }}>
-          <button 
-            onClick={onBack}
-            style={{
-              background: 'none',
-              border: '2px solid #d2691e',
-              borderRadius: '50%',
-              width: '50px',
-              height: '50px',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              color: '#d2691e'
-            }}
-          >
-            ←
-          </button>
-          
-          <h1 style={{
-            fontSize: '2rem',
-            color: '#d2691e',
-            margin: 0,
-            fontWeight: 'normal',
-            fontStyle: 'italic'
-          }}>
-            Release {tokenType}
-          </h1>
-          
-          <div style={{ width: '50px' }} />
-        </div>
+          Release {tokenType}
+        </h1>
 
         {/* Message Display */}
         {message && (
           <div style={{
             padding: '1rem',
             marginBottom: '2rem',
-            backgroundColor: message.includes('successful') || message.includes('Released') ? '#d4edda' : 
-                           message.includes('failed') ? '#f8d7da' : '#fff3cd',
-            color: message.includes('successful') || message.includes('Released') ? '#155724' : 
-                   message.includes('failed') ? '#721c24' : '#856404',
-            borderRadius: '15px',
-            fontSize: '1rem'
+            backgroundColor: message.includes('successful') || message.includes('Released') ? '#d4edda' : '#f8d7da',
+            color: message.includes('successful') || message.includes('Released') ? '#155724' : '#721c24',
+            borderRadius: '20px'
           }}>
             {message}
           </div>
         )}
 
-        {/* Simple Release Section */}
+        {/* Release Form */}
         <div style={{ marginBottom: '2rem' }}>
-          <div style={{ marginBottom: '1.5rem' }}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              borderRadius: '20px',
-              padding: '1rem',
-              marginBottom: '1rem',
-              border: '2px solid #d2691e',
-              boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
-            }}>
-              <input
-                type="number"
-                placeholder="Amount"
-                value={releaseData.amount}
-                onChange={(e) => setReleaseData(prev => ({ ...prev, amount: e.target.value }))}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  fontSize: '1.1rem',
-                  border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
-                  textAlign: 'left',
-                  color: '#8b4513',
-                  fontStyle: 'italic'
-                }}
-              />
-            </div>
-            
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              borderRadius: '20px',
-              padding: '1rem',
-              border: '2px solid #d2691e',
-              boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
-            }}>
-              <textarea
-                placeholder="Reason (optional)"
-                value={releaseData.reason}
-                onChange={(e) => setReleaseData(prev => ({ ...prev, reason: e.target.value }))}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  fontSize: '1rem',
-                  border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
-                  minHeight: '60px',
-                  resize: 'vertical',
-                  textAlign: 'left',
-                  color: '#8b4513',
-                  fontStyle: 'italic'
-                }}
-              />
-            </div>
-          </div>
-
-          <button
-            onClick={() => onRelease(tokenType)}
-            disabled={isReleasing || !releaseData.amount}
+          <input
+            type="number"
+            value={releaseData.amount}
+            onChange={(e) => setReleaseData(prev => ({ ...prev, amount: e.target.value }))}
+            placeholder="Amount"
+            min="0"
+            step="0.01"
             style={{
               width: '100%',
-              padding: '1rem 2rem',
-              fontSize: '1.1rem',
-              fontWeight: '500',
-              background: isReleasing || !releaseData.amount ? '#ccc' : 'linear-gradient(45deg, #8b4513, #a0522d)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '20px',
-              cursor: isReleasing || !releaseData.amount ? 'not-allowed' : 'pointer',
-              fontStyle: 'italic',
-              boxShadow: isReleasing || !releaseData.amount ? 'none' : '0 4px 15px rgba(139, 69, 19, 0.3)',
-              transition: 'all 0.3s ease'
+              padding: '1rem',
+              fontSize: '1.2rem',
+              border: '2px solid #d2691e',
+              borderRadius: '25px',
+              textAlign: 'center',
+              marginBottom: '1rem',
+              outline: 'none',
+              boxSizing: 'border-box'
             }}
-            onMouseOver={(e) => {
-              if (!isReleasing && releaseData.amount) {
-                e.target.style.transform = 'translateY(-2px)'
-                e.target.style.boxShadow = '0 6px 20px rgba(139, 69, 19, 0.4)'
-              }
+          />
+          
+          <textarea
+            value={releaseData.reason}
+            onChange={(e) => setReleaseData(prev => ({ ...prev, reason: e.target.value }))}
+            placeholder="Reason (optional)"
+            style={{
+              width: '100%',
+              padding: '1rem',
+              fontSize: '1.2rem',
+              border: '2px solid #d2691e',
+              borderRadius: '25px',
+              textAlign: 'center',
+              minHeight: '60px',
+              resize: 'vertical',
+              outline: 'none',
+              boxSizing: 'border-box',
+              fontFamily: 'inherit'
             }}
-            onMouseOut={(e) => {
-              e.target.style.transform = 'translateY(0)'
-              e.target.style.boxShadow = isReleasing || !releaseData.amount ? 'none' : '0 4px 15px rgba(139, 69, 19, 0.3)'
-            }}
-          >
-            {isReleasing ? 'Releasing...' : 'Release'}
-          </button>
+          />
         </div>
 
-        {/* Category Filter */}
+        <button
+          onClick={() => onRelease(tokenType)}
+          disabled={isReleasing || !releaseData.amount}
+          style={{
+            background: isReleasing || !releaseData.amount ? '#ccc' : 'linear-gradient(45deg, #8b4513, #a0522d)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '25px',
+            padding: '1rem 3rem',
+            fontSize: '1.2rem',
+            fontWeight: '500',
+            cursor: isReleasing || !releaseData.amount ? 'not-allowed' : 'pointer',
+            boxShadow: isReleasing || !releaseData.amount ? 'none' : '0 4px 15px rgba(139, 69, 19, 0.3)',
+            marginBottom: '3rem'
+          }}
+        >
+          {isReleasing ? 'Releasing...' : 'Release'}
+        </button>
+
+        {/* Gift Store Section */}
         {gifts.length > 0 && (
-          <div style={{
-            display: 'flex',
-            gap: '0.5rem',
-            marginBottom: '1.5rem',
-            overflowX: 'auto',
-            paddingBottom: '0.5rem'
-          }}>
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                style={{
-                  background: selectedCategory === category ? 
-                    'linear-gradient(45deg, #7c3aed, #a855f7)' : 
-                    'rgba(255, 255, 255, 0.9)',
-                  color: selectedCategory === category ? 'white' : '#8b4513',
-                  border: selectedCategory === category ? 'none' : '2px solid #d2691e',
-                  borderRadius: '20px',
-                  padding: '0.5rem 1rem',
-                  cursor: 'pointer',
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.3s ease',
-                  fontStyle: 'italic',
-                  boxShadow: selectedCategory === category ? 
-                    '0 4px 15px rgba(124, 58, 237, 0.3)' : 
-                    '0 2px 8px rgba(210, 105, 30, 0.1)'
-                }}
-                onMouseOver={(e) => {
-                  if (selectedCategory !== category) {
-                    e.target.style.transform = 'translateY(-1px)'
-                    e.target.style.boxShadow = '0 4px 12px rgba(210, 105, 30, 0.2)'
-                  }
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.transform = 'translateY(0)'
-                  e.target.style.boxShadow = selectedCategory === category ? 
-                    '0 4px 15px rgba(124, 58, 237, 0.3)' : 
-                    '0 2px 8px rgba(210, 105, 30, 0.1)'
-                }}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        )}
+          <>
+            <div style={{
+              borderTop: '2px solid #d2691e',
+              paddingTop: '2rem',
+              marginBottom: '2rem'
+            }}>
+              <h2 style={{
+                fontSize: '2rem',
+                color: '#8b4513',
+                marginBottom: '1.5rem',
+                fontWeight: 'normal'
+              }}>
+                🎁 Gift Store
+              </h2>
 
-        {/* Gifts Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '1rem'
-        }}>
-          {filteredGifts.map(gift => (
-            <GiftCard 
-              key={gift.id}
-              gift={gift}
-              onClaim={claimGift}
-              userBalance={profile?.total_palomas_collected || 0}
-              claiming={claiming === gift.id}
-            />
-          ))}
-        </div>
+              {/* Category Filter */}
+              <div style={{
+                display: 'flex',
+                gap: '0.5rem',
+                marginBottom: '2rem',
+                overflowX: 'auto',
+                paddingBottom: '0.5rem',
+                justifyContent: 'center',
+                flexWrap: 'wrap'
+              }}>
+                {categories.map(category => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    style={{
+                      background: selectedCategory === category ? 
+                        'linear-gradient(45deg, #d2691e, #cd853f)' : 
+                        'rgba(255, 255, 255, 0.9)',
+                      color: selectedCategory === category ? 'white' : '#8b4513',
+                      border: selectedCategory === category ? 'none' : '2px solid #d2691e',
+                      borderRadius: '20px',
+                      padding: '0.5rem 1rem',
+                      cursor: 'pointer',
+                      fontSize: '0.9rem',
+                      fontWeight: '500',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+
+              {/* Gifts Grid */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                gap: '1rem',
+                maxWidth: '600px',
+                margin: '0 auto'
+              }}>
+                {filteredGifts.map(gift => (
+                  <GiftCard 
+                    key={gift.id}
+                    gift={gift}
+                    onClaim={claimGift}
+                    userBalance={profile?.total_palomas_collected || 0}
+                    claiming={claiming === gift.id}
+                  />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
 }
 
-// Simplified Gift Card Component
+// Clean Gift Card Component
 const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
   const canAfford = userBalance >= gift.price
   const isAvailable = gift.active
@@ -377,30 +341,30 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
   return (
     <div style={{
       background: 'rgba(255, 255, 255, 0.9)',
-      borderRadius: '20px',
+      borderRadius: '25px',
       padding: '1rem',
-      boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)',
       transition: 'all 0.3s ease',
       opacity: isAvailable ? 1 : 0.6,
       border: '2px solid #d2691e',
-      cursor: canAfford && isAvailable ? 'pointer' : 'default'
+      cursor: canAfford && isAvailable ? 'pointer' : 'default',
+      boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)'
     }}
     onClick={() => canAfford && isAvailable && !claiming ? onClaim(gift) : null}
     onMouseOver={(e) => {
       if (isAvailable && canAfford) {
         e.currentTarget.style.transform = 'translateY(-4px)'
-        e.currentTarget.style.boxShadow = '0 8px 25px rgba(210, 105, 30, 0.2)'
+        e.currentTarget.style.boxShadow = '0 8px 25px rgba(210, 105, 30, 0.4)'
       }
     }}
     onMouseOut={(e) => {
       e.currentTarget.style.transform = 'translateY(0)'
-      e.currentTarget.style.boxShadow = '0 4px 15px rgba(210, 105, 30, 0.1)'
+      e.currentTarget.style.boxShadow = '0 4px 15px rgba(210, 105, 30, 0.3)'
     }}>
       
       {/* Gift Image or Placeholder */}
       <div style={{
         textAlign: 'center',
-        marginBottom: '1rem'
+        marginBottom: '0.75rem'
       }}>
         {gift.image_url ? (
           <img
@@ -408,7 +372,7 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
             alt={gift.name}
             style={{
               width: '100%',
-              height: '100px',
+              height: '80px',
               objectFit: 'cover',
               borderRadius: '15px'
             }}
@@ -416,13 +380,13 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
         ) : (
           <div style={{
             width: '100%',
-            height: '100px',
+            height: '80px',
             background: 'rgba(139, 69, 19, 0.1)',
             borderRadius: '15px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '2rem',
+            fontSize: '1.5rem',
             color: '#8b4513'
           }}>
             🎁
@@ -433,11 +397,10 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
       {/* Gift Title */}
       <h4 style={{
         margin: '0 0 0.5rem 0',
-        fontSize: '1rem',
+        fontSize: '0.9rem',
         color: '#8b4513',
         fontWeight: '600',
-        textAlign: 'center',
-        fontStyle: 'italic'
+        textAlign: 'center'
       }}>
         {gift.name}
       </h4>
@@ -445,11 +408,10 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
       {/* Price */}
       <div style={{
         textAlign: 'center',
-        fontSize: '1.125rem',
+        fontSize: '1rem',
         fontWeight: 'bold',
         color: canAfford ? '#d2691e' : '#dc2626',
-        marginBottom: '0.5rem',
-        fontStyle: 'italic'
+        marginBottom: '0.5rem'
       }}>
         🪙 {gift.price}
       </div>
@@ -457,12 +419,11 @@ const GiftCard = ({ gift, onClaim, userBalance, claiming }) => {
       {/* Status */}
       <div style={{
         textAlign: 'center',
-        fontSize: '0.8rem',
+        fontSize: '0.7rem',
         color: claiming ? '#f59e0b' : 
                !canAfford ? '#dc2626' : 
                '#8b4513',
-        fontWeight: '500',
-        fontStyle: 'italic'
+        fontWeight: '500'
       }}>
         {claiming ? 'Claiming...' : 
          !isAvailable ? 'Unavailable' :
