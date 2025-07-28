@@ -165,7 +165,9 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   const [searchResults, setSearchResults] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
   const [showWelcome, setShowWelcome] = useState(false)
+  const [showLeaderboard, setShowLeaderboard] = useState(false)  
   const [currentTransformationCost, setCurrentTransformationCost] = useState(50)
+  const [leaderboardData, setLeaderboardData] = useState({ tarotLeaders: [], cupLeaders: [] })
 
   // Check if user should see welcome window
   useEffect(() => {
@@ -242,6 +244,13 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     
     loadProfiles()
   }, [supabase])
+
+  // Load leaderboard when component mounts or when showing leaderboard
+  useEffect(() => {
+    if (showLeaderboard) {
+      loadLeaderboard()
+    }
+  }, [showLeaderboard, supabase])
 
   // Calculate merit percentage based on palomas purchased and current transformation cost
   const calculateMeritPercentage = () => {
@@ -470,7 +479,241 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
       color: '#8b5a3c',
       position: 'relative'
     }}>
-      {/* Welcome Window for New Users */}
+      {/* Leaderboard Modal */}
+      {showLeaderboard && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '2rem'
+        }}>
+          <div style={{
+            backgroundColor: '#faf8f3',
+            borderRadius: '24px',
+            padding: '2.5rem',
+            maxWidth: '600px',
+            width: '100%',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            boxShadow: '0 20px 60px rgba(139, 90, 60, 0.3)',
+            border: '2px solid rgba(210, 105, 30, 0.2)',
+            position: 'relative'
+          }}>
+            {/* Close button */}
+            <button
+              onClick={() => setShowLeaderboard(false)}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5rem',
+                cursor: 'pointer',
+                color: '#8b5a3c',
+                opacity: 0.6,
+                padding: '0.5rem'
+              }}
+            >
+              ×
+            </button>
+
+            <div style={{
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              color: '#d2691e',
+              marginBottom: '2rem',
+              textAlign: 'center',
+              fontStyle: 'italic'
+            }}>
+              Casa de Copas Leaderboard
+            </div>
+
+            {/* Dual Leaderboard Layout */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '2rem',
+              '@media (max-width: 600px)': {
+                gridTemplateColumns: '1fr'
+              }
+            }}>
+              {/* Tarot Hierarchy */}
+              <div>
+                <h3 style={{
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  color: '#8b5a3c',
+                  marginBottom: '1rem',
+                  textAlign: 'center'
+                }}>
+                  🎴 Tarot Hierarchy
+                </h3>
+                <div style={{
+                  fontSize: '0.8rem',
+                  color: '#a0785a',
+                  textAlign: 'center',
+                  marginBottom: '1rem',
+                  fontStyle: 'italic'
+                }}>
+                  Spiritual Leadership
+                </div>
+                
+                {leaderboardData.tarotLeaders.map((player, index) => {
+                  const transformationNumber = player.transformation_numbers?.[player.tarot_level] || '';
+                  return (
+                    <div
+                      key={player.username}
+                      style={{
+                        padding: '0.8rem',
+                        marginBottom: '0.5rem',
+                        backgroundColor: index === 0 ? 'rgba(212, 175, 55, 0.2)' : 
+                                       index === 1 ? 'rgba(192, 192, 192, 0.2)' : 
+                                       index === 2 ? 'rgba(205, 127, 50, 0.2)' : 'rgba(255, 255, 255, 0.4)',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(210, 105, 30, 0.2)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <div>
+                        <div style={{
+                          fontWeight: '500',
+                          color: '#8b5a3c',
+                          fontSize: '0.9rem'
+                        }}>
+                          {index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`} {player.username}
+                        </div>
+                        <div style={{
+                          fontSize: '0.8rem',
+                          color: '#a0785a'
+                        }}>
+                          {getTarotCardName(player.tarot_level || 1)}
+                          {transformationNumber && ` #${transformationNumber}`}
+                        </div>
+                      </div>
+                      <div style={{
+                        fontSize: '0.8rem',
+                        color: '#d2691e',
+                        fontWeight: '500'
+                      }}>
+                        L{player.tarot_level || 1}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Cup/Grail Leaders */}
+              <div>
+                <h3 style={{
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  color: '#8b5a3c',
+                  marginBottom: '1rem',
+                  textAlign: 'center'
+                }}>
+                  🏆 Grail Keepers
+                </h3>
+                <div style={{
+                  fontSize: '0.8rem',
+                  color: '#a0785a',
+                  textAlign: 'center',
+                  marginBottom: '1rem',
+                  fontStyle: 'italic'
+                }}>
+                  Commitment & Support
+                </div>
+                
+                {leaderboardData.cupLeaders.map((player, index) => (
+                  <div
+                    key={player.username}
+                    style={{
+                      padding: '0.8rem',
+                      marginBottom: '0.5rem',
+                      backgroundColor: index === 0 ? 'rgba(212, 175, 55, 0.2)' : 
+                                     index === 1 ? 'rgba(192, 192, 192, 0.2)' : 
+                                     index === 2 ? 'rgba(205, 127, 50, 0.2)' : 'rgba(255, 255, 255, 0.4)',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(210, 105, 30, 0.2)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <div>
+                      <div style={{
+                        fontWeight: '500',
+                        color: '#8b5a3c',
+                        fontSize: '0.9rem'
+                      }}>
+                        {index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`} {player.username}
+                      </div>
+                      <div style={{
+                        fontSize: '0.8rem',
+                        color: '#a0785a'
+                      }}>
+                        {getTarotCardName(player.tarot_level || 1)}
+                      </div>
+                    </div>
+                    <div style={{
+                      fontSize: '0.8rem',
+                      color: '#d2691e',
+                      fontWeight: '500'
+                    }}>
+                      {player.cup_count || 0} {(player.tarot_level || 1) >= 15 ? 'grails' : 'cups'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom explanation */}
+            <div style={{
+              marginTop: '2rem',
+              padding: '1rem',
+              backgroundColor: 'rgba(210, 105, 30, 0.1)',
+              borderRadius: '12px',
+              fontSize: '0.8rem',
+              color: '#8b5a3c',
+              fontStyle: 'italic',
+              textAlign: 'center'
+            }}>
+              <strong>Tarot Hierarchy</strong> shows spiritual progression through the cards.
+              <br />
+              <strong>Grail Keepers</strong> shows ongoing commitment and support.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Back Button */}
+      <button
+        onClick={onBack}
+        style={{
+          position: 'absolute',
+          top: '2rem',
+          left: '2rem',
+          background: 'rgba(210, 105, 30, 0.1)',
+          border: '1px solid rgba(210, 105, 30, 0.3)',
+          borderRadius: '20px',
+          padding: '0.8rem 1.5rem',
+          fontSize: '1rem',
+          cursor: 'pointer',
+          color: '#d2691e',
+          fontWeight: '500'
+        }}
+      >
+        ← Back
+      </button>
       {showWelcome && (
         <div style={{
           position: 'fixed',
@@ -586,13 +829,13 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
         margin: '0 auto',
         textAlign: 'center'
       }}>
-        {/* Back Button */}
+        {/* Leaderboard Button */}
         <button
-          onClick={onBack}
+          onClick={() => setShowLeaderboard(true)}
           style={{
             position: 'absolute',
             top: '2rem',
-            left: '2rem',
+            right: '2rem',
             background: 'rgba(210, 105, 30, 0.1)',
             border: '1px solid rgba(210, 105, 30, 0.3)',
             borderRadius: '20px',
@@ -603,7 +846,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             fontWeight: '500'
           }}
         >
-          ← Back
+          📊 Leaderboard
         </button>
 
         {/* Current Tarot Card Display */}
