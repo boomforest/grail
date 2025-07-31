@@ -1,4 +1,4 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.paypal.com https://*.paypal.com https://www.paypalobjects.com https://*.paypalobjects.com; style-src 'self' 'unsafe-inline' https://www.paypal.com https://*.paypal.com https://www.paypalobjects.com https://*.paypalobjects.com; img-src 'self' data: https: blob:; connect-src 'self' https://www.paypal.com https://*.paypal.com https://api.paypal.com https://*.paypalobjects.com https://*.supabase.co https://*.supabase.com wss://*.supabase.co wss://*.supabase.com; frame-src https://www.paypal.com https://*.paypal.com; font-src 'self' data: https:; media-src 'self' https: data: blob:;"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:; style-src 'self' 'unsafe-inline' https: http:; img-src 'self' data: https: http: blob:; connect-src 'self' https: http: wss: ws:; frame-src https: http:; font-src 'self' data: https: http:; media-src 'self' https: http: data: blob:; object-src 'none';"
