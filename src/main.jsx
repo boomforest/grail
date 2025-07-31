@@ -261,29 +261,10 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
   const [paypalLoaded, setPaypalLoaded] = useState(false)
 
   useEffect(() => {
-    // Check if PayPal SDK is loaded
-    if (window.paypal) {
+    // Since PayPal SDK is loaded from HTML, just check if it exists and render
+    if (window.paypal && user) {
       setPaypalLoaded(true)
       renderPayPalButton()
-    } else {
-      // Load PayPal SDK dynamically
-      const script = document.createElement('script')
-      script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}&currency=USD`
-      script.onload = () => {
-        setPaypalLoaded(true)
-        renderPayPalButton()
-      }
-      script.onerror = () => {
-        console.error('Failed to load PayPal SDK')
-        onError && onError(new Error('Failed to load PayPal SDK'))
-      }
-      document.head.appendChild(script)
-      
-      return () => {
-        if (document.head.contains(script)) {
-          document.head.removeChild(script)
-        }
-      }
     }
   }, [user])
 
