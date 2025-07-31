@@ -284,6 +284,8 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
     // Load PayPal SDK dynamically
     const script = document.createElement('script')
     script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&enable-funding=venmo,paylater`
+    // In the PayPal component, add this line after getting the clientId:
+console.log('PayPal SDK URL being loaded:', `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&enable-funding=venmo,paylater`)
     
     script.onload = () => {
       console.log('PayPal SDK loaded successfully')
