@@ -42,7 +42,6 @@ const WelcomeModal = ({ onClose, onBuyPalomas }) => {
         border: '1px solid rgba(255, 255, 255, 0.2)',
         animation: 'slideUp 0.5s ease-out'
       }}>
-        {/* Close button */}
         <button 
           onClick={onClose}
           style={{
@@ -69,13 +68,11 @@ const WelcomeModal = ({ onClose, onBuyPalomas }) => {
           ×
         </button>
 
-        {/* Content */}
         <div style={{
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
           lineHeight: '1.6',
           color: '#1e293b'
         }}>
-          {/* Welcome Header */}
           <div style={{
             textAlign: 'center',
             marginBottom: '32px'
@@ -100,7 +97,6 @@ const WelcomeModal = ({ onClose, onBuyPalomas }) => {
             </h2>
           </div>
 
-          {/* Main description */}
           <div style={{
             fontSize: '17px',
             fontStyle: 'italic',
@@ -114,7 +110,6 @@ const WelcomeModal = ({ onClose, onBuyPalomas }) => {
             and creative grants for emerging Mexican artists.
           </div>
 
-          {/* Beta Access Section */}
           <div style={{
             backgroundColor: '#f1f5f9',
             borderRadius: '16px',
@@ -142,7 +137,6 @@ const WelcomeModal = ({ onClose, onBuyPalomas }) => {
             </p>
           </div>
 
-          {/* How it works */}
           <div style={{
             marginBottom: '32px'
           }}>
@@ -181,7 +175,6 @@ const WelcomeModal = ({ onClose, onBuyPalomas }) => {
             </div>
           </div>
 
-          {/* Call to action */}
           <div style={{
             textAlign: 'center',
             marginBottom: '24px'
@@ -215,7 +208,6 @@ const WelcomeModal = ({ onClose, onBuyPalomas }) => {
             </button>
           </div>
 
-          {/* Footer message */}
           <div style={{
             fontSize: '15px',
             fontStyle: 'italic',
@@ -255,16 +247,13 @@ const WelcomeModal = ({ onClose, onBuyPalomas }) => {
   )
 }
 
-// Simple PayPal Button Component - No design flourishes
+// PayPal Button Component
 const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }) => {
   const [isLoading, setIsLoading] = useState(false)
-  const [paypalLoaded, setPaypalLoaded] = useState(false)
 
   useEffect(() => {
-    // Since PayPal SDK is loaded from HTML, just check if it exists and render
     if (window.paypal && user) {
-      setPaypalLoaded(true)
-      renderPayPalButton()
+      setTimeout(renderPayPalButton, 100)
     }
   }, [user])
 
@@ -278,7 +267,6 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
       return
     }
 
-    // Wait for the container to be available
     const container = document.getElementById('paypal-button-container')
     console.log('PayPal container found:', !!container)
     
@@ -288,25 +276,19 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
       return
     }
     
-    // Clear any existing PayPal buttons
     container.innerHTML = ''
 
-    try {
-
-    try {
-    // Render PayPal button
     window.paypal.Buttons({
-      // Create order on PayPal
       createOrder: (data, actions) => {
         setIsLoading(true)
         return actions.order.create({
           purchase_units: [{
             amount: {
-              value: '10.00', // $10 = 10 Palomas
+              value: '10.00',
               currency_code: 'USD'
             },
             description: 'Casa de Copas Palomas - DOV Tokens',
-            custom_id: user.id, // This is crucial for the webhook!
+            custom_id: user.id,
             invoice_id: `palomas-${user.id}-${Date.now()}`
           }],
           application_context: {
@@ -318,33 +300,17 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
         })
       },
 
-      // Handle successful payment
       onApprove: async (data, actions) => {
-        try {
-          const order = await actions.order.capture()
-          console.log('Payment successful:', order)
-          
-          setIsLoading(false)
-          
-          // The webhook will handle adding Palomas automatically
-          onSuccess && onSuccess(order)
-          
-          // Sync cups after payment
-          if (syncCupsFromPalomas) {
-            setTimeout(() => syncCupsFromPalomas(user.id), 2000)
-          }
-          
-          // Show success message
-          alert(`Payment successful! Your Palomas will be credited shortly. Order ID: ${order.id}`)
-          
-        } catch (error) {
-          console.error('Payment capture error:', error)
-          setIsLoading(false)
-          onError && onError(error)
+        const order = await actions.order.capture()
+        console.log('Payment successful:', order)
+        setIsLoading(false)
+        onSuccess && onSuccess(order)
+        if (syncCupsFromPalomas) {
+          setTimeout(() => syncCupsFromPalomas(user.id), 2000)
         }
+        alert(`Payment successful! Your Palomas will be credited shortly. Order ID: ${order.id}`)
       },
 
-      // Handle payment errors
       onError: (err) => {
         console.error('PayPal error:', err)
         setIsLoading(false)
@@ -352,14 +318,12 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
         alert('Payment failed. Please try again.')
       },
 
-      // Handle cancelled payments
       onCancel: (data) => {
         console.log('Payment cancelled:', data)
         setIsLoading(false)
         alert('Payment cancelled.')
       },
 
-      // Simple button styling - no flourishes
       style: {
         color: 'gold',
         shape: 'rect',
@@ -369,26 +333,12 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
         tagline: false
       }
     }).render('#paypal-button-container')
-    
-    } catch (error) {
-      console.error('Error rendering PayPal button:', error)
-      onError && onError(error)
-    }
-  }
   }
 
   if (!user) {
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
         <p>Please log in to purchase Palomas</p>
-      </div>
-    )
-  }
-
-  if (!paypalLoaded) {
-    return (
-      <div style={{ textAlign: 'center', padding: '20px' }}>
-        <p>Loading PayPal...</p>
       </div>
     )
   }
@@ -412,14 +362,12 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
 }
 
 function App() {
-  // Core state
   const [supabase, setSupabase] = useState(null)
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [allProfiles, setAllProfiles] = useState([])
   const [notifications, setNotifications] = useState([])
   
-  // UI state
   const [showSendForm, setShowSendForm] = useState(null)
   const [showReleaseForm, setShowReleaseForm] = useState(null)
   const [showSendMeritsForm, setShowSendMeritsForm] = useState(false)
@@ -428,12 +376,11 @@ function App() {
   const [showManifesto, setShowManifesto] = useState(false)
   const [showCupGame, setShowCupGame] = useState(false)
   const [showGPTChat, setShowGPTChat] = useState(false)
-  const [showPayPal, setShowPayPal] = useState(false) // PayPal modal state
-  const [showResetPassword, setShowResetPassword] = useState(false) // Reset password state
-  const [showWelcome, setShowWelcome] = useState(false) // Welcome modal state
-  const [hasSeenWelcome, setHasSeenWelcome] = useState(false) // Track if user has seen welcome
+  const [showPayPal, setShowPayPal] = useState(false)
+  const [showResetPassword, setShowResetPassword] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
+  const [hasSeenWelcome, setHasSeenWelcome] = useState(false)
   
-  // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
     recipient: '',
     amount: ''
@@ -443,7 +390,6 @@ function App() {
     reason: ''
   })
   
-  // Loading states
   const [message, setMessage] = useState('')
   const [isTransferring, setIsTransferring] = useState(false)
   const [isReleasing, setIsReleasing] = useState(false)
@@ -452,12 +398,10 @@ function App() {
     setShowGPTChat(prev => !prev)
   }
 
-  // Check if should show welcome modal
   useEffect(() => {
     if (user && profile && !hasSeenWelcome) {
       const totalPalomas = profile.total_palomas_collected || 0
       if (totalPalomas === 0) {
-        // Small delay to let the dashboard load first
         const timer = setTimeout(() => {
           setShowWelcome(true)
         }, 1000)
@@ -467,18 +411,15 @@ function App() {
     }
   }, [user, profile, hasSeenWelcome])
 
-  // Close welcome modal
   const closeWelcome = () => {
     setShowWelcome(false)
     setHasSeenWelcome(true)
   }
 
-  // Sync cups function
   const syncCupsFromPalomas = async (userId) => {
     if (!supabase || !userId) return
 
     try {
-      // Get current profile data
       const { data: profile, error: fetchError } = await supabase
         .from('profiles')
         .select('total_palomas_collected, cup_count')
@@ -490,11 +431,9 @@ function App() {
         return
       }
 
-      // Calculate cups earned from total palomas
       const cupsEarned = Math.floor((profile.total_palomas_collected || 0) / 100)
       const currentCups = profile.cup_count || 0
 
-      // Only update if there's a difference
       if (cupsEarned !== currentCups) {
         const { error: updateError } = await supabase
           .from('profiles')
@@ -509,10 +448,8 @@ function App() {
         } else {
           console.log(`Synced cups for user ${userId}: ${currentCups} → ${cupsEarned}`)
           
-          // Refresh profile data
           await ensureProfileExists({ id: userId })
           
-          // Log the cup sync if there was an increase
           if (cupsEarned > currentCups) {
             await supabase
               .from('cup_logs')
@@ -534,7 +471,6 @@ function App() {
   useEffect(() => {
     const initSupabase = async () => {
       try {
-        // Check if this is a password reset URL first
         const urlParams = new URLSearchParams(window.location.search)
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const type = urlParams.get('type') || hashParams.get('type')
@@ -551,7 +487,6 @@ function App() {
         setSupabase(client)
         setMessage('')
 
-        // Only auto-login if NOT on a reset password page
         if (type !== 'recovery') {
           const { data: { session } } = await client.auth.getSession()
           if (session?.user) {
@@ -560,7 +495,6 @@ function App() {
             await loadAllProfiles(client)
             await loadNotifications(client)
             
-            // Set up real-time subscription for notifications
             try {
               const notificationSubscription = client
                 .channel('release_notifications')
@@ -603,7 +537,6 @@ function App() {
 
       if (existingProfile) {
         setProfile(existingProfile)
-        // Sync cups when user logs in
         await syncCupsFromPalomas(authUser.id)
         return existingProfile
       }
@@ -618,7 +551,6 @@ function App() {
         name: authUser.user_metadata?.name || '',
         dov_balance: isAdmin ? 1000000 : 0,
         djr_balance: isAdmin ? 1000000 : 0,
-        // Add default cup game values for new profiles
         cup_count: 0,
         tarot_level: 1,
         merit_count: 0,
@@ -638,7 +570,6 @@ function App() {
 
       setProfile(createdProfile)
       setMessage('Profile created successfully!')
-      // Sync cups for new profile
       await syncCupsFromPalomas(authUser.id)
       return createdProfile
     } catch (error) {
@@ -756,7 +687,6 @@ function App() {
     }
   }
 
-  // Success handlers for LoginForm
   const handleSuccessfulLogin = async (data) => {
     console.log('Login successful:', data.user)
     setUser(data.user)
@@ -775,9 +705,7 @@ function App() {
     await loadNotifications()
   }
 
-  // Handle password reset completion
   const handlePasswordResetComplete = async () => {
-    // Sign out the user after password reset
     if (supabase) {
       await supabase.auth.signOut()
     }
@@ -786,7 +714,6 @@ function App() {
     setUser(null)
     setProfile(null)
     
-    // Clear URL parameters
     window.history.replaceState({}, document.title, window.location.pathname)
     setMessage('Password reset complete! Please log in with your new password.')
   }
@@ -811,15 +738,14 @@ function App() {
     setShowManifesto(false)
     setShowCupGame(false)
     setShowGPTChat(false)
-    setShowPayPal(false) // Reset PayPal modal
-    setShowWelcome(false) // Reset welcome modal
-    setHasSeenWelcome(false) // Reset welcome state
+    setShowPayPal(false)
+    setShowWelcome(false)
+    setHasSeenWelcome(false)
     setMessage('')
     setTransferData({ recipient: '', amount: '' })
     setReleaseData({ amount: '', reason: '' })
   }
 
-  // NEW: Handle Palomas Transfer Function
   const handlePalomasTransfer = async () => {
     if (!supabase || !profile) {
       setMessage('Please wait for connection...')
@@ -837,7 +763,6 @@ function App() {
     try {
       setIsTransferring(true)
 
-      // Find recipient
       const { data: recipientProfile, error: findError } = await supabase
         .from('profiles')
         .select('*')
@@ -854,13 +779,11 @@ function App() {
         return
       }
 
-      // Check sender has enough Palomas
       if (profile.total_palomas_collected < amount) {
         setMessage('Insufficient Palomas')
         return
       }
 
-      // Transfer Palomas
       await supabase
         .from('profiles')
         .update({ 
@@ -890,7 +813,6 @@ function App() {
     }
   }
 
-  // EXISTING: Admin Transfer Function (for DOV/DJR tokens)
   const handleAdminTransfer = async (tokenType) => {
     if (!supabase || !profile) {
       setMessage('Please wait for connection...')
@@ -979,7 +901,6 @@ function App() {
       return
     }
 
-    // For Palomas (DOV), check total_palomas_collected instead of dov_balance
     const currentBalance = tokenType === 'DOV' ? profile.total_palomas_collected : profile.djr_balance
     if (currentBalance < amount) {
       setMessage('Insufficient tokens')
@@ -990,7 +911,6 @@ function App() {
       setIsReleasing(true)
 
       if (tokenType === 'DOV') {
-        // Release Palomas from total_palomas_collected
         await supabase
           .from('profiles')
           .update({ 
@@ -1026,20 +946,18 @@ function App() {
     }
   }
 
-  // PayPal handler - updated to close welcome modal
   const handlePayPalClick = () => {
     if (!user) {
       setMessage('Please log in to purchase Palomas')
       return
     }
-    closeWelcome() // Close welcome modal when opening PayPal
+    closeWelcome()
     setShowPayPal(true)
     setMessage('Use the PayPal checkout below to purchase Palomas. Your tokens will be credited automatically!')
   }
 
   const isAdmin = profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com'
 
-  // Welcome Modal View - Show if user has 0 palomas and hasn't seen it
   if (user && showWelcome) {
     return (
       <>
@@ -1082,7 +1000,6 @@ function App() {
     )
   }
 
-  // Reset Password View - Show this first if we're on a reset URL
   if (showResetPassword) {
     return (
       <>
@@ -1096,7 +1013,6 @@ function App() {
     )
   }
 
-  // PayPal Modal View
   if (user && showPayPal) {
     return (
       <>
@@ -1145,7 +1061,6 @@ function App() {
               onSuccess={(order) => {
                 console.log('Payment completed:', order)
                 setMessage(`Payment successful! Palomas will be credited shortly.`)
-                // Refresh user data after a short delay
                 setTimeout(async () => {
                   await ensureProfileExists(user)
                   await syncCupsFromPalomas(user.id)
@@ -1191,7 +1106,6 @@ function App() {
     )
   }
 
-  // Add send merits view
   if (user && showSendMeritsForm && isAdmin) {
     return (
       <>
@@ -1213,7 +1127,6 @@ function App() {
     )
   }
 
-  // Add cup game view
   if (user && showCupGame) {
     return (
       <>
@@ -1224,7 +1137,6 @@ function App() {
           user={user}
           onProfileUpdate={(updatedProfile) => {
             setProfile(updatedProfile)
-            // Sync cups when profile updates in cup game
             syncCupsFromPalomas(user.id)
           }}
         />
@@ -1239,7 +1151,6 @@ function App() {
     )
   }
 
-  // Render based on current view
   if (user && showNotifications && isAdmin) {
     return (
       <>
@@ -1269,7 +1180,7 @@ function App() {
           transferData={transferData}
           setTransferData={setTransferData}
           isTransferring={isTransferring}
-          onSend={showSendForm === 'DOV' ? handlePalomasTransfer : handleAdminTransfer} // FIXED: Use Palomas transfer for DOV
+          onSend={showSendForm === 'DOV' ? handlePalomasTransfer : handleAdminTransfer}
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
@@ -1321,7 +1232,6 @@ function App() {
           onShowNotifications={() => setShowNotifications(true)}
           onShowCupGame={() => {
             setShowCupGame(true)
-            // Sync cups when opening cup game
             syncCupsFromPalomas(user.id)
           }}
           onWalletSave={handleWalletSave}
