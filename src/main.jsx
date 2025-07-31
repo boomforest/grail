@@ -278,11 +278,22 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
       return
     }
 
-    // Clear any existing PayPal buttons
+    // Wait for the container to be available
     const container = document.getElementById('paypal-button-container')
     console.log('PayPal container found:', !!container)
-    if (container) container.innerHTML = ''
+    
+    if (!container) {
+      console.log('Container not found, retrying in 100ms...')
+      setTimeout(renderPayPalButton, 100)
+      return
+    }
+    
+    // Clear any existing PayPal buttons
+    container.innerHTML = ''
 
+    try {
+
+    try {
     // Render PayPal button
     window.paypal.Buttons({
       // Create order on PayPal
@@ -358,6 +369,11 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
         tagline: false
       }
     }).render('#paypal-button-container')
+    
+    } catch (error) {
+      console.error('Error rendering PayPal button:', error)
+      onError && onError(error)
+    }
   }
 
   if (!user) {
