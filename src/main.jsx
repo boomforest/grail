@@ -255,161 +255,120 @@ const WelcomeModal = ({ onClose, onBuyPalomas }) => {
   )
 }
 
-// Fixed PayPal Button Component
+// Simple PayPal Button Component - No design flourishes
 const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [paypalLoaded, setPaypalLoaded] = useState(false)
-  const [sdkError, setSdkError] = useState(null)
 
   useEffect(() => {
-    const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID
-    
-    // Debug: Log the client ID (remove in production)
-    console.log('PayPal Client ID:', clientId ? 'Present' : 'Missing')
-    
-    if (!clientId) {
-      const error = new Error('PayPal Client ID not configured')
-      setSdkError(error)
-      onError && onError(error)
-      return
-    }
-
-    // Check if PayPal SDK is already loaded
+    // Check if PayPal SDK is loaded
     if (window.paypal) {
       setPaypalLoaded(true)
       renderPayPalButton()
-      return
-    }
-
-    // Load PayPal SDK dynamically
-    const script = document.createElement('script')
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&enable-funding=venmo,paylater`
-    // In the PayPal component, add this line after getting the clientId:
-console.log('PayPal SDK URL being loaded:', `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&enable-funding=venmo,paylater`)
-    
-    script.onload = () => {
-      console.log('PayPal SDK loaded successfully')
-      setPaypalLoaded(true)
-      setSdkError(null)
-      renderPayPalButton()
-    }
-    
-    script.onerror = (error) => {
-      console.error('Failed to load PayPal SDK:', error)
-      const sdkError = new Error('Failed to load PayPal SDK')
-      setSdkError(sdkError)
-      onError && onError(sdkError)
-    }
-    
-    document.head.appendChild(script)
-    
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script)
+    } else {
+      // Load PayPal SDK dynamically
+      const script = document.createElement('script')
+      script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}&currency=USD&intent=capture&enable-funding=venmo,paylater`
+      script.onload = () => {
+        setPaypalLoaded(true)
+        renderPayPalButton()
+      }
+      script.onerror = () => {
+        console.error('Failed to load PayPal SDK')
+        onError && onError(new Error('Failed to load PayPal SDK'))
+      }
+      document.head.appendChild(script)
+      
+      return () => {
+        if (document.head.contains(script)) {
+          document.head.removeChild(script)
+        }
       }
     }
   }, [user])
 
   const renderPayPalButton = () => {
-    if (!window.paypal || !user || !paypalLoaded) {
-      console.log('Cannot render PayPal button:', {
-        paypalSDK: !!window.paypal,
-        user: !!user,
-        paypalLoaded
-      })
-      return
-    }
+    if (!window.paypal || !user || !paypalLoaded) return
 
     // Clear any existing PayPal buttons
     const container = document.getElementById('paypal-button-container')
     if (container) container.innerHTML = ''
 
-    try {
-      // Render PayPal button
-      window.paypal.Buttons({
-        // Create order on PayPal
-        createOrder: (data, actions) => {
-          console.log('Creating PayPal order...')
-          setIsLoading(true)
-          
-          return actions.order.create({
-            purchase_units: [{
-              amount: {
-                value: '10.00', // $10 = 10 Palomas
-                currency_code: 'USD'
-              },
-              description: 'Casa de Copas Palomas - DOV Tokens',
-              custom_id: user.id,
-              invoice_id: `palomas-${user.id}-${Date.now()}`
-            }],
-            application_context: {
-              brand_name: 'Casa de Copas',
-              locale: 'en-US',
-              landing_page: 'BILLING',
-              user_action: 'PAY_NOW'
-            }
-          })
-        },
-
-        // Handle successful payment
-        onApprove: async (data, actions) => {
-          try {
-            console.log('Payment approved, capturing order...')
-            const order = await actions.order.capture()
-            console.log('Payment successful:', order)
-            
-            setIsLoading(false)
-            
-            // The webhook will handle adding Palomas automatically
-            onSuccess && onSuccess(order)
-            
-            // Sync cups after payment
-            if (syncCupsFromPalomas) {
-              setTimeout(() => syncCupsFromPalomas(user.id), 2000)
-            }
-            
-            // Show success message
-            alert(`Payment successful! Your Palomas will be credited shortly. Order ID: ${order.id}`)
-            
-          } catch (error) {
-            console.error('Payment capture error:', error)
-            setIsLoading(false)
-            onError && onError(error)
-            alert('Payment processing failed. Please contact support.')
+    // Render PayPal button
+    window.paypal.Buttons({
+      // Create order on PayPal
+      createOrder: (data, actions) => {
+        setIsLoading(true)
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: '10.00', // $10 = 10 Palomas
+              currency_code: 'USD'
+            },
+            description: 'Casa de Copas Palomas - DOV Tokens',
+            custom_id: user.id, // This is crucial for the webhook!
+            invoice_id: `palomas-${user.id}-${Date.now()}`
+          }],
+          application_context: {
+            brand_name: 'Casa de Copas',
+            locale: 'en-US',
+            landing_page: 'BILLING',
+            user_action: 'PAY_NOW'
           }
-        },
+        })
+      },
 
-        // Handle payment errors
-        onError: (err) => {
-          console.error('PayPal error:', err)
+      // Handle successful payment
+      onApprove: async (data, actions) => {
+        try {
+          const order = await actions.order.capture()
+          console.log('Payment successful:', order)
+          
           setIsLoading(false)
-          onError && onError(err)
-          alert('Payment failed. Please try again.')
-        },
-
-        // Handle cancelled payments
-        onCancel: (data) => {
-          console.log('Payment cancelled:', data)
+          
+          // The webhook will handle adding Palomas automatically
+          onSuccess && onSuccess(order)
+          
+          // Sync cups after payment
+          if (syncCupsFromPalomas) {
+            setTimeout(() => syncCupsFromPalomas(user.id), 2000)
+          }
+          
+          // Show success message
+          alert(`Payment successful! Your Palomas will be credited shortly. Order ID: ${order.id}`)
+          
+        } catch (error) {
+          console.error('Payment capture error:', error)
           setIsLoading(false)
-          alert('Payment cancelled.')
-        },
-
-        // Button styling
-        style: {
-          color: 'gold',
-          shape: 'rect',
-          label: 'paypal',
-          layout: 'vertical',
-          height: 40,
-          tagline: false
+          onError && onError(error)
         }
-      }).render('#paypal-button-container')
-      
-    } catch (error) {
-      console.error('Error rendering PayPal button:', error)
-      setSdkError(error)
-      onError && onError(error)
-    }
+      },
+
+      // Handle payment errors
+      onError: (err) => {
+        console.error('PayPal error:', err)
+        setIsLoading(false)
+        onError && onError(err)
+        alert('Payment failed. Please try again.')
+      },
+
+      // Handle cancelled payments
+      onCancel: (data) => {
+        console.log('Payment cancelled:', data)
+        setIsLoading(false)
+        alert('Payment cancelled.')
+      },
+
+      // Simple button styling - no flourishes
+      style: {
+        color: 'gold',
+        shape: 'rect',
+        label: 'paypal',
+        layout: 'vertical',
+        height: 40,
+        tagline: false
+      }
+    }).render('#paypal-button-container')
   }
 
   if (!user) {
@@ -420,49 +379,10 @@ console.log('PayPal SDK URL being loaded:', `https://www.paypal.com/sdk/js?clien
     )
   }
 
-  if (sdkError) {
-    return (
-      <div style={{ textAlign: 'center', padding: '20px', color: 'red' }}>
-        <p>PayPal configuration error</p>
-        <p style={{ fontSize: '14px' }}>{sdkError.message}</p>
-        <button 
-          onClick={() => window.location.reload()}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#007cba',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer'
-          }}
-        >
-          Reload Page
-        </button>
-      </div>
-    )
-  }
-
   if (!paypalLoaded) {
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
         <p>Loading PayPal...</p>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          border: '4px solid #f3f3f3',
-          borderTop: '4px solid #007cba',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-          margin: '0 auto'
-        }}></div>
-        <style>
-          {`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}
-        </style>
       </div>
     )
   }
@@ -475,13 +395,7 @@ console.log('PayPal SDK URL being loaded:', `https://www.paypal.com/sdk/js?clien
       </div>
       
       {isLoading && (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: '10px',
-          backgroundColor: '#f0f8ff',
-          borderRadius: '8px',
-          marginBottom: '10px'
-        }}>
+        <div style={{ textAlign: 'center', padding: '10px' }}>
           <p>Processing payment...</p>
         </div>
       )}
