@@ -375,6 +375,7 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
       onError && onError(error)
     }
   }
+  }
 
   if (!user) {
     return (
