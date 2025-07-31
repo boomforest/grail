@@ -272,9 +272,11 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
     console.log('renderPayPalButton called')
     console.log('window.paypal exists:', !!window.paypal)
     console.log('user exists:', !!user)
-    console.log('paypalLoaded:', paypalLoaded)
     
-    if (!window.paypal || !user || !paypalLoaded) return
+    if (!window.paypal || !user) {
+      console.log('Exiting early - missing paypal or user')
+      return
+    }
 
     // Clear any existing PayPal buttons
     const container = document.getElementById('paypal-button-container')
