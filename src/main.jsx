@@ -268,7 +268,7 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
     } else {
       // Load PayPal SDK dynamically
       const script = document.createElement('script')
-      script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}&currency=USD&intent=capture&enable-funding=venmo,paylater`
+      script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}&currency=USD`
       script.onload = () => {
         setPaypalLoaded(true)
         renderPayPalButton()
