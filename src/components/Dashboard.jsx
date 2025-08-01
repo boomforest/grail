@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Upload, Plus, Edit, Trash2, Save, X, Coffee, ArrowLeft, Receipt, Calendar, Package } from 'lucide-react'
+import { Upload, Plus, Edit, Trash2, Save, X, Coffee, ArrowLeft, Receipt, Calendar, Package, HelpCircle } from 'lucide-react'
 import WalletInput from './WalletInput'
 import ProfilePicture from './ProfilePicture'
 
@@ -7,8 +7,68 @@ const formatNumber = (num) => {
   return new Intl.NumberFormat().format(num || 0)
 }
 
-// Purchase History Component
+// Help Tooltip Component
+const HelpTooltip = ({ text, position = 'top' }) => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <HelpCircle
+        size={16}
+        style={{ 
+          color: '#8b4513', 
+          cursor: 'pointer',
+          opacity: 0.7
+        }}
+        onMouseEnter={() => setIsVisible(true)}
+        onMouseLeave={() => setIsVisible(false)}
+        onClick={() => setIsVisible(!isVisible)}
+      />
+      {isVisible && (
+        <div style={{
+          position: 'absolute',
+          bottom: position === 'top' ? '100%' : 'auto',
+          top: position === 'bottom' ? '100%' : 'auto',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#333',
+          color: 'white',
+          padding: '0.5rem',
+          borderRadius: '8px',
+          fontSize: '0.8rem',
+          whiteSpace: 'nowrap',
+          zIndex: 1000,
+          boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+          marginBottom: position === 'top' ? '5px' : '0',
+          marginTop: position === 'bottom' ? '5px' : '0',
+          maxWidth: '200px',
+          whiteSpace: 'normal',
+          textAlign: 'center',
+          lineHeight: '1.2'
+        }}>
+          {text}
+          <div style={{
+            position: 'absolute',
+            top: position === 'top' ? '100%' : 'auto',
+            bottom: position === 'bottom' ? '100%' : 'auto',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0,
+            height: 0,
+            borderLeft: '5px solid transparent',
+            borderRight: '5px solid transparent',
+            borderTop: position === 'top' ? '5px solid #333' : 'none',
+            borderBottom: position === 'bottom' ? '5px solid #333' : 'none'
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Purchase History Component (unchanged)
 const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
+  // ... (keeping all the existing PurchaseHistory code unchanged)
   const [purchases, setPurchases] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedPurchase, setSelectedPurchase] = useState(null)
@@ -461,7 +521,7 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
   )
 }
 
-// Admin Product Manager Component
+// Admin Product Manager Component (unchanged)
 const AdminProductManager = ({ profile, supabase, onBack }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1470,9 +1530,17 @@ function Dashboard({
             color: '#d2691e',
             margin: '0 0 0.4rem 0',
             fontWeight: 'normal',
-            fontStyle: 'italic'
+            fontStyle: 'italic',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem'
           }}>
             Palomas
+            <HelpTooltip 
+              text="Palomas are available for purchase 1=1 USD or 20 MEX. The currency of Casa de Copas."
+              position="bottom"
+            />
           </h2>
           <div style={{
             background: 'rgba(255, 255, 255, 0.9)',
@@ -1558,9 +1626,17 @@ function Dashboard({
             color: '#8b4513',
             margin: '0 0 0.4rem 0',
             fontWeight: 'normal',
-            fontStyle: 'italic'
+            fontStyle: 'italic',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem'
           }}>
             Tiempo
+            <HelpTooltip 
+              text="Tiempo tokens are discount credits earned through purchases, participation and volunteering. Can be gifted or unlocked for personal use through subscription packages."
+              position="bottom"
+            />
           </h2>
           <div style={{ fontSize: '1.2rem', marginBottom: '0.3rem' }}>⏳</div>
           <div style={{
