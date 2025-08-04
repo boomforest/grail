@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Copy, Users, Gift, Star, Trophy, Crown } from 'lucide-react'
 
 // Helper functions for tarot system
 const getTarotCardName = (level) => {
@@ -19,102 +20,49 @@ const getTarotCardName = (level) => {
   return 'Knight of Cups' // Max level
 }
 
-const getCardASCII = (level) => {
-  const isSword = level <= 14
-  const isAce = (level === 14 || level === 15) // Ace of Swords or Ace of Cups
-  const displayNumber = isSword ? (15 - level) : (level - 14) // Reverse for swords, forward for cups
-  
-  if (isSword) {
-    // Swords - symbols of shame and complicity
-    if (level === 1) { // King of Swords
-      return `┌─────────┐
-│    K    │
-│   ⚔️    │
-│ ♠ ⚔️ ♠  │
-│   ⚔️    │
-│    K    │
-└─────────┘`
-    } else if (level === 2) { // Queen of Swords  
-      return `┌─────────┐
-│    Q    │
-│   ⚔️    │
-│ ♠ ⚔️ ♠  │
-│   ⚔️    │
-│    Q    │
-└─────────┘`
-    } else if (level === 3) { // Knight of Swords
-      return `┌─────────┐
-│   Kt    │
-│   ⚔️    │
-│ ♠ ⚔️ ♠  │
-│   ⚔️    │
-│   Kt    │
-└─────────┘`
-    } else if (level === 4) { // Page of Swords
-      return `┌─────────┐
-│    P    │
-│   ⚔️    │
-│ ♠ ⚔️ ♠  │
-│   ⚔️    │
-│    P    │
-└─────────┘`
-    } else if (level === 14) { // Ace of Swords
-      return `┌─────────┐
-│    A    │
-│   👑    │
-│   ⚔️    │
-│   👑    │
-│    A    │
-└─────────┘`
-    } else {
-      // Numbered sword cards (10-2)
-      const num = 15 - level
-      return `┌─────────┐
-│   ${num.toString().padStart(2)}    │
-│  ⚔️ ⚔️   │
-│ ♠ ⚔️ ♠  │
-│  ⚔️ ⚔️   │
-│   ${num.toString().padStart(2)}    │
-└─────────┘`
-    }
-  } else {
-    // Cups - symbols of pride and compassionate giving
-    if (level === 15) { // Ace of Cups
-      return `┌─────────┐
-│    A    │
-│   ✨    │
-│   🏆    │
-│   ✨    │
-│    A    │
-└─────────┘`
-    } else if (level === 25) { // Page of Cups
-      return `┌─────────┐
-│    P    │
-│   🏆    │
-│ ♥ 🏆 ♥  │
-│   🏆    │
-│    P    │
-└─────────┘`
-    } else if (level === 26) { // Knight of Cups - MAX LEVEL
-      return `┌─────────┐
-│   Kt    │
-│   👑    │
-│ ♥ 🏆 ♥  │
-│   👑    │
-│   Kt    │
-└─────────┘`
-    } else {
-      // Numbered cup cards (2-10)
-      const num = level - 14
-      return `┌─────────┐
-│   ${num.toString().padStart(2)}    │
-│  🏆 🏆   │
-│ ♥ 🏆 ♥  │
-│  🏆 🏆   │
-│   ${num.toString().padStart(2)}    │
-└─────────┘`
-    }
+const getCardImage = (level, supabaseInstance = null) => {
+  // Map levels to your card naming convention
+  const cardNames = {
+    1: 'KingS.png',      // King of Swords
+    2: 'QueenS.png',     // Queen of Swords  
+    3: 'KnightS.png',    // Knight of Swords
+    4: 'PageS.png',      // Page of Swords
+    5: 'TenS.png',       // Ten of Swords
+    6: 'NineS.png',      // Nine of Swords
+    7: 'EightS.png',     // Eight of Swords
+    8: 'SevenS.png',     // Seven of Swords
+    9: 'SixS.png',       // Six of Swords
+    10: 'FiveS.png',     // Five of Swords
+    11: 'FourS.png',     // Four of Swords
+    12: 'ThreeS.png',    // Three of Swords
+    13: 'TwoS.png',      // Two of Swords
+    14: 'AceS.png',      // Ace of Swords
+    15: 'AceC.png',      // Ace of Cups
+    16: 'TwoC.png',      // Two of Cups
+    17: 'ThreeC.png',    // Three of Cups
+    18: 'FourC.png',     // Four of Cups
+    19: 'FiveC.png',     // Five of Cups
+    20: 'SixC.png',      // Six of Cups
+    21: 'SevenC.png',    // Seven of Cups
+    22: 'EightC.png',    // Eight of Cups
+    23: 'NineC.png',     // Nine of Cups
+    24: 'TenC.png',      // Ten of Cups
+    25: 'PageC.png',     // Page of Cups
+    26: 'KnightC.png'    // Knight of Cups
   }
+  
+  if (!supabaseInstance) {
+    // Fallback placeholder if Supabase not available
+    return `https://via.placeholder.com/200x350/D2691E/FFFFFF?text=Level+${level}`
+  }
+  
+  const cardName = cardNames[level] || 'KingS.png'
+  
+  const { data: { publicUrl } } = supabaseInstance.storage
+    .from('tarot-cards')
+    .getPublicUrl(cardName)
+  
+  return publicUrl
 }
 
 const getCardMeaning = (level) => {
@@ -157,6 +105,14 @@ const getCardMeaning = (level) => {
   }
 }
 
+// Referral bonus calculator
+const calculateReferralBonus = (referralLevel, currentUserLevel) => {
+  // More bonus for referring higher level users
+  const levelDifference = Math.max(0, referralLevel - currentUserLevel)
+  const baseBonus = referralLevel >= 15 ? 10 : 5 // Cups worth more than Swords
+  return baseBonus + (levelDifference * 2)
+}
+
 function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -165,17 +121,77 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   const [searchResults, setSearchResults] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
   const [showWelcome, setShowWelcome] = useState(false)
-  const [showLeaderboard, setShowLeaderboard] = useState(false)  
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [showReferrals, setShowReferrals] = useState(false)
   const [currentTransformationCost, setCurrentTransformationCost] = useState(50)
   const [leaderboardData, setLeaderboardData] = useState({ tarotLeaders: [], cupLeaders: [] })
+  const [referralData, setReferralData] = useState({ referred: [], referredBy: null, totalEarned: 0 })
+  const [userReferralCode, setUserReferralCode] = useState('')
+  const [showEraModal, setShowEraModal] = useState(null) // 'swords' or 'cups'
+
+  // Generate user's referral code
+  useEffect(() => {
+    if (user?.id) {
+      // Create a simple referral code from user ID
+      setUserReferralCode(`CASA${user.id.slice(-6).toUpperCase()}`)
+    }
+  }, [user])
 
   // Check if user should see welcome window
   useEffect(() => {
-    // Show welcome window for new users (tarot_level 1 = King of Swords start)
     setShowWelcome((profile?.tarot_level || 1) === 1 && (profile?.merit_count || 0) === 0)
   }, [profile])
 
-  // Load current transformation cost for user's next level
+  // Load referral data
+  const loadReferralData = async () => {
+    if (!supabase || !user) return
+    
+    try {
+      // Get users this person referred
+      const { data: referredUsers, error: referredError } = await supabase
+        .from('profiles')
+        .select('id, username, tarot_level, created_at, referral_earnings')
+        .eq('referred_by', user.id)
+        .order('tarot_level', { ascending: false })
+
+      if (referredError) throw referredError
+
+      // Get who referred this user
+      const { data: referrerData, error: referrerError } = await supabase
+        .from('profiles')
+        .select('username, tarot_level')
+        .eq('id', profile?.referred_by)
+        .single()
+
+      // Calculate total earnings from referrals
+      const totalEarned = (referredUsers || []).reduce((sum, user) => {
+        return sum + (user.referral_earnings || 0)
+      }, 0)
+
+      setReferralData({
+        referred: referredUsers || [],
+        referredBy: referrerData || null,
+        totalEarned
+      })
+    } catch (error) {
+      console.error('Error loading referral data:', error)
+    }
+  }
+
+  // Copy referral link to clipboard
+  const copyReferralLink = async () => {
+    const referralLink = `https://casadecopas.com/join?ref=${userReferralCode}`
+    try {
+      await navigator.clipboard.writeText(referralLink)
+      setMessage('Referral link copied to clipboard! 📋')
+      setTimeout(() => setMessage(''), 3000)
+    } catch (error) {
+      console.error('Failed to copy:', error)
+      setMessage('Failed to copy referral link')
+    }
+  }
+
+  // Load current transformation cost
   useEffect(() => {
     const loadTransformationCost = async () => {
       if (!supabase || !profile) return
@@ -183,11 +199,10 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
       try {
         const nextLevel = (profile.tarot_level || 1) + 1
         if (nextLevel > 26) {
-          setCurrentTransformationCost(0) // Max level reached
+          setCurrentTransformationCost(0)
           return
         }
 
-        // Special case: Ace of Swords (level 14) → Ace of Cups (level 15)
         const isAceTransformation = (profile.tarot_level || 1) === 14 && nextLevel === 15
         
         const { data, error } = await supabase
@@ -197,8 +212,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           .single()
         
         if (error) {
-          // If no record exists, create it with appropriate base cost
-          const baseCost = isAceTransformation ? 500 : 50 // 500 for Ace transformation, 50 for others
+          const baseCost = isAceTransformation ? 500 : 50
           const { error: insertError } = await supabase
             .from('tarot_transformations')
             .insert([{ 
@@ -215,7 +229,6 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
         }
       } catch (error) {
         console.error('Error loading transformation cost:', error)
-        // Fallback costs
         const isAceTransformation = (profile.tarot_level || 1) === 14
         setCurrentTransformationCost(isAceTransformation ? 500 : 50)
       }
@@ -223,38 +236,6 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     
     loadTransformationCost()
   }, [supabase, profile?.tarot_level])
-
-  // Load leaderboard data
-  const loadLeaderboard = async () => {
-    if (!supabase) return
-    
-    try {
-      // Get top 10 by Tarot level (highest first, then by transformation number)
-      const { data: tarotData, error: tarotError } = await supabase
-        .from('profiles')
-        .select('username, tarot_level, transformation_numbers, cup_count')
-        .order('tarot_level', { ascending: false })
-        .limit(10)
-      
-      if (tarotError) throw tarotError
-
-      // Get top 10 by cup count
-      const { data: cupData, error: cupError } = await supabase
-        .from('profiles')
-        .select('username, cup_count, tarot_level')
-        .order('cup_count', { ascending: false })
-        .limit(10)
-      
-      if (cupError) throw cupError
-
-      setLeaderboardData({
-        tarotLeaders: tarotData || [],
-        cupLeaders: cupData || []
-      })
-    } catch (error) {
-      console.error('Error loading leaderboard:', error)
-    }
-  }
 
   // Load all profiles for search
   useEffect(() => {
@@ -277,14 +258,46 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     loadProfiles()
   }, [supabase])
 
-  // Load leaderboard when component mounts or when showing leaderboard
-  useEffect(() => {
-    if (showLeaderboard) {
-      loadLeaderboard()
+  // Load leaderboard data
+  const loadLeaderboard = async () => {
+    if (!supabase) return
+    
+    try {
+      const { data: tarotData, error: tarotError } = await supabase
+        .from('profiles')
+        .select('username, tarot_level, transformation_numbers, cup_count')
+        .order('tarot_level', { ascending: false })
+        .limit(10)
+      
+      if (tarotError) throw tarotError
+
+      const { data: cupData, error: cupError } = await supabase
+        .from('profiles')
+        .select('username, cup_count, tarot_level')
+        .order('cup_count', { ascending: false })
+        .limit(10)
+      
+      if (cupError) throw cupError
+
+      setLeaderboardData({
+        tarotLeaders: tarotData || [],
+        cupLeaders: cupData || []
+      })
+    } catch (error) {
+      console.error('Error loading leaderboard:', error)
     }
+  }
+
+  // Load leaderboard and referral data when showing respective modals
+  useEffect(() => {
+    if (showLeaderboard) loadLeaderboard()
   }, [showLeaderboard, supabase])
 
-  // Calculate merit percentage based on palomas purchased and current transformation cost
+  useEffect(() => {
+    if (showReferrals) loadReferralData()
+  }, [showReferrals, supabase, user])
+
+  // Calculate merit percentage
   const calculateMeritPercentage = () => {
     if (!profile || currentTransformationCost === 0) return 0
     
@@ -292,15 +305,13 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     const palomasPurchased = profile.palomas_purchased || 0
     const percentage = Math.min((palomasPurchased / palomasNeeded) * 100, 100)
     
-    return Math.round(percentage * 10) / 10 // Round to 1 decimal place
+    return Math.round(percentage * 10) / 10
   }
 
-  // Calculate how many merit circles should be filled
+  // Calculate merit circle states
   const getMeritCircleStates = () => {
     const totalPercentage = calculateMeritPercentage()
-    const meritCount = profile?.merit_count || 0
     
-    // Each merit circle represents 33.33% progress
     const circles = []
     for (let i = 0; i < 3; i++) {
       const circleStartPercent = i * 33.33
@@ -320,14 +331,14 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     return circles
   }
 
-  // Search users as they type
+  // Search functionality
   const handleSearchChange = (value) => {
     setSearchTerm(value)
     
     if (value.length > 0) {
       const filtered = allProfiles.filter(profile => 
         profile.username.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 5) // Show max 5 results
+      ).slice(0, 5)
       setSearchResults(filtered)
     } else {
       setSearchResults([])
@@ -340,30 +351,27 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     setSearchResults([])
   }
 
-  // Admin function to award merit
+  // Award merit function with referral bonuses
   const awardMerit = async (userId, reason = 'Good community contribution') => {
     if (!supabase || !user) return
 
     try {
       setLoading(true)
       
-      // Get current profile
       const { data: currentProfile, error: fetchError } = await supabase
         .from('profiles')
-        .select('merit_count, tarot_level, cup_count, username, palomas_purchased, transformation_numbers')
+        .select('merit_count, tarot_level, cup_count, username, palomas_purchased, transformation_numbers, referred_by')
         .eq('id', userId)
         .single()
 
       if (fetchError) throw fetchError
 
-      // Check if ready to level up (100% progress from palomas purchased)
       const nextLevel = (currentProfile.tarot_level || 1) + 1
       if (nextLevel > 26) {
         setMessage('This user has reached maximum level (Knight of Cups)!')
         return
       }
 
-      // Get transformation cost for next level
       const { data: transformData, error: transformError } = await supabase
         .from('tarot_transformations')
         .select('current_cost, transformation_count')
@@ -371,8 +379,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
         .single()
 
       if (transformError) {
-        // Create new transformation record if doesn't exist
-        const isAceTransformation = nextLevel === 15 // Ace of Swords → Ace of Cups
+        const isAceTransformation = nextLevel === 15
         const baseCost = isAceTransformation ? 500 : 50
         
         const { data: newTransform, error: insertError } = await supabase
@@ -393,20 +400,18 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
       const currentPalomas = currentProfile.palomas_purchased || 0
       const progressPercentage = (currentPalomas / requiredPalomas) * 100
 
-      // Check if user can level up (has 100% progress)
       if (progressPercentage >= 100) {
-        // Level up the user
+        // Level up logic
         const newTransformationNumbers = {
           ...(currentProfile.transformation_numbers || {}),
           [nextLevel]: (transformData.transformation_count || 0) + 1
         }
 
-        // Update user's level and reset palomas_purchased
         const { error: updateUserError } = await supabase
           .from('profiles')
           .update({
             tarot_level: nextLevel,
-            palomas_purchased: currentPalomas - requiredPalomas, // Subtract used palomas
+            palomas_purchased: currentPalomas - requiredPalomas,
             transformation_numbers: newTransformationNumbers,
             last_status_update: new Date().toISOString()
           })
@@ -414,18 +419,42 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
 
         if (updateUserError) throw updateUserError
 
-        // Update transformation count and cost for next person
         const { error: updateTransformError } = await supabase
           .from('tarot_transformations')
           .update({ 
             transformation_count: (transformData.transformation_count || 0) + 1,
-            current_cost: requiredPalomas + (nextLevel === 15 ? 10 : 1) // +10 for Ace transformation, +1 for others
+            current_cost: requiredPalomas + (nextLevel === 15 ? 10 : 1)
           })
           .eq('card_level', nextLevel)
 
         if (updateTransformError) throw updateTransformError
 
-        // Log the level up
+        // Referral bonus for level up
+        if (currentProfile.referred_by) {
+          const bonus = calculateReferralBonus(nextLevel, currentProfile.tarot_level || 1)
+          
+          const { error: bonusError } = await supabase
+            .from('profiles')
+            .update({
+              referral_earnings: supabase.raw(`referral_earnings + ${bonus}`),
+              total_palomas_collected: supabase.raw(`total_palomas_collected + ${bonus}`)
+            })
+            .eq('id', currentProfile.referred_by)
+
+          if (!bonusError) {
+            // Log referral bonus
+            await supabase
+              .from('referral_bonuses')
+              .insert([{
+                referrer_id: currentProfile.referred_by,
+                referred_user_id: userId,
+                bonus_amount: bonus,
+                reason: `Level up to ${getTarotCardName(nextLevel)}`,
+                level_achieved: nextLevel
+              }])
+          }
+        }
+
         await supabase
           .from('merit_logs')
           .insert([{
@@ -437,7 +466,6 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             new_tarot_level: nextLevel
           }])
 
-        // Update parent component if it's the current user
         if (userId === user.id && onProfileUpdate) {
           const updatedProfile = {
             ...profile,
@@ -452,7 +480,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
         const transformationNumber = (transformData.transformation_count || 0) + 1
         setMessage(`🎉 ${recipientName} leveled up to ${getTarotCardName(nextLevel)} #${transformationNumber}!`)
       } else {
-        // Just award merit without leveling up
+        // Just award merit
         const newMeritCount = (currentProfile.merit_count || 0) + 1
 
         const { error: updateError } = await supabase
@@ -465,7 +493,6 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
 
         if (updateError) throw updateError
 
-        // Log the merit award
         await supabase
           .from('merit_logs')
           .insert([{
@@ -479,10 +506,9 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
 
         const recipientName = userId === user.id ? 'You' : currentProfile.username
         const progressNeeded = Math.max(0, 100 - progressPercentage)
-        setMessage(`Merit awarded to ${recipientName}! 🌟 (${progressNeeded.toFixed(1)}% more progress needed to level up)`)
+        setMessage(`Merit awarded to ${recipientName}! 🌟 (${progressNeeded.toFixed(1)}% more progress needed)`)
       }
 
-      // Clear search if awarding to someone else
       if (userId !== user.id) {
         setSearchTerm('')
         setSelectedUser(null)
@@ -503,204 +529,244 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   const isMaxLevel = (profile?.tarot_level || 1) >= 26
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#f5f1e8',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      padding: '2rem 1rem',
-      color: '#8b5a3c',
-      position: 'relative'
-    }}>
-      {/* Leaderboard Modal */}
-      {showLeaderboard && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '2rem'
-        }}>
-          <div style={{
-            backgroundColor: '#faf8f3',
-            borderRadius: '24px',
-            padding: '2.5rem',
-            maxWidth: '600px',
-            width: '100%',
-            maxHeight: '80vh',
-            overflow: 'auto',
-            boxShadow: '0 20px 60px rgba(139, 90, 60, 0.3)',
-            border: '2px solid rgba(210, 105, 30, 0.2)',
-            position: 'relative'
-          }}>
-            {/* Close button */}
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 font-sans p-4 text-amber-900 relative">
+      {/* Era Modal */}
+      {showEraModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className={`rounded-3xl p-8 max-w-lg w-full shadow-2xl border-2 relative ${
+            showEraModal === 'swords' 
+              ? 'bg-gradient-to-br from-gray-100 to-slate-200 border-gray-300' 
+              : 'bg-gradient-to-br from-purple-100 to-indigo-100 border-purple-200'
+          }`}>
             <button
-              onClick={() => setShowLeaderboard(false)}
-              style={{
-                position: 'absolute',
-                top: '1rem',
-                right: '1rem',
-                background: 'none',
-                border: 'none',
-                fontSize: '1.5rem',
-                cursor: 'pointer',
-                color: '#8b5a3c',
-                opacity: 0.6,
-                padding: '0.5rem'
-              }}
+              onClick={() => setShowEraModal(null)}
+              className="absolute top-4 right-4 text-2xl opacity-60 hover:opacity-100 p-2"
             >
               ×
             </button>
 
-            <div style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: '#d2691e',
-              marginBottom: '2rem',
-              textAlign: 'center',
-              fontStyle: 'italic'
-            }}>
-              Casa de Copas Leaderboard
+            <div className="text-center mb-6">
+              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-4 ${
+                showEraModal === 'swords'
+                  ? 'bg-gray-600 text-white'
+                  : 'bg-purple-500 text-white'
+              }`}>
+                {showEraModal === 'swords' ? '⚔️ Era of Swords' : '🏆 Era of Cups'}
+              </div>
             </div>
 
-            {/* Dual Leaderboard Layout */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '2rem',
-              '@media (max-width: 600px)': {
-                gridTemplateColumns: '1fr'
-              }
-            }}>
+            {showEraModal === 'swords' ? (
+              <div className="space-y-4 text-gray-800">
+                <div className="text-lg font-medium text-center">
+                  "When Arthur pulled the sword from the stone..."
+                </div>
+                
+                <div className="text-gray-700 italic leading-relaxed">
+                  A dark era began where man used intellect to defend attacks and gain as much as possible. For centuries, no remedy existed for this endless cycle of extraction and pain.
+                </div>
+
+                <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-300">
+                  <p className="text-sm text-gray-600 italic text-center">
+                    <strong>The age of taking.</strong> Sword-holders defend what they've seized, trapped in endless cycles of fear and accumulation.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4 text-purple-800">
+                <div className="text-lg font-medium text-center">
+                  "Learn the power of unclenching the sword and holding the cup."
+                </div>
+                
+                <div className="text-purple-700 italic leading-relaxed">
+                  The game of cups teaches the joy of giving for the sake of giving. Break free from the endless cycle. Entry grows more difficult as early participants become exponentially rare.
+                </div>
+
+                <div className="mt-6 p-4 bg-purple-50 rounded-xl border border-purple-200">
+                  <p className="text-sm text-purple-600 italic text-center">
+                    <strong>The cup holders shape tomorrow.</strong> Position yourself while the path remains open.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Referrals Modal */}
+      {showReferrals && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-amber-50 to-orange-100 rounded-3xl p-6 max-w-md w-full max-h-[80vh] overflow-auto shadow-2xl border-2 border-orange-200">
+            <button
+              onClick={() => setShowReferrals(false)}
+              className="absolute top-4 right-4 text-2xl text-amber-700 opacity-60 hover:opacity-100 p-2"
+            >
+              ×
+            </button>
+
+            <div className="text-center mb-6">
+              <Users className="w-12 h-12 text-orange-500 mx-auto mb-3" />
+              <h2 className="text-2xl font-bold text-orange-600 mb-2">Referral System</h2>
+              <p className="text-amber-700 text-sm italic">Grow the Casa community and earn rewards</p>
+            </div>
+
+            {/* User's Referral Code */}
+            <div className="bg-white bg-opacity-60 rounded-2xl p-4 mb-6 border border-orange-200">
+              <h3 className="font-semibold text-amber-800 mb-2 text-center">Your Referral Code</h3>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-gradient-to-r from-orange-200 to-amber-200 rounded-lg p-3 text-center font-mono font-bold text-orange-700">
+                  {userReferralCode}
+                </div>
+                <button
+                  onClick={copyReferralLink}
+                  className="bg-orange-500 text-white p-3 rounded-lg hover:bg-orange-600 transition-colors"
+                >
+                  <Copy className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-xs text-amber-600 mt-2 text-center italic">
+                Share your code with friends to earn bonuses when they level up!
+              </p>
+            </div>
+
+            {/* Referral Stats */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl p-4 text-center border border-green-200">
+                <Gift className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-green-700">{referralData.referred.length}</div>
+                <div className="text-sm text-green-600">Referred</div>
+              </div>
+              <div className="bg-gradient-to-br from-yellow-100 to-amber-100 rounded-xl p-4 text-center border border-yellow-200">
+                <Star className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-yellow-700">{referralData.totalEarned}</div>
+                <div className="text-sm text-yellow-600">Palomas Earned</div>
+              </div>
+            </div>
+
+            {/* Referred Users */}
+            <div className="mb-6">
+              <h4 className="font-semibold text-amber-800 mb-3">Users You've Referred</h4>
+              {referralData.referred.length === 0 ? (
+                <div className="text-center text-amber-600 italic py-4">
+                  No referrals yet. Share your code to start earning!
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {referralData.referred.map((user) => (
+                    <div key={user.id} className="bg-white bg-opacity-60 rounded-lg p-3 flex justify-between items-center border border-orange-200">
+                      <div>
+                        <div className="font-medium text-amber-800">{user.username}</div>
+                        <div className="text-sm text-amber-600">{getTarotCardName(user.tarot_level || 1)}</div>
+                      </div>
+                      <div className="text-orange-600 font-semibold">
+                        L{user.tarot_level || 1}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Who referred this user */}
+            {referralData.referredBy && (
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <h4 className="font-semibold text-blue-800 mb-2">Referred By</h4>
+                <div className="text-blue-700">
+                  <strong>{referralData.referredBy.username}</strong> • {getTarotCardName(referralData.referredBy.tarot_level || 1)}
+                </div>
+              </div>
+            )}
+
+            {/* Referral Rules */}
+            <div className="mt-6 bg-orange-50 rounded-lg p-4 border border-orange-200">
+              <h4 className="font-semibold text-orange-800 mb-2">Referral Rewards</h4>
+              <ul className="text-sm text-orange-700 space-y-1">
+                <li>• 5+ Palomas for each Sword level-up</li>
+                <li>• 10+ Palomas for each Cup level-up</li>
+                <li>• Higher level achievements = bigger bonuses</li>
+                <li>• Bonuses added to your total Paloma balance</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leaderboard Modal */}
+      {showLeaderboard && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-amber-50 to-orange-100 rounded-3xl p-6 max-w-2xl w-full max-h-[80vh] overflow-auto shadow-2xl border-2 border-orange-200">
+            <button
+              onClick={() => setShowLeaderboard(false)}
+              className="absolute top-4 right-4 text-2xl text-amber-700 opacity-60 hover:opacity-100 p-2"
+            >
+              ×
+            </button>
+
+            <div className="text-center mb-6">
+              <Trophy className="w-12 h-12 text-orange-500 mx-auto mb-3" />
+              <h2 className="text-2xl font-bold text-orange-600 mb-2">Casa de Copas Leaderboard</h2>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
               {/* Tarot Hierarchy */}
               <div>
-                <h3 style={{
-                  fontSize: '1.1rem',
-                  fontWeight: '600',
-                  color: '#8b5a3c',
-                  marginBottom: '1rem',
-                  textAlign: 'center'
-                }}>
+                <h3 className="text-xl font-bold text-amber-800 mb-3 text-center flex items-center justify-center gap-2">
                   🎴 Tarot Hierarchy
                 </h3>
-                <div style={{
-                  fontSize: '0.8rem',
-                  color: '#a0785a',
-                  textAlign: 'center',
-                  marginBottom: '1rem',
-                  fontStyle: 'italic'
-                }}>
-                  Spiritual Leadership
-                </div>
+                <div className="text-sm text-amber-600 text-center mb-4 italic">Spiritual Leadership</div>
                 
                 {leaderboardData.tarotLeaders.map((player, index) => {
                   const transformationNumber = player.transformation_numbers?.[player.tarot_level] || '';
                   return (
                     <div
                       key={player.username}
-                      style={{
-                        padding: '0.8rem',
-                        marginBottom: '0.5rem',
-                        backgroundColor: index === 0 ? 'rgba(212, 175, 55, 0.2)' : 
-                                       index === 1 ? 'rgba(192, 192, 192, 0.2)' : 
-                                       index === 2 ? 'rgba(205, 127, 50, 0.2)' : 'rgba(255, 255, 255, 0.4)',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(210, 105, 30, 0.2)',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}
+                      className={`p-3 mb-2 rounded-xl border flex justify-between items-center ${
+                        index === 0 ? 'bg-gradient-to-r from-yellow-200 to-amber-200 border-yellow-300' :
+                        index === 1 ? 'bg-gradient-to-r from-gray-200 to-slate-300 border-gray-300' :
+                        index === 2 ? 'bg-gradient-to-r from-orange-200 to-red-200 border-orange-300' :
+                        'bg-white bg-opacity-60 border-orange-200'
+                      }`}
                     >
                       <div>
-                        <div style={{
-                          fontWeight: '500',
-                          color: '#8b5a3c',
-                          fontSize: '0.9rem'
-                        }}>
+                        <div className="font-medium text-amber-800">
                           {index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`} {player.username}
                         </div>
-                        <div style={{
-                          fontSize: '0.8rem',
-                          color: '#a0785a'
-                        }}>
+                        <div className="text-sm text-amber-600">
                           {getTarotCardName(player.tarot_level || 1)}
                           {transformationNumber && ` #${transformationNumber}`}
                         </div>
                       </div>
-                      <div style={{
-                        fontSize: '0.8rem',
-                        color: '#d2691e',
-                        fontWeight: '500'
-                      }}>
-                        L{player.tarot_level || 1}
-                      </div>
+                      <div className="text-orange-600 font-bold">L{player.tarot_level || 1}</div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Cup/Grail Leaders */}
+              {/* Cup Leaders */}
               <div>
-                <h3 style={{
-                  fontSize: '1.1rem',
-                  fontWeight: '600',
-                  color: '#8b5a3c',
-                  marginBottom: '1rem',
-                  textAlign: 'center'
-                }}>
+                <h3 className="text-xl font-bold text-amber-800 mb-3 text-center flex items-center justify-center gap-2">
                   🏆 Grail Keepers
                 </h3>
-                <div style={{
-                  fontSize: '0.8rem',
-                  color: '#a0785a',
-                  textAlign: 'center',
-                  marginBottom: '1rem',
-                  fontStyle: 'italic'
-                }}>
-                  Commitment & Support
-                </div>
+                <div className="text-sm text-amber-600 text-center mb-4 italic">Commitment & Support</div>
                 
                 {leaderboardData.cupLeaders.map((player, index) => (
                   <div
                     key={player.username}
-                    style={{
-                      padding: '0.8rem',
-                      marginBottom: '0.5rem',
-                      backgroundColor: index === 0 ? 'rgba(212, 175, 55, 0.2)' : 
-                                     index === 1 ? 'rgba(192, 192, 192, 0.2)' : 
-                                     index === 2 ? 'rgba(205, 127, 50, 0.2)' : 'rgba(255, 255, 255, 0.4)',
-                      borderRadius: '12px',
-                      border: '1px solid rgba(210, 105, 30, 0.2)',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}
+                    className={`p-3 mb-2 rounded-xl border flex justify-between items-center ${
+                      index === 0 ? 'bg-gradient-to-r from-yellow-200 to-amber-200 border-yellow-300' :
+                      index === 1 ? 'bg-gradient-to-r from-gray-200 to-slate-300 border-gray-300' :
+                      index === 2 ? 'bg-gradient-to-r from-orange-200 to-red-200 border-orange-300' :
+                      'bg-white bg-opacity-60 border-orange-200'
+                    }`}
                   >
                     <div>
-                      <div style={{
-                        fontWeight: '500',
-                        color: '#8b5a3c',
-                        fontSize: '0.9rem'
-                      }}>
+                      <div className="font-medium text-amber-800">
                         {index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`} {player.username}
                       </div>
-                      <div style={{
-                        fontSize: '0.8rem',
-                        color: '#a0785a'
-                      }}>
+                      <div className="text-sm text-amber-600">
                         {getTarotCardName(player.tarot_level || 1)}
                       </div>
                     </div>
-                    <div style={{
-                      fontSize: '0.8rem',
-                      color: '#d2691e',
-                      fontWeight: '500'
-                    }}>
+                    <div className="text-orange-600 font-bold">
                       {player.cup_count || 0} {(player.tarot_level || 1) >= 15 ? 'grails' : 'cups'}
                     </div>
                   </div>
@@ -708,147 +774,55 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
               </div>
             </div>
 
-            {/* Bottom explanation */}
-            <div style={{
-              marginTop: '2rem',
-              padding: '1rem',
-              backgroundColor: 'rgba(210, 105, 30, 0.1)',
-              borderRadius: '12px',
-              fontSize: '0.8rem',
-              color: '#8b5a3c',
-              fontStyle: 'italic',
-              textAlign: 'center'
-            }}>
-              <strong>Tarot Hierarchy</strong> shows spiritual progression through the cards.
-              <br />
-              <strong>Grail Keepers</strong> shows ongoing commitment and support.
+            <div className="mt-6 bg-orange-50 rounded-xl p-4 border border-orange-200 text-center">
+              <p className="text-sm text-amber-700 italic">
+                <strong>Tarot Hierarchy</strong> shows spiritual progression through the cards.
+                <br />
+                <strong>Grail Keepers</strong> shows ongoing commitment and support.
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Back Button */}
-      <button
-        onClick={onBack}
-        style={{
-          position: 'absolute',
-          top: '2rem',
-          left: '2rem',
-          background: 'rgba(210, 105, 30, 0.1)',
-          border: '1px solid rgba(210, 105, 30, 0.3)',
-          borderRadius: '20px',
-          padding: '0.8rem 1.5rem',
-          fontSize: '1rem',
-          cursor: 'pointer',
-          color: '#d2691e',
-          fontWeight: '500'
-        }}
-      >
-        ← Back
-      </button>
+      {/* Welcome Modal */}
       {showWelcome && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '2rem'
-        }}>
-          <div style={{
-            backgroundColor: '#faf8f3',
-            borderRadius: '24px',
-            padding: '3rem 2.5rem',
-            maxWidth: '500px',
-            width: '100%',
-            boxShadow: '0 20px 60px rgba(139, 90, 60, 0.3)',
-            border: '2px solid rgba(210, 105, 30, 0.2)',
-            position: 'relative',
-            textAlign: 'center'
-          }}>
-            {/* Close button */}
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-amber-50 to-orange-100 rounded-3xl p-8 max-w-lg w-full shadow-2xl border-2 border-orange-200 text-center">
             <button
               onClick={() => setShowWelcome(false)}
-              style={{
-                position: 'absolute',
-                top: '1rem',
-                right: '1rem',
-                background: 'none',
-                border: 'none',
-                fontSize: '1.5rem',
-                cursor: 'pointer',
-                color: '#8b5a3c',
-                opacity: 0.6,
-                padding: '0.5rem'
-              }}
+              className="absolute top-4 right-4 text-2xl text-amber-700 opacity-60 hover:opacity-100 p-2"
             >
               ×
             </button>
 
-            <div style={{
-              fontSize: '1.5rem',
-              fontWeight: '600',
-              color: '#d2691e',
-              marginBottom: '2rem',
-              fontStyle: 'italic'
-            }}>
+            <Crown className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+            
+            <h2 className="text-2xl font-bold text-orange-600 mb-4 italic">
               Welcome to the Game of Cups
-            </div>
+            </h2>
 
-            {/* Explanation text */}
-            <div style={{
-              fontSize: '1rem',
-              lineHeight: '1.6',
-              color: '#8b5a3c',
-              fontStyle: 'italic',
-              marginBottom: '2.5rem',
-              textAlign: 'left'
-            }}>
-              <p style={{ marginBottom: '1rem' }}>
+            <div className="text-left text-amber-800 space-y-4 mb-6">
+              <p className="italic">
                 <em>The game of belonging to Casa de Copas...</em>
               </p>
               
-              <p style={{ marginBottom: '1rem' }}>
+              <p className="italic">
                 <em>Purchase Palomas to progress through your Tarot journey. Earn merits through community contributions and volunteering to unlock your next card transformation.</em>
               </p>
               
-              <p style={{ marginBottom: '1rem' }}>
+              <p className="italic">
                 <em>Your journey: King of Swords → ... → Ace of Swords → Ace of Cups → ... → Knight of Cups (the ultimate achievement).</em>
               </p>
               
-              <p style={{ marginBottom: '0' }}>
+              <p className="italic">
                 <em>The earlier you begin your journey, the more meaningful your contributions become to the House.</em>
               </p>
             </div>
 
-            {/* Got it button */}
             <button
               onClick={() => setShowWelcome(false)}
-              style={{
-                background: 'linear-gradient(135deg, #d2691e, #cd853f)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '16px',
-                padding: '1rem 2rem',
-                fontSize: '1rem',
-                cursor: 'pointer',
-                fontWeight: '500',
-                boxShadow: '0 4px 20px rgba(210, 105, 30, 0.3)',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'translateY(-2px)'
-                e.target.style.boxShadow = '0 6px 25px rgba(210, 105, 30, 0.4)'
-              }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'translateY(0)'
-                e.target.style.boxShadow = '0 4px 20px rgba(210, 105, 30, 0.3)'
-              }}
+              className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-8 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
             >
               Begin Your Journey
             </button>
@@ -856,354 +830,180 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
         </div>
       )}
 
-      <div style={{
-        maxWidth: '400px',
-        margin: '0 auto',
-        textAlign: 'center'
-      }}>
-        {/* Leaderboard Button */}
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
         <button
-          onClick={() => setShowLeaderboard(true)}
-          style={{
-            position: 'absolute',
-            top: '2rem',
-            right: '2rem',
-            background: 'rgba(210, 105, 30, 0.1)',
-            border: '1px solid rgba(210, 105, 30, 0.3)',
-            borderRadius: '20px',
-            padding: '0.8rem 1.5rem',
-            fontSize: '1rem',
-            cursor: 'pointer',
-            color: '#d2691e',
-            fontWeight: '500'
-          }}
+          onClick={onBack}
+          className="bg-orange-100 border border-orange-300 rounded-2xl px-6 py-3 text-orange-600 font-medium hover:bg-orange-200 transition-colors"
         >
-          📊 Leaderboard
+          ← Back
         </button>
 
-        {/* Current Tarot Card Display */}
-        <div style={{ marginTop: '2rem', marginBottom: '3rem' }}>
-          {/* ASCII Card */}
-          <div style={{
-            fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-            fontSize: '0.7rem',
-            lineHeight: '1',
-            color: '#8b5a3c',
-            backgroundColor: '#faf8f3',
-            padding: '1rem',
-            borderRadius: '12px',
-            border: '2px solid rgba(210, 105, 30, 0.3)',
-            marginBottom: '1rem',
-            whiteSpace: 'pre',
-            display: 'inline-block',
-            boxShadow: '0 4px 15px rgba(139, 90, 60, 0.2)'
-          }}>
-            {getCardASCII(profile?.tarot_level || 1)}
-          </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowReferrals(true)}
+            className="bg-orange-100 border border-orange-300 rounded-2xl px-6 py-3 text-orange-600 font-medium hover:bg-orange-200 transition-colors flex items-center gap-2"
+          >
+            <Users className="w-5 h-5" />
+            Referrals
+          </button>
           
-          <div style={{
-            fontSize: '1.2rem',
-            color: '#8b5a3c',
-            marginBottom: '0.5rem',
-            fontWeight: '600'
-          }}>
-            {getTarotCardName(profile?.tarot_level || 1)}
-            {profile?.transformation_numbers && profile.transformation_numbers[profile.tarot_level] && (
-              <span style={{ 
-                fontSize: '0.9rem', 
-                color: '#d2691e',
-                marginLeft: '0.5rem'
-              }}>
-                #{profile.transformation_numbers[profile.tarot_level]}
-              </span>
+          <button
+            onClick={() => setShowLeaderboard(true)}
+            className="bg-orange-100 border border-orange-300 rounded-2xl px-6 py-3 text-orange-600 font-medium hover:bg-orange-200 transition-colors flex items-center gap-2"
+          >
+            <Trophy className="w-5 h-5" />
+            Leaderboard
+          </button>
+        </div>
+      </div>
+
+      <div className="max-w-md mx-auto text-center">
+        {/* Main Display - Card and Cost Side by Side */}
+        <div className="flex justify-center items-start gap-8 mb-8">
+          {/* Tarot Card */}
+          <div className="flex flex-col items-center">
+            <div className="relative mb-4">
+              <img
+                src={getCardImage(profile?.tarot_level || 1, supabase)}
+                alt={getTarotCardName(profile?.tarot_level || 1)}
+                className="w-48 h-72 rounded-2xl shadow-2xl border-4 border-orange-200 transform hover:scale-105 transition-transform duration-300"
+                style={{
+                  filter: 'drop-shadow(0 10px 30px rgba(139, 90, 60, 0.3))'
+                }}
+              />
+              
+              {/* Transformation number overlay */}
+              {profile?.transformation_numbers && profile.transformation_numbers[profile.tarot_level] && (
+                <div className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-sm shadow-lg">
+                  #{profile.transformation_numbers[profile.tarot_level]}
+                </div>
+              )}
+            </div>
+            
+            <h1 className="text-2xl font-bold text-amber-800 mb-2">
+              {getTarotCardName(profile?.tarot_level || 1)}
+            </h1>
+            <div className="text-lg text-amber-600 mb-4">
+              Level {profile?.tarot_level || 1} {isMaxLevel && '• JOURNEY COMPLETE'}
+            </div>
+            
+            {/* Card Meaning */}
+            <details className="bg-white bg-opacity-60 rounded-2xl p-4 border border-orange-200 cursor-pointer">
+              <summary className="font-semibold text-orange-600 mb-2">
+                Card Meaning
+              </summary>
+              <p className="text-sm text-amber-700 italic leading-relaxed">
+                {getCardMeaning(profile?.tarot_level || 1)}
+              </p>
+            </details>
+          </div>
+
+          {/* Next Transformation Cost */}
+          <div className="flex flex-col items-center gap-4 pt-8">
+            <div className="text-amber-600 font-medium mb-2 text-center">
+              Next Transformation
+            </div>
+            
+            {isMaxLevel ? (
+              <div className="bg-gradient-to-r from-yellow-400 to-amber-500 text-white rounded-2xl p-6 text-center shadow-lg">
+                <div className="text-2xl mb-2">👑</div>
+                <div className="font-bold">Journey Complete!</div>
+                <div className="text-sm opacity-90">Knight of Cups Achieved</div>
+              </div>
+            ) : (
+              <div className="text-center">
+                <div className="bg-white bg-opacity-80 rounded-2xl p-6 border-2 border-orange-200 shadow-lg">
+                  <div className="text-sm text-amber-600 mb-2">Cost to reach</div>
+                  <div className="text-lg font-bold text-amber-800 mb-1">
+                    {getTarotCardName((profile?.tarot_level || 1) + 1)}
+                  </div>
+                  <div className="text-3xl font-bold text-orange-600 mb-2">
+                    {currentTransformationCost} 🕊️
+                  </div>
+                  <div className="text-xs text-amber-600">
+                    Palomas needed
+                  </div>
+                </div>
+                
+                {overallProgress >= 100 && (
+                  <div className="mt-3 bg-green-100 border-2 border-green-300 rounded-xl p-3">
+                    <div className="text-green-700 font-bold text-sm">
+                      ✅ Ready to Transform!
+                    </div>
+                    <div className="text-green-600 text-xs">
+                      Visit Casa to complete your advancement
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
-          <div style={{
-            fontSize: '0.9rem',
-            color: '#a0785a',
-            marginBottom: '1rem'
-          }}>
-            Level {profile?.tarot_level || 1} {isMaxLevel && '• JOURNEY COMPLETE'}
-          </div>
+        </div>
+
+        {/* Era Buttons */}
+        <div className="flex justify-center gap-4 mb-6">
+          <button
+            onClick={() => setShowEraModal('swords')}
+            className="bg-gradient-to-r from-gray-500 to-slate-600 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2"
+          >
+            ⚔️ Era of Swords
+          </button>
           
-          {/* Card Meaning - Expandable */}
-          <details style={{
-            fontSize: '0.85rem',
-            color: '#8b5a3c',
-            backgroundColor: 'rgba(255, 255, 255, 0.6)',
-            borderRadius: '8px',
-            padding: '0.8rem',
-            border: '1px solid rgba(210, 105, 30, 0.2)',
-            cursor: 'pointer'
-          }}>
-            <summary style={{
-              fontWeight: '500',
-              color: '#d2691e',
-              marginBottom: '0.5rem'
-            }}>
-              Card Meaning
-            </summary>
-            <div style={{
-              fontStyle: 'italic',
-              lineHeight: '1.4',
-              color: '#8b5a3c'
-            }}>
-              {getCardMeaning(profile?.tarot_level || 1)}
-            </div>
-          </details>
-        </div>
-
-        {/* Main Content - Cup and Merit Display */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '3rem',
-          marginBottom: '3rem'
-        }}>
-          {/* Cup Display */}
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.8)',
-            borderRadius: '20px',
-            padding: '2rem',
-            border: '1px solid rgba(210, 105, 30, 0.2)',
-            boxShadow: '0 4px 20px rgba(139, 90, 60, 0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>
-              {(profile?.tarot_level || 1) >= 15 ? '🏆' : '🏆'}
-            </div>
-            <div style={{
-              fontSize: '1.8rem',
-              fontWeight: '600',
-              color: '#d2691e',
-              marginBottom: '0.5rem'
-            }}>
-              {profile?.cup_count || 0}
-            </div>
-            <div style={{
-              fontSize: '0.9rem',
-              color: '#a0785a'
-            }}>
-              {(profile?.tarot_level || 1) >= 15 ? 'Grails' : 'Cups'}
-            </div>
-          </div>
-
-          {/* Merit Display - Vertical Circles with Percentages */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '1rem'
-          }}>
-            <div style={{
-              fontSize: '0.9rem',
-              color: '#a0785a',
-              marginBottom: '0.5rem'
-            }}>
-              Transformation Progress
-            </div>
-            
-            {/* Merit Circles - 3 circles stacked vertically (top to bottom: 2, 1, 0) */}
-            {[2, 1, 0].map((index) => {
-              const circle = meritCircles[index]
-              return (
-                <div
-                  key={index}
-                  style={{
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    border: '3px solid #d2691e',
-                    backgroundColor: circle.filled ? '#d2691e' : 'rgba(210, 105, 30, 0.1)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.8rem',
-                    fontWeight: '600',
-                    color: circle.filled ? 'white' : '#d2691e',
-                    boxShadow: circle.filled ? '0 0 20px rgba(210, 105, 30, 0.4)' : 'none',
-                    transition: 'all 0.3s ease',
-                    position: 'relative'
-                  }}
-                >
-                  {circle.filled ? '⭐' : `${circle.percentage}%`}
-                </div>
-              )
-            })}
-            
-            {/* Overall progress display */}
-            <div style={{
-              fontSize: '0.8rem',
-              color: '#d2691e',
-              fontWeight: '600',
-              marginTop: '0.5rem'
-            }}>
-              {isMaxLevel ? 'Journey Complete!' : 
-               overallProgress >= 100 ? 'Ready to Transform!' : `${overallProgress.toFixed(1)}% Complete`}
-            </div>
-          </div>
-        </div>
-
-        {/* Progress Info */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.6)',
-          borderRadius: '16px',
-          padding: '1.5rem',
-          border: '1px solid rgba(210, 105, 30, 0.2)',
-          marginBottom: '2rem'
-        }}>
-          <div style={{
-            fontSize: '1rem',
-            fontWeight: '500',
-            color: '#8b5a3c',
-            marginBottom: '0.5rem'
-          }}>
-            {isMaxLevel ? 'Maximum Level Achieved' : 
-             overallProgress >= 100 ? 'Ready for Next Transformation!' :
-             'Progress to Next Transformation'}
-          </div>
-          <div style={{
-            fontSize: '0.9rem',
-            color: '#a0785a',
-            marginBottom: '1rem'
-          }}>
-            {isMaxLevel ? 
-              'You have reached Knight of Cups - the highest achievement in Casa de Copas' :
-              overallProgress >= 100 ?
-                `You can transform to ${getTarotCardName((profile?.tarot_level || 1) + 1)}` :
-                `${overallProgress.toFixed(1)}% progress from Paloma purchases`}
-          </div>
-          <div style={{
-            fontSize: '0.85rem',
-            color: '#c4a373',
-            lineHeight: '1.4'
-          }}>
-            {isMaxLevel ? 
-              'Welcome to the inner circle of Casa de Copas. Your journey through the Tarot is complete.' :
-              (profile?.tarot_level || 1) === 14 ?
-                'The Great Transformation awaits - lay down your sword and take up the cup. This threshold requires a deeper commitment.' :
-                'Purchase Palomas to advance your transformation progress. Community contributions and volunteering earn you recognition when you reach 100%.'}
-          </div>
+          <button
+            onClick={() => setShowEraModal('cups')}
+            className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2"
+          >
+            🏆 Era of Cups
+          </button>
         </div>
 
         {/* Message Display */}
         {message && (
-          <div style={{
-            padding: '1rem',
-            marginBottom: '2rem',
-            backgroundColor: message.includes('Error') ? 'rgba(220, 53, 69, 0.1)' : 'rgba(40, 167, 69, 0.1)',
-            color: message.includes('Error') ? '#dc3545' : '#28a745',
-            borderRadius: '16px',
-            border: `1px solid ${message.includes('Error') ? 'rgba(220, 53, 69, 0.3)' : 'rgba(40, 167, 69, 0.3)'}`
-          }}>
+          <div className={`p-4 mb-6 rounded-2xl border-2 ${
+            message.includes('Error') 
+              ? 'bg-red-50 text-red-700 border-red-200' 
+              : 'bg-green-50 text-green-700 border-green-200'
+          }`}>
             {message}
           </div>
         )}
 
-        {/* Admin Controls Section */}
+        {/* Admin Controls */}
         {isAdmin && (
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.6)',
-            borderRadius: '16px',
-            padding: '1.5rem',
-            border: '1px solid rgba(210, 105, 30, 0.2)',
-            marginBottom: '2rem'
-          }}>
-            <div style={{
-              fontSize: '1rem',
-              fontWeight: '500',
-              color: '#8b5a3c',
-              marginBottom: '1rem'
-            }}>
-              Admin Controls
-            </div>
+          <div className="bg-white bg-opacity-60 rounded-3xl p-6 border-2 border-orange-200">
+            <h3 className="text-xl font-bold text-amber-800 mb-4">Admin Controls</h3>
             
-            {/* Award Merit to Self */}
-            <div style={{ 
-              display: 'flex', 
-              gap: '1rem', 
-              justifyContent: 'center',
-              marginBottom: '1.5rem'
-            }}>
+            <div className="flex justify-center mb-4">
               <button
                 onClick={() => awardMerit(user?.id)}
                 disabled={loading}
-                style={{
-                  background: 'linear-gradient(135deg, #28a745, #20c997)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '0.8rem 1.5rem',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                  fontWeight: '500',
-                  opacity: loading ? 0.5 : 1
-                }}
+                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-2xl font-semibold disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
               >
                 Award Merit to Self
               </button>
             </div>
 
-            {/* Search User to Award Merit */}
-            <div style={{ position: 'relative' }}>
-              <label style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontSize: '0.9rem',
-                fontWeight: '500',
-                color: '#8b5a3c'
-              }}>
-                Award Merit to User
-              </label>
+            <div className="relative">
+              <label className="block mb-2 text-amber-800 font-medium">Award Merit to User</label>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 placeholder="Search username..."
-                style={{
-                  width: '100%',
-                  padding: '0.8rem',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(210, 105, 30, 0.3)',
-                  fontSize: '1rem',
-                  backgroundColor: 'white',
-                  color: '#8b5a3c',
-                  marginBottom: '1rem'
-                }}
+                className="w-full p-3 rounded-2xl border-2 border-orange-200 bg-white text-amber-800 mb-4"
               />
               
-              {/* Search Results */}
               {searchResults.length > 0 && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
-                  backgroundColor: 'white',
-                  border: '1px solid rgba(210, 105, 30, 0.3)',
-                  borderRadius: '12px',
-                  marginTop: '-1rem',
-                  marginBottom: '1rem',
-                  boxShadow: '0 4px 20px rgba(139, 90, 60, 0.1)',
-                  zIndex: 1000
-                }}>
+                <div className="absolute top-full left-0 right-0 bg-white border-2 border-orange-200 rounded-2xl mt-1 shadow-lg z-10">
                   {searchResults.map((profile, index) => (
                     <div
                       key={profile.id}
                       onClick={() => selectUser(profile)}
-                      style={{
-                        padding: '0.8rem',
-                        cursor: 'pointer',
-                        borderBottom: index < searchResults.length - 1 ? '1px solid rgba(210, 105, 30, 0.1)' : 'none',
-                        fontSize: '0.9rem',
-                        color: '#8b5a3c'
-                      }}
-                      onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(210, 105, 30, 0.1)'}
-                      onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+                      className="p-3 cursor-pointer hover:bg-orange-50 border-b border-orange-100 last:border-b-0"
                     >
-                      <div style={{ fontWeight: '500' }}>{profile.username}</div>
-                      <div style={{ fontSize: '0.8rem', color: '#a0785a' }}>
+                      <div className="font-medium text-amber-800">{profile.username}</div>
+                      <div className="text-sm text-amber-600">
                         {profile.cup_count || 0} cups • {getTarotCardName(profile.tarot_level || 1)} • {profile.merit_count || 0} merits
                       </div>
                     </div>
@@ -1211,21 +1011,10 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                 </div>
               )}
 
-              {/* Award Merit Button */}
               <button
                 onClick={() => selectedUser && awardMerit(selectedUser.id)}
                 disabled={loading || !selectedUser}
-                style={{
-                  width: '100%',
-                  padding: '0.8rem',
-                  backgroundColor: loading || !selectedUser ? '#cccccc' : '#f39c12',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '12px',
-                  fontSize: '0.9rem',
-                  cursor: loading || !selectedUser ? 'not-allowed' : 'pointer',
-                  fontWeight: '500'
-                }}
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 rounded-2xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
               >
                 {loading ? 'Processing...' : 
                  selectedUser ? `Award Merit to ${selectedUser.username}` : 
