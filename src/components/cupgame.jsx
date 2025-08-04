@@ -860,65 +860,66 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
 
       <div className="max-w-md mx-auto text-center">
         {/* Main Display - Card and Cost Side by Side */}
-        <div className="flex justify-center items-start gap-8 mb-8">
+        <div className="flex flex-col lg:flex-row justify-center items-center gap-6 mb-8">
           {/* Tarot Card */}
           <div className="flex flex-col items-center">
             <div className="relative mb-4">
               <img
                 src={getCardImage(profile?.tarot_level || 1, supabase)}
                 alt={getTarotCardName(profile?.tarot_level || 1)}
-                className="w-48 h-72 rounded-2xl shadow-2xl border-4 border-orange-200 transform hover:scale-105 transition-transform duration-300"
+                className="w-32 h-48 lg:w-40 lg:h-60 rounded-xl shadow-lg border-2 border-orange-200 transform hover:scale-105 transition-transform duration-300"
                 style={{
-                  filter: 'drop-shadow(0 10px 30px rgba(139, 90, 60, 0.3))'
+                  filter: 'drop-shadow(0 4px 15px rgba(139, 90, 60, 0.2))',
+                  imageRendering: 'pixelated'
                 }}
               />
               
               {/* Transformation number overlay */}
               {profile?.transformation_numbers && profile.transformation_numbers[profile.tarot_level] && (
-                <div className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-sm shadow-lg">
+                <div className="absolute -top-1 -right-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-full w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center font-bold text-xs shadow-lg">
                   #{profile.transformation_numbers[profile.tarot_level]}
                 </div>
               )}
             </div>
             
-            <h1 className="text-2xl font-bold text-amber-800 mb-2">
+            <h1 className="text-lg lg:text-2xl font-bold text-amber-800 mb-1 text-center">
               {getTarotCardName(profile?.tarot_level || 1)}
             </h1>
-            <div className="text-lg text-amber-600 mb-4">
-              Level {profile?.tarot_level || 1} {isMaxLevel && '• JOURNEY COMPLETE'}
+            <div className="text-sm lg:text-lg text-amber-600 mb-3 text-center">
+              Level {profile?.tarot_level || 1} {isMaxLevel && '• COMPLETE'}
             </div>
             
             {/* Card Meaning */}
-            <details className="bg-white bg-opacity-60 rounded-2xl p-4 border border-orange-200 cursor-pointer">
-              <summary className="font-semibold text-orange-600 mb-2">
+            <details className="bg-white bg-opacity-60 rounded-xl p-3 border border-orange-200 cursor-pointer w-full max-w-sm">
+              <summary className="font-semibold text-orange-600 mb-2 text-sm">
                 Card Meaning
               </summary>
-              <p className="text-sm text-amber-700 italic leading-relaxed">
+              <p className="text-xs text-amber-700 italic leading-relaxed">
                 {getCardMeaning(profile?.tarot_level || 1)}
               </p>
             </details>
           </div>
 
           {/* Next Transformation Cost */}
-          <div className="flex flex-col items-center gap-4 pt-8">
-            <div className="text-amber-600 font-medium mb-2 text-center">
+          <div className="flex flex-col items-center gap-3">
+            <div className="text-amber-600 font-medium text-sm text-center">
               Next Transformation
             </div>
             
             {isMaxLevel ? (
-              <div className="bg-gradient-to-r from-yellow-400 to-amber-500 text-white rounded-2xl p-6 text-center shadow-lg">
-                <div className="text-2xl mb-2">👑</div>
-                <div className="font-bold">Journey Complete!</div>
-                <div className="text-sm opacity-90">Knight of Cups Achieved</div>
+              <div className="bg-gradient-to-r from-yellow-400 to-amber-500 text-white rounded-xl p-4 text-center shadow-lg">
+                <div className="text-xl mb-1">👑</div>
+                <div className="font-bold text-sm">Journey Complete!</div>
+                <div className="text-xs opacity-90">Knight of Cups Achieved</div>
               </div>
             ) : (
               <div className="text-center">
-                <div className="bg-white bg-opacity-80 rounded-2xl p-6 border-2 border-orange-200 shadow-lg">
-                  <div className="text-sm text-amber-600 mb-2">Cost to reach</div>
-                  <div className="text-lg font-bold text-amber-800 mb-1">
+                <div className="bg-white bg-opacity-80 rounded-xl p-4 border-2 border-orange-200 shadow-lg">
+                  <div className="text-xs text-amber-600 mb-1">Cost to reach</div>
+                  <div className="text-sm font-bold text-amber-800 mb-1">
                     {getTarotCardName((profile?.tarot_level || 1) + 1)}
                   </div>
-                  <div className="text-3xl font-bold text-orange-600 mb-2">
+                  <div className="text-xl font-bold text-orange-600 mb-1">
                     {currentTransformationCost} 🕊️
                   </div>
                   <div className="text-xs text-amber-600">
@@ -927,12 +928,12 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                 </div>
                 
                 {overallProgress >= 100 && (
-                  <div className="mt-3 bg-green-100 border-2 border-green-300 rounded-xl p-3">
-                    <div className="text-green-700 font-bold text-sm">
+                  <div className="mt-2 bg-green-100 border-2 border-green-300 rounded-lg p-2">
+                    <div className="text-green-700 font-bold text-xs">
                       ✅ Ready to Transform!
                     </div>
                     <div className="text-green-600 text-xs">
-                      Visit Casa to complete your advancement
+                      Visit Casa to complete
                     </div>
                   </div>
                 )}
