@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Palomas - Grail</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f1e8;
+            color: #8b5a3c;
+            min-height: 100vh;
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(210, 105, 30, 0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #d2691e;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(139, 90, 60, 0.2);
+        }
+
+        .bird-icon {
+            font-size: 8rem;
+            color: #d2691e;
+            margin-bottom: 2rem;
+        }
+
+        .title {
+            background: linear-gradient(135deg, #d2691e, #cd853f, #daa520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 400;
+            margin-bottom: 3rem;
+            letter-spacing: -0.02em;
+        }
+
+        .quantity-section {
+            margin: 3rem 0;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .qty-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(210, 105, 30, 0.3);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #d2691e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qty-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(139, 90, 60, 0.2);
+        }
+
+        #quantity {
+            width: 100px;
+            padding: 1rem;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(210, 105, 30, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #8b5a3c;
+            font-weight: 500;
+        }
+
+        #quantity:focus {
+            outline: none;
+            border-color: rgba(210, 105, 30, 0.6);
+            box-shadow: 0 0 0 3px rgba(210, 105, 30, 0.1);
+        }
+
+        .total-price {
+            font-size: 2rem;
+            font-weight: 400;
+            background: linear-gradient(135deg, #d2691e, #cd853f, #daa520);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .payment-section {
+            margin: 4rem 0;
+        }
+
+        .payment-btn {
+            background: linear-gradient(135deg, #d2691e, #cd853f);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 1.2rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 250px;
+            max-width: 90%;
+            margin: 0 auto 1.5rem auto;
+            display: block;
+        }
+
+        .payment-btn:hover {
+            background: linear-gradient(135deg, #cd853f, #b8860b);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(210, 105, 30, 0.4);
+        }
+
+        .payment-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .payment-container {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(210, 105, 30, 0.2);
+            display: none;
+        }
+
+        .back-to-payment {
+            background: rgba(139, 90, 60, 0.1);
+            color: #8b5a3c;
+            border: 1px solid rgba(139, 90, 60, 0.3);
+            border-radius: 12px;
+            padding: 0.8rem 2rem;
+            cursor: pointer;
+            margin: 1rem auto;
+            display: none;
+        }
+
+        .back-to-payment:hover {
+            background: rgba(139, 90, 60, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .bird-icon {
+                font-size: 6rem;
+            }
+            
+            .payment-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="https://grail3.netlify.app" class="back-button">←</a>
+    
+    <div class="container">
+        <div class="bird-icon">🕊️</div>
+        <h1 class="title">Buy Palomas</h1>
+
+        <div class="quantity-section">
+            <div class="quantity-controls">
+                <button class="qty-btn" onclick="decreaseQuantity()">−</button>
+                <input type="number" id="quantity" value="1" min="1" max="999" onchange="updateTotal()">
+                <button class="qty-btn" onclick="increaseQuantity()">+</button>
+            </div>
+            <div class="total-price" id="totalPrice">$1 USD / 20 MXN</div>
+        </div>
+
+        <div class="payment-section" id="paymentSection">
+            <button class="payment-btn" onclick="initiateStripePayment()">
+                Pay with Stripe
+            </button>
+            <button class="payment-btn" onclick="initiatePayPalPayment()">
+                Pay with PayPal
+            </button>
+            <button class="payment-btn" onclick="initiateCryptoPayment()">
+                Pay with Crypto
+            </button>
+            <button class="payment-btn" onclick="initiateVenmoPayment()">
+                Pay with Venmo
+            </button>
+        </div>
+
+        <!-- PayPal Container -->
+        <div id="paypal-container" class="payment-container">
+            <h3 style="margin-bottom: 1rem; color: #8b5a3c;">Complete Payment with PayPal</h3>
+            <div id="paypal-button-container"></div>
+        </div>
+
+        <!-- Stripe Container -->
+        <div id="stripe-container" class="payment-container">
+            <h3 style="margin-bottom: 1rem; color: #8b5a3c;">Complete Payment with Stripe</h3>
+            <div id="stripe-button-container">
+                <p style="color: #a0785a; margin-bottom: 1rem;">Stripe integration coming soon!</p>
+                <button class="payment-btn" style="width: 100%;" onclick="alert('Stripe checkout will open here')">
+                    Continue to Stripe
+                </button>
+            </div>
+        </div>
+
+        <button class="back-to-payment" id="backButton" onclick="showPaymentButtons()">
+            ← Back to Payment Options
+        </button>
+    </div>
+
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=BAA_8yGzKqPYaGudQh8g5QkTgjJ6XnP0ew33GrTu70H5tZW7uWbzV-sfC_fr5yc3GqFMhpyIBimr7TV374&components=hosted-buttons&enable-funding=venmo&currency=USD"></script>
+    
+    <script>
+        function increaseQuantity() {
+            const input = document.getElementById('quantity');
+            const currentValue = parseInt(input.value) || 1;
+            if (currentValue < 999) {
+                input.value = currentValue + 1;
+                updateTotal();
+            }
+        }
+
+        function decreaseQuantity() {
+            const input = document.getElementById('quantity');
+            const currentValue = parseInt(input.value) || 1;
+            if (currentValue > 1) {
+                input.value = currentValue - 1;
+                updateTotal();
+            }
+        }
+
+        function updateTotal() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const usdTotal = quantity * 1;
+            const mxnTotal = quantity * 20;
+            
+            document.getElementById('totalPrice').textContent = `$${usdTotal} USD / ${mxnTotal} MXN`;
+        }
+
+        function showPaymentButtons() {
+            document.getElementById('paymentSection').style.display = 'block';
+            document.getElementById('paypal-container').style.display = 'none';
+            document.getElementById('stripe-container').style.display = 'none';
+            document.getElementById('backButton').style.display = 'none';
+        }
+
+        function initiateStripePayment() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const total = quantity * 1;
+            
+            // Show Stripe container
+            document.getElementById('paymentSection').style.display = 'none';
+            document.getElementById('stripe-container').style.display = 'block';
+            document.getElementById('backButton').style.display = 'block';
+            
+            // TODO: Integrate real Stripe here
+            console.log(`Stripe payment for ${quantity} Palomas - $${total} USD`);
+        }
+
+        function initiatePayPalPayment() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const total = quantity * 1;
+            
+            // Hide payment buttons
+            document.getElementById('paymentSection').style.display = 'none';
+            document.getElementById('paypal-container').style.display = 'block';
+            document.getElementById('backButton').style.display = 'block';
+            
+            // Clear previous PayPal buttons
+            document.getElementById('paypal-button-container').innerHTML = '';
+            
+            // Create PayPal payment
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: total.toString(),
+                                currency_code: 'USD'
+                            },
+                            description: `${quantity} Palomas from Grail`
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        alert(`🎉 Payment successful!\n\nTransaction ID: ${details.id}\n\n${quantity} Palomas will be credited to your account shortly.`);
+                        
+                        // TODO: Credit palomas to user account via API call
+                        console.log('Payment completed:', details);
+                        
+                        // Redirect back to grail after success
+                        setTimeout(() => {
+                            window.location.href = 'https://grail3.netlify.app';
+                        }, 3000);
+                    });
+                },
+                onError: function(err) {
+                    console.error('PayPal error:', err);
+                    alert('❌ Payment failed. Please try again.');
+                },
+                onCancel: function(data) {
+                    console.log('Payment cancelled:', data);
+                    showPaymentButtons();
+                }
+            }).render('#paypal-button-container');
+        }
+
+        function initiateCryptoPayment() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            alert(`₿ Crypto payment coming soon!\n\nWould charge equivalent of $${quantity} USD for ${quantity} Palomas.\n\nWill support Bitcoin, Ethereum, Solana and more.`);
+        }
+
+        function initiateVenmoPayment() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const total = quantity * 1;
+            alert(`💸 Venmo integration coming soon!\n\nWould charge $${total} USD for ${quantity} Palomas.`);
+        }
+    </script>
+</body>
+</html>
+
+
