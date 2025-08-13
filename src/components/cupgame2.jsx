@@ -84,31 +84,23 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   const [showEraModal, setShowEraModal] = useState(null)
   const [currentTransformationCost, setCurrentTransformationCost] = useState(50)
   const [message, setMessage] = useState('')
-
+  
   const isMaxLevel = (profile?.tarot_level || 1) >= 26
 
   // Load current transformation cost
   useEffect(() => {
     const loadTransformationCost = async () => {
-      if (!profile) return
-      
-      const nextLevel = (profile.tarot_level || 1) + 1
-      if (nextLevel > 26) {
-        setCurrentTransformationCost(0)
-        return
-      }
-
-      const isAceTransformation = (profile.tarot_level || 1) === 14 && nextLevel === 15
-      const isKnightTransformation = (profile.tarot_level || 1) === 25 && nextLevel === 26
-      
-      // If no supabase connection (like in dev mode), use fallback costs
-      if (!supabase) {
-        const baseCost = isKnightTransformation ? 1000000 : (isAceTransformation ? 500 : 50)
-        setCurrentTransformationCost(baseCost)
-        return
-      }
+      if (!supabase || !profile) return
       
       try {
+        const nextLevel = (profile.tarot_level || 1) + 1
+        if (nextLevel > 26) {
+          setCurrentTransformationCost(0)
+          return
+        }
+
+        const isAceTransformation = (profile.tarot_level || 1) === 14 && nextLevel === 15
+        
         const { data, error } = await supabase
           .from('tarot_transformations')
           .select('current_cost')
@@ -116,21 +108,20 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           .single()
         
         if (error) {
-          const baseCost = isKnightTransformation ? 1000000 : (isAceTransformation ? 500 : 50)
+          const baseCost = isAceTransformation ? 500 : 100
           setCurrentTransformationCost(baseCost)
         } else {
           setCurrentTransformationCost(data.current_cost)
         }
       } catch (error) {
         console.error('Error loading transformation cost:', error)
-        const baseCost = isKnightTransformation ? 1000000 : (isAceTransformation ? 500 : 50)
-        setCurrentTransformationCost(baseCost)
+        const isAceTransformation = (profile.tarot_level || 1) === 14
+        setCurrentTransformationCost(isAceTransformation ? 500 : 100)
       }
     }
     
     loadTransformationCost()
   }, [supabase, profile?.tarot_level])
-
 
   const calculateMeritPercentage = () => {
     if (!profile || currentTransformationCost === 0) return 0
@@ -216,6 +207,40 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     border: '2px solid #fb923c',
     boxShadow: '0 4px 15px rgba(139, 90, 60, 0.1)',
     minWidth: '140px'
+  }
+
+  const eraButtonsStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '0.75rem',
+    marginBottom: '1.5rem',
+    flexWrap: 'wrap'
+  }
+
+  const swordButtonStyle = {
+    background: 'linear-gradient(135deg, #6b7280, #374151)',
+    color: 'white',
+    padding: '0.5rem 1rem',
+    borderRadius: '0.75rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    border: 'none',
+    boxShadow: '0 4px 15px rgba(107, 114, 128, 0.3)',
+    fontSize: '0.85rem',
+    transition: 'transform 0.2s ease'
+  }
+
+  const cupButtonStyle = {
+    background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
+    color: 'white',
+    padding: '0.5rem 1rem',
+    borderRadius: '0.75rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    border: 'none',
+    boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)',
+    fontSize: '0.85rem',
+    transition: 'transform 0.2s ease'
   }
 
   const modalOverlayStyle = {
@@ -451,10 +476,10 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                     {getTarotCardName((profile?.tarot_level || 1) + 1)}
                   </div>
                   <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ea580c', marginBottom: '0.25rem' }}>
-                    {currentTransformationCost.toLocaleString()} ❤️
+                    {currentTransformationCost} 🕊️
                   </div>
                   <div style={{ fontSize: '0.7rem', color: '#a16207' }}>
-                    Love needed
+                    Palomas needed
                   </div>
                 </div>
                 
@@ -479,29 +504,11 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           </div>
         </div>
 
-
         {/* Era Buttons */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '0.75rem',
-          marginBottom: '1.5rem',
-          flexWrap: 'wrap'
-        }}>
+        <div style={eraButtonsStyle}>
           <button
             onClick={() => setShowEraModal('swords')}
-            style={{
-              background: 'linear-gradient(135deg, #6b7280, #374151)',
-              color: 'white',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.75rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              border: 'none',
-              boxShadow: '0 4px 15px rgba(107, 114, 128, 0.3)',
-              fontSize: '0.85rem',
-              transition: 'transform 0.2s ease'
-            }}
+            style={swordButtonStyle}
             onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
             onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
           >
@@ -510,18 +517,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           
           <button
             onClick={() => setShowEraModal('cups')}
-            style={{
-              background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
-              color: 'white',
-              padding: '0.5rem 1rem',
-              borderRadius: '0.75rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              border: 'none',
-              boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)',
-              fontSize: '0.85rem',
-              transition: 'transform 0.2s ease'
-            }}
+            style={cupButtonStyle}
             onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
             onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
           >
@@ -572,7 +568,6 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             {message}
           </div>
         )}
-
       </div>
     </div>
   )
