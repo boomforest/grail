@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react'
 
-// Helper function to calculate Tiempo earning rate based on tarot level
-const calculateTiempoEarningRate = (tarotLevel) => {
+// Helper function to calculate Love earning rate based on tarot level  
+const calculateLoveEarningRate = (tarotLevel) => {
   if (tarotLevel <= 1) return 0 // King of Swords starts at 0%
   if (tarotLevel <= 14) return (tarotLevel - 1) * 3 // Swords: 0%, 3%, 6%, 9%... up to 39%
   if (tarotLevel <= 26) return 39 + ((tarotLevel - 14) * 3) // Cups: 42%, 45%, 48%... up to 75%
   return 75 // Max rate
 }
 
-// Helper function to check if user can use Tiempo for personal discounts
+// Helper function to check if user can use Love for personal discounts
 const canUsePersonalDiscounts = (tarotLevel) => {
   return tarotLevel >= 15 // Only Cups levels (15+)
 }
@@ -37,7 +37,7 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
 
   const isAdmin = profile?.username === 'JPR333'
   const userTarotLevel = profile?.tarot_level || 1
-  const tiempoEarningRate = calculateTiempoEarningRate(userTarotLevel)
+  const loveEarningRate = calculateLoveEarningRate(userTarotLevel)
   const canGetDiscounts = canUsePersonalDiscounts(userTarotLevel)
 
   // Load products
@@ -82,17 +82,17 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
     }
   }
 
-  // Calculate Tiempo tokens that will be earned from a purchase
-  const calculateTiempoEarning = (product) => {
-    if (!product.cost_price || tiempoEarningRate === 0) return 0
+  // Calculate Love tokens that will be earned from a purchase
+  const calculateLoveEarning = (product) => {
+    if (!product.cost_price || loveEarningRate === 0) return 0
     
     const profitMargin = product.price - product.cost_price
-    const tiempoEarned = Math.floor((profitMargin * tiempoEarningRate / 100) * quantity)
-    return Math.max(0, tiempoEarned)
+    const loveEarned = Math.floor((profitMargin * loveEarningRate / 100) * quantity)
+    return Math.max(0, loveEarned)
   }
 
-  // Award Tiempo tokens to user
-  const awardTiempoTokens = async (userId, amount, reason) => {
+  // Award Love tokens to user (stored as DJR in backend)
+  const awardLoveTokens = async (userId, amount, reason) => {
     if (amount <= 0) return
 
     try {
@@ -105,7 +105,7 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
 
       if (fetchError) throw fetchError
 
-      // Update Tiempo balance
+      // Update Love balance (stored as tiempo_balance in backend)
       const newBalance = (currentProfile.tiempo_balance || 0) + amount
       const { error: updateError } = await supabase
         .from('profiles')
@@ -117,7 +117,7 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
 
       if (updateError) throw updateError
 
-      // Log the Tiempo award
+      // Log the Love award (stored in tiempo_logs table)
       await supabase
         .from('tiempo_logs')
         .insert([{
@@ -128,9 +128,9 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
           balance_after: newBalance
         }])
 
-      console.log(`Awarded ${amount} Tiempo tokens to user ${userId}`)
+      console.log(`Awarded ${amount} Love tokens to user ${userId}`)
     } catch (error) {
-      console.error('Error awarding Tiempo tokens:', error)
+      console.error('Error awarding Love tokens:', error)
     }
   }
 
@@ -147,8 +147,8 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
     }
 
     try {
-      // Calculate Tiempo earning before purchase
-      const tiempoToEarn = calculateTiempoEarning(product)
+      // Calculate Love earning before purchase
+      const loveToEarn = calculateLoveEarning(product)
 
       // Deduct Palomas from user balance
       const { error: deductError } = await supabase
@@ -199,11 +199,11 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
 
       if (notificationError) throw notificationError
 
-      // Award Tiempo tokens if earned
-      if (tiempoToEarn > 0) {
-        await awardTiempoTokens(
+      // Award Love tokens if earned
+      if (loveToEarn > 0) {
+        await awardLoveTokens(
           user.id, 
-          tiempoToEarn, 
+          loveToEarn, 
           `Earned from purchasing ${product.name} (${quantity}x)`
         )
       }
@@ -211,8 +211,8 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
       // Update local profile state
       profile.total_palomas_collected -= totalCost
 
-      const tiempoMessage = tiempoToEarn > 0 ? ` You earned ${tiempoToEarn} Tiempo tokens!` : ''
-      setClaimMessage(`Gift claimed successfully! Receipt: ${receiptNumber}.${tiempoMessage}`)
+      const loveMessage = loveToEarn > 0 ? ` You earned ${loveToEarn} Love tokens!` : ''
+      setClaimMessage(`Gift claimed successfully! Receipt: ${receiptNumber}.${loveMessage}`)
       setSelectedProduct(null)
       setQuantity(1)
 
@@ -670,7 +670,7 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
     )
   }
 
-  // Rest of the component remains the same, but with added Tiempo earning display
+  // Rest of the component remains the same, but with added Love earning display
   return (
     <div style={{
       minHeight: '100vh',
@@ -740,8 +740,8 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
           </div>
         </div>
 
-        {/* User Tiempo Info */}
-        {tiempoEarningRate > 0 && (
+        {/* User Love Info */}
+        {loveEarningRate > 0 && (
           <div style={{
             backgroundColor: 'rgba(210, 105, 30, 0.1)',
             borderRadius: '16px',
@@ -755,16 +755,16 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
               color: '#8b5a3c',
               marginBottom: '0.5rem'
             }}>
-              🎯 Your Tiempo Earning Rate: {tiempoEarningRate}%
+              🎯 Your Love Earning Rate: {loveEarningRate}%
             </div>
             <div style={{
               fontSize: '0.9rem',
               color: '#a0785a',
               lineHeight: '1.4'
             }}>
-              You earn {tiempoEarningRate}% of profit margin as Tiempo tokens on purchases.
-              {!canGetDiscounts && ' As a Swords level member, you can use Tiempo tokens to support Mexican artists.'}
-              {canGetDiscounts && ' As a Cups level member, you can use Tiempo for discounts or artist support.'}
+              You earn {loveEarningRate}% of profit margin as Love tokens on purchases.
+              {!canGetDiscounts && ' As a Swords level member, you can use Love tokens to support Mexican artists.'}
+              {canGetDiscounts && ' As a Cups level member, you can use Love for discounts or artist support.'}
             </div>
           </div>
         )}
@@ -925,7 +925,7 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
                 </button>
               </div>
 
-              {/* Total Cost and Tiempo Earning */}
+              {/* Total Cost and Love Earning */}
               <div style={{
                 backgroundColor: 'rgba(210, 105, 30, 0.1)',
                 borderRadius: '12px',
@@ -941,14 +941,14 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
                   Total: {selectedProduct.price * quantity} Palomas
                 </div>
                 
-                {/* Show Tiempo earning if applicable */}
-                {tiempoEarningRate > 0 && selectedProduct.cost_price && (
+                {/* Show Love earning if applicable */}
+                {loveEarningRate > 0 && selectedProduct.cost_price && (
                   <div style={{
                     fontSize: '0.9rem',
                     color: '#d2691e',
                     fontWeight: '500'
                   }}>
-                    🎯 You'll earn {calculateTiempoEarning(selectedProduct)} Tiempo tokens
+                    🎯 You'll earn {calculateLoveEarning(selectedProduct)} Love tokens
                   </div>
                 )}
               </div>
@@ -1097,15 +1097,15 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
                   </span>
                 </div>
 
-                {/* Show potential Tiempo earning on card */}
-                {tiempoEarningRate > 0 && product.cost_price && (
+                {/* Show potential Love earning on card */}
+                {loveEarningRate > 0 && product.cost_price && (
                   <div style={{
                     marginTop: '0.5rem',
                     fontSize: '0.8rem',
                     color: '#d2691e',
                     fontWeight: '500'
                   }}>
-                    🎯 Earn {Math.floor((product.price - product.cost_price) * tiempoEarningRate / 100)} Tiempo
+                    🎯 Earn {Math.floor((product.price - product.cost_price) * loveEarningRate / 100)} Love
                   </div>
                 )}
               </div>
