@@ -1,56 +1,50 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [paypalLoaded, setPaypalLoaded] = useState(false)
+  const paypalRef = useRef(null)
+  const sdkLoadedRef = useRef(false)
 
   useEffect(() => {
-    // Check if PayPal SDK is loaded
-    if (window.paypal) {
-      setPaypalLoaded(true)
-      renderPayPalButton()
-    } else {
-      // Load PayPal SDK dynamically
+    if (!user) return
+
+    // Only load SDK once
+    if (!sdkLoadedRef.current) {
       const script = document.createElement('script')
       script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}&currency=USD&intent=capture&enable-funding=venmo,paylater`
       script.onload = () => {
+        sdkLoadedRef.current = true
         setPaypalLoaded(true)
-        renderPayPalButton()
       }
       script.onerror = () => {
-        console.error('Failed to load PayPal SDK')
         onError && onError(new Error('Failed to load PayPal SDK'))
       }
       document.head.appendChild(script)
-      
       return () => {
         if (document.head.contains(script)) {
           document.head.removeChild(script)
         }
       }
+    } else {
+      setPaypalLoaded(true)
     }
   }, [user])
 
-  const renderPayPalButton = () => {
-    if (!window.paypal || !user || !paypalLoaded) return
+  useEffect(() => {
+    if (!paypalLoaded || !user || !paypalRef.current || !window.paypal) return
 
-    // Clear any existing PayPal buttons
-    const container = document.getElementById('paypal-button-container')
-    if (container) container.innerHTML = ''
+    // Clear previous buttons
+    paypalRef.current.innerHTML = ''
 
-    // Render PayPal button
     window.paypal.Buttons({
-      // Create order on PayPal
       createOrder: (data, actions) => {
         setIsLoading(true)
         return actions.order.create({
           purchase_units: [{
-            amount: {
-              value: '10.00', // $10 = 10 Palomas
-              currency_code: 'USD'
-            },
+            amount: { value: '10.00', currency_code: 'USD' },
             description: 'Casa de Copas Palomas - DOV Tokens',
-            custom_id: user.id, // This is crucial for the webhook!
+            custom_id: user.id,
             invoice_id: `palomas-${user.id}-${Date.now()}`
           }],
           application_context: {
@@ -61,49 +55,27 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
           }
         })
       },
-
-      // Handle successful payment
       onApprove: async (data, actions) => {
         try {
           const order = await actions.order.capture()
-          console.log('Payment successful:', order)
-          
           setIsLoading(false)
-          
-          // The webhook will handle adding Palomas automatically
           onSuccess && onSuccess(order)
-          
-          // Sync cups after payment
-          if (syncCupsFromPalomas) {
-            setTimeout(() => syncCupsFromPalomas(user.id), 2000)
-          }
-          
-          // Show success message
+          if (syncCupsFromPalomas) setTimeout(() => syncCupsFromPalomas(user.id), 2000)
           alert(`Payment successful! Your Palomas will be credited shortly. Order ID: ${order.id}`)
-          
         } catch (error) {
-          console.error('Payment capture error:', error)
           setIsLoading(false)
           onError && onError(error)
         }
       },
-
-      // Handle payment errors
       onError: (err) => {
-        console.error('PayPal error:', err)
         setIsLoading(false)
         onError && onError(err)
         alert('Payment failed. Please try again.')
       },
-
-      // Handle cancelled payments
       onCancel: (data) => {
-        console.log('Payment cancelled:', data)
         setIsLoading(false)
         alert('Payment cancelled.')
       },
-
-      // Simple button styling - no flourishes
       style: {
         color: 'gold',
         shape: 'rect',
@@ -112,8 +84,8 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
         height: 40,
         tagline: false
       }
-    }).render('#paypal-button-container')
-  }
+    }).render(paypalRef.current)
+  }, [paypalLoaded, user])
 
   if (!user) {
     return (
@@ -137,14 +109,12 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
         <h3>Purchase Palomas</h3>
         <p>$10 = 10 Palomas</p>
       </div>
-      
       {isLoading && (
         <div style={{ textAlign: 'center', padding: '10px' }}>
           <p>Processing payment...</p>
         </div>
       )}
-      
-      <div id="paypal-button-container"></div>
+      <div ref={paypalRef}></div>
     </div>
   )
 }
