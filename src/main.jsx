@@ -13,6 +13,7 @@ import TarotCupsPage from './components/cupgame'
 import GPTChatWindow from './components/GPTChatWindow'
 import WelcomeModal from './components/WelcomeModal'
 import PayPalButton from './components/PayPalButton'
+import PalomasMenu from './components/PalomasMenu'
 
 function App() {
   // Core state
@@ -35,6 +36,7 @@ function App() {
   const [showResetPassword, setShowResetPassword] = useState(false) // Reset password state
   const [showWelcome, setShowWelcome] = useState(false) // Welcome modal state
   const [hasSeenWelcome, setHasSeenWelcome] = useState(false) // Track if user has seen welcome
+  const [showPalomasMenu, setShowPalomasMenu] = useState(false) // Palomas management menu
   
   // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
@@ -670,10 +672,18 @@ function App() {
           onProfileUpdate={setProfile}
           message={message}
           onShowSendMeritsForm={() => setShowSendMeritsForm(true)}
-          onShowSendForm={setShowSendForm}
-          onShowReleaseForm={setShowReleaseForm}
-          onPayPalClick={handlePayPalClick}
+          onShowPalomasMenu={() => setShowPalomasMenu(true)}
         />
+        {showPalomasMenu && (
+          <PalomasMenu
+            profile={profile}
+            isAdmin={isAdmin}
+            onShowSendForm={setShowSendForm}
+            onShowReleaseForm={setShowReleaseForm}
+            onPayPalClick={handlePayPalClick}
+            onClose={() => setShowPalomasMenu(false)}
+          />
+        )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         <GPTChatWindow 
@@ -779,10 +789,18 @@ function App() {
           onProfileUpdate={setProfile}
           message={message}
           onShowSendMeritsForm={() => setShowSendMeritsForm(true)}
-          onShowSendForm={setShowSendForm}
-          onShowReleaseForm={setShowReleaseForm}
-          onPayPalClick={handlePayPalClick}
+          onShowPalomasMenu={() => setShowPalomasMenu(true)}
         />
+        {showPalomasMenu && (
+          <PalomasMenu
+            profile={profile}
+            isAdmin={isAdmin}
+            onShowSendForm={setShowSendForm}
+            onShowReleaseForm={setShowReleaseForm}
+            onPayPalClick={handlePayPalClick}
+            onClose={() => setShowPalomasMenu(false)}
+          />
+        )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         <GPTChatWindow 
@@ -932,10 +950,18 @@ function App() {
           onProfileUpdate={setProfile}
           message={message}
           onShowSendMeritsForm={() => setShowSendMeritsForm(true)}
-          onShowSendForm={setShowSendForm}
-          onShowReleaseForm={setShowReleaseForm}
-          onPayPalClick={handlePayPalClick}
+          onShowPalomasMenu={() => setShowPalomasMenu(true)}
         />
+        {showPalomasMenu && (
+          <PalomasMenu
+            profile={profile}
+            isAdmin={isAdmin}
+            onShowSendForm={setShowSendForm}
+            onShowReleaseForm={setShowReleaseForm}
+            onPayPalClick={handlePayPalClick}
+            onClose={() => setShowPalomasMenu(false)}
+          />
+        )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         <GPTChatWindow 

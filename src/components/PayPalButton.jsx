@@ -42,7 +42,7 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
         setIsLoading(true)
         return actions.order.create({
           purchase_units: [{
-            amount: { value: '10.00', currency_code: 'USD' },
+            amount: { value: '5.00', currency_code: 'USD' },
             description: 'Casa de Copas Palomas - DOV Tokens',
             custom_id: user.id,
             invoice_id: `palomas-${user.id}-${Date.now()}`

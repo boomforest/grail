@@ -1126,9 +1126,7 @@ function Dashboard({
   onLogout,
   onProfileUpdate,
   message,
-  onShowSendForm,
-  onShowReleaseForm,
-  onPayPalClick
+  onShowPalomasMenu
 }) {
   const [showProductManager, setShowProductManager] = useState(false);
   const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
@@ -1462,163 +1460,63 @@ function Dashboard({
           </div>
         )}
 
-        {/* Palomas Section */}
-        <div style={{ marginBottom: '2.5rem' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '0.3rem' }}>🕊️</div>
-          <h2 style={{
-            fontSize: '2.2rem',
-            color: '#d2691e',
-            margin: '0 0 0.4rem 0',
-            fontWeight: 'normal',
-            fontStyle: 'italic'
-          }}>
-            Palomas
-          </h2>
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.9)',
-            borderRadius: '20px',
-            padding: '0.6rem 1.2rem',
-            display: 'inline-block',
-            fontSize: '1.2rem',
-            fontWeight: '500',
-            color: '#8b4513',
-            marginBottom: '1.2rem',
-            fontStyle: 'italic'
-          }}>
-            {formatNumber(profile?.total_palomas_collected)}
-          </div>
-          <br />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', alignItems: 'center' }}>
-            {isAdmin ? (
-              <button
-                onClick={() => onShowSendForm('DOV')}
-                style={{
-                  background: 'linear-gradient(45deg, #d2691e, #cd853f)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '20px',
-                  padding: '0.7rem 1.8rem',
-                  fontSize: '1rem',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)',
-                  width: '180px',
-                  fontStyle: 'italic'
-                }}
-              >
-                Send
-              </button>
-            ) : (
-              <button
-                onClick={() => onShowReleaseForm('DOV')}
-                style={{
-                  background: 'linear-gradient(45deg, #8b4513, #a0522d)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '20px',
-                  padding: '0.7rem 1.8rem',
-                  fontSize: '1rem',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 15px rgba(139, 69, 19, 0.3)',
-                  width: '180px',
-                  fontStyle: 'italic'
-                }}
-              >
-                Give
-              </button>
-            )}
+        {/* Main Palomas Display - Clean tap interface */}
+        <div style={{ 
+          marginTop: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem'
+        }}>
+          {/* Large tappable dove section */}
+          <div
+            onClick={() => onShowPalomasMenu && onShowPalomasMenu()}
+            style={{
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              position: 'relative',
+              padding: '2rem'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'scale(1)'
+            }}
+          >
+            {/* Dove emoji */}
+            <div style={{ 
+              fontSize: '8rem', 
+              marginBottom: '0.5rem',
+              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.15))',
+              textAlign: 'center'
+            }}>
+              🕊️
+            </div>
             
-            {/* Get Palomas Button */}
-            <button
-              onClick={onPayPalClick}
-              style={{
-                background: 'linear-gradient(45deg, #0070ba, #003087)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '20px',
-                padding: '0.7rem 1.8rem',
-                fontSize: '1rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(0, 112, 186, 0.3)',
-                width: '180px',
-                fontStyle: 'italic'
-              }}
-            >
-              Get
-            </button>
+            {/* Palomas count */}
+            <div style={{
+              fontSize: '3rem',
+              fontWeight: '600',
+              color: '#d2691e',
+              fontStyle: 'italic',
+              textAlign: 'center'
+            }}>
+              {formatNumber(profile?.total_palomas_collected || 0)}
+            </div>
+            
+            {/* Tap to manage hint */}
+            <div style={{
+              marginTop: '1rem',
+              fontSize: '0.9rem',
+              color: '#a0522d',
+              fontStyle: 'italic',
+              opacity: 0.6,
+              textAlign: 'center'
+            }}>
+              Tap to manage
+            </div>
           </div>
-        </div>
-
-        {/* Love Section */}
-        <div>
-          <h2 style={{
-            fontSize: '2.2rem',
-            color: '#8b4513',
-            margin: '0 0 0.4rem 0',
-            fontWeight: 'normal',
-            fontStyle: 'italic'
-          }}>
-            Love
-          </h2>
-          <div style={{ fontSize: '1.2rem', marginBottom: '0.3rem' }}>❤️</div>
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.9)',
-            borderRadius: '20px',
-            padding: '0.6rem 1.2rem',
-            display: 'inline-block',
-            fontSize: '1.2rem',
-            fontWeight: '500',
-            color: '#8b4513',
-            marginBottom: '1.2rem',
-            fontStyle: 'italic'
-          }}>
-            {formatNumber(profile?.djr_balance)}
-          </div>
-          <br />
-          {isAdmin ? (
-            <button
-              onClick={() => onShowSendForm('DJR')}
-              style={{
-                background: 'linear-gradient(45deg, #d2691e, #cd853f)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '20px',
-                padding: '0.7rem 1.8rem',
-                fontSize: '1rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)',
-                width: '180px',
-                margin: '0 auto',
-                fontStyle: 'italic'
-              }}
-            >
-              Send
-            </button>
-          ) : (
-            <button
-              onClick={() => onShowReleaseForm('DJR')}
-              style={{
-                background: 'linear-gradient(45deg, #8b4513, #a0522d)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '20px',
-                padding: '0.7rem 1.8rem',
-                fontSize: '1rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(139, 69, 19, 0.3)',
-                width: '180px',
-                margin: '0 auto',
-                display: 'block',
-                fontStyle: 'italic'
-              }}
-            >
-              Give
-            </button>
-          )}
         </div>
       </div>
     </div>
