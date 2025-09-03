@@ -21,7 +21,7 @@ function FloatingGrailButton({ onGrailClick }) {
         boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
       }}
     >
-      grail // antisocial media MMXXV
+      antisocial media MMXXV
     </button>
   )
 }

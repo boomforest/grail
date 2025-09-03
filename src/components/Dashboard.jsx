@@ -1126,7 +1126,8 @@ function Dashboard({
   onLogout,
   onProfileUpdate,
   message,
-  onShowPalomasMenu
+  onShowPalomasMenu,
+  onShowTickets
 }) {
   const [showProductManager, setShowProductManager] = useState(false);
   const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
@@ -1305,17 +1306,14 @@ function Dashboard({
               fontStyle: 'italic',
               marginTop: '0.2rem'
             }}>
-              Cups
+              Game
             </div>
           </button>
 
-          {/* Right - Hanglight */}
-          <a 
-            href="https://hanglight.mx" 
-            target="_blank" 
-            rel="noopener noreferrer"
+          {/* Right - Tickets */}
+          <button
+            onClick={() => onShowTickets(false)} // Always go to user tickets page
             style={{
-              textDecoration: 'none',
               background: 'rgba(255, 255, 255, 0.9)',
               border: '2px solid #d2691e',
               borderRadius: '50%',
@@ -1326,7 +1324,8 @@ function Dashboard({
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: '1.8rem',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
+              cursor: 'pointer'
             }}
             onMouseOver={(e) => {
               e.target.style.transform = 'scale(1.05)'
@@ -1335,7 +1334,7 @@ function Dashboard({
               e.target.style.transform = 'scale(1)'
             }}
           >
-            🟢
+            🎫
             <div style={{
               fontSize: '0.7rem',
               fontWeight: '500',
@@ -1343,9 +1342,9 @@ function Dashboard({
               fontStyle: 'italic',
               marginTop: '0.2rem'
             }}>
-              Hang
+              Tickets
             </div>
-          </a>
+          </button>
 
           {/* Settings Panel */}
           {showSettings && (
@@ -1403,25 +1402,47 @@ function Dashboard({
 
               {/* Admin Product Management Button */}
               {isAdmin && (
-                <button
-                  onClick={() => {
-                    setShowSettings(false);
-                    setShowProductManager(true);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    backgroundColor: '#d2691e',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '10px',
-                    cursor: 'pointer',
-                    fontWeight: '500',
-                    marginBottom: '0.5rem'
-                  }}
-                >
-                  🛍️ Manage Products
-                </button>
+                <>
+                  <button
+                    onClick={() => {
+                      setShowSettings(false);
+                      setShowProductManager(true);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem 1rem',
+                      backgroundColor: '#d2691e',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      fontWeight: '500',
+                      marginBottom: '0.5rem'
+                    }}
+                  >
+                    🛍️ Manage Products
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setShowSettings(false);
+                      onShowTickets(true); // Pass true to indicate admin view
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem 1rem',
+                      backgroundColor: '#9b59b6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      fontWeight: '500',
+                      marginBottom: '0.5rem'
+                    }}
+                  >
+                    🎫 Manage Tickets
+                  </button>
+                </>
               )}
               
               <button
@@ -1460,13 +1481,16 @@ function Dashboard({
           </div>
         )}
 
-        {/* Main Palomas Display - Clean tap interface */}
+        {/* Main Palomas Display - Center focal point */}
         <div style={{ 
-          marginTop: '2rem',
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '1rem'
+          justifyContent: 'center'
         }}>
           {/* Large tappable dove section */}
           <div
@@ -1474,47 +1498,40 @@ function Dashboard({
             style={{
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              position: 'relative',
-              padding: '2rem'
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)'
+              e.currentTarget.style.transform = 'scale(1.08)'
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.transform = 'scale(1)'
             }}
           >
-            {/* Dove emoji */}
+            {/* Dove emoji - massive */}
             <div style={{ 
-              fontSize: '8rem', 
-              marginBottom: '0.5rem',
-              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.15))',
-              textAlign: 'center'
+              fontSize: 'clamp(12rem, 30vw, 20rem)', // Huge responsive size
+              marginBottom: '0rem',
+              filter: 'drop-shadow(0 8px 30px rgba(0,0,0,0.2))',
+              textAlign: 'center',
+              lineHeight: '0.9'
             }}>
               🕊️
             </div>
             
-            {/* Palomas count */}
+            {/* Palomas count - big */}
             <div style={{
-              fontSize: '3rem',
-              fontWeight: '600',
+              fontSize: 'clamp(4rem, 12vw, 7rem)', // Large responsive size
+              fontWeight: '700',
               color: '#d2691e',
               fontStyle: 'italic',
-              textAlign: 'center'
+              textAlign: 'center',
+              lineHeight: '1',
+              textShadow: '0 2px 10px rgba(210, 105, 30, 0.2)'
             }}>
               {formatNumber(profile?.total_palomas_collected || 0)}
-            </div>
-            
-            {/* Tap to manage hint */}
-            <div style={{
-              marginTop: '1rem',
-              fontSize: '0.9rem',
-              color: '#a0522d',
-              fontStyle: 'italic',
-              opacity: 0.6,
-              textAlign: 'center'
-            }}>
-              Tap to manage
             </div>
           </div>
         </div>

@@ -14,6 +14,8 @@ import GPTChatWindow from './components/GPTChatWindow'
 import WelcomeModal from './components/WelcomeModal'
 import PayPalButton from './components/PayPalButton'
 import PalomasMenu from './components/PalomasMenu'
+import TicketsPage from './components/TicketsPage'
+import AdminTicketManager from './components/AdminTicketManager'
 
 function App() {
   // Core state
@@ -37,6 +39,8 @@ function App() {
   const [showWelcome, setShowWelcome] = useState(false) // Welcome modal state
   const [hasSeenWelcome, setHasSeenWelcome] = useState(false) // Track if user has seen welcome
   const [showPalomasMenu, setShowPalomasMenu] = useState(false) // Palomas management menu
+  const [showTickets, setShowTickets] = useState(false) // Tickets page
+  const [showAdminTickets, setShowAdminTickets] = useState(false) // Admin ticket management
   
   // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
@@ -642,7 +646,9 @@ function App() {
     setMessage('Use the PayPal checkout below to purchase Palomas. Your tokens will be credited automatically!')
   }
 
-  const isAdmin = profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com'
+  // FOR DEVELOPMENT: Make all users admin for testing
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  const isAdmin = isDevelopment ? true : (profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com')
 
   // Welcome Modal View - Show if user has 0 palomas and hasn't seen it
   if (user && showWelcome) {
@@ -673,6 +679,13 @@ function App() {
           message={message}
           onShowSendMeritsForm={() => setShowSendMeritsForm(true)}
           onShowPalomasMenu={() => setShowPalomasMenu(true)}
+          onShowTickets={(isAdmin) => {
+            if (isAdmin) {
+              setShowAdminTickets(true)
+            } else {
+              setShowTickets(true)
+            }
+          }}
         />
         {showPalomasMenu && (
           <PalomasMenu
@@ -790,6 +803,13 @@ function App() {
           message={message}
           onShowSendMeritsForm={() => setShowSendMeritsForm(true)}
           onShowPalomasMenu={() => setShowPalomasMenu(true)}
+          onShowTickets={(isAdmin) => {
+            if (isAdmin) {
+              setShowAdminTickets(true)
+            } else {
+              setShowTickets(true)
+            }
+          }}
         />
         {showPalomasMenu && (
           <PalomasMenu
@@ -848,6 +868,49 @@ function App() {
             // Sync cups when profile updates in cup game
             syncCupsFromPalomas(user.id)
           }}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        />
+      </>
+    )
+  }
+
+  // Tickets view
+  if (user && showTickets) {
+    return (
+      <>
+        <TicketsPage
+          user={user}
+          profile={profile}
+          supabase={supabase}
+          onBack={() => setShowTickets(false)}
+          isAdmin={isAdmin}
+          onProfileUpdate={setProfile}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        />
+      </>
+    )
+  }
+
+  // Admin ticket management view
+  if (user && showAdminTickets && isAdmin) {
+    return (
+      <>
+        <AdminTicketManager
+          profile={profile}
+          supabase={supabase}
+          onBack={() => setShowAdminTickets(false)}
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
@@ -951,6 +1014,13 @@ function App() {
           message={message}
           onShowSendMeritsForm={() => setShowSendMeritsForm(true)}
           onShowPalomasMenu={() => setShowPalomasMenu(true)}
+          onShowTickets={(isAdmin) => {
+            if (isAdmin) {
+              setShowAdminTickets(true)
+            } else {
+              setShowTickets(true)
+            }
+          }}
         />
         {showPalomasMenu && (
           <PalomasMenu
