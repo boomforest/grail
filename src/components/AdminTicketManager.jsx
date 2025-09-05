@@ -19,8 +19,24 @@ function AdminTicketManager({ profile, supabase, onBack }) {
     is_active: true,
     partner_username: '',
     partner_palomas_per_ticket: '',
-    image_file: null
+    image_file: null,
+    timezone: 'America/Mexico_City' // Default to Mexico City
   })
+
+  // Common timezones for events
+  const timezones = [
+    { value: 'America/Mexico_City', label: 'Mexico City' },
+    { value: 'America/New_York', label: 'New York (ET)' },
+    { value: 'America/Chicago', label: 'Chicago (CT)' },
+    { value: 'America/Denver', label: 'Denver (MT)' },
+    { value: 'America/Los_Angeles', label: 'Los Angeles (PT)' },
+    { value: 'America/Phoenix', label: 'Phoenix (AZ)' },
+    { value: 'Europe/London', label: 'London' },
+    { value: 'Europe/Paris', label: 'Paris' },
+    { value: 'Europe/Berlin', label: 'Berlin' },
+    { value: 'Asia/Tokyo', label: 'Tokyo' },
+    { value: 'UTC', label: 'UTC/GMT' }
+  ]
 
   // Check if user is admin (allow all users on localhost for development)
   const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -148,6 +164,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
         event_image: imageUrl || null,
         is_active: formData.is_active,
         tickets_sold: editingTicket ? editingTicket.tickets_sold : 0,
+        timezone: formData.timezone || 'America/Mexico_City',
         partner_username: formData.partner_username ? formData.partner_username.trim().toUpperCase() : null,
         partner_palomas_per_ticket: formData.partner_palomas_per_ticket ? parseInt(formData.partner_palomas_per_ticket) : null
       }
@@ -181,6 +198,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
       event_name: ticket.event_name,
       description: ticket.description || '',
       event_date: ticket.event_date.slice(0, 16), // Format for datetime-local input
+      timezone: ticket.timezone || 'America/Mexico_City',
       location: ticket.location || '',
       price_palomas: ticket.price_palomas.toString(),
       max_tickets: ticket.max_tickets ? ticket.max_tickets.toString() : '',
@@ -426,6 +444,32 @@ function AdminTicketManager({ profile, supabase, onBack }) {
                 }}
                 required
               />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                Timezone *
+              </label>
+              <select
+                name="timezone"
+                value={formData.timezone}
+                onChange={handleInputChange}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                  fontSize: '0.9rem',
+                  backgroundColor: 'white'
+                }}
+                required
+              >
+                {timezones.map(tz => (
+                  <option key={tz.value} value={tz.value}>
+                    {tz.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>

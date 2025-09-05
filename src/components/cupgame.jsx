@@ -92,18 +92,31 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     const loadTransformationCost = async () => {
       if (!profile) return
       
-      const nextLevel = (profile.tarot_level || 1) + 1
+      const currentLevel = profile.tarot_level || 1
+      const nextLevel = currentLevel + 1
       if (nextLevel > 26) {
         setCurrentTransformationCost(0)
         return
       }
 
-      const isAceTransformation = (profile.tarot_level || 1) === 14 && nextLevel === 15
-      const isKnightTransformation = (profile.tarot_level || 1) === 25 && nextLevel === 26
+      // New cost structure: 3,333 tokens total to Page of Cups (level 25)
+      // Starts expensive, gets cheaper as you progress
+      const getBaseCost = (level) => {
+        if (level <= 5) return 300  // Levels 1-5: 300 each = 1,500
+        if (level <= 10) return 150  // Levels 6-10: 150 each = 750
+        if (level <= 14) return 100  // Levels 11-14: 100 each = 400
+        if (level === 15) return 200  // Ace to Ace crossing: 200
+        if (level <= 20) return 75   // Levels 16-20: 75 each = 375
+        if (level <= 24) return 27   // Levels 21-24: 27 each = 108
+        if (level === 25) return 0   // Already at Page
+        if (level === 26) return 1000000  // Knight transformation remains special
+        return 50  // Fallback
+      }
+
+      const baseCost = getBaseCost(nextLevel)
       
       // If no supabase connection (like in dev mode), use fallback costs
       if (!supabase) {
-        const baseCost = isKnightTransformation ? 1000000 : (isAceTransformation ? 500 : 50)
         setCurrentTransformationCost(baseCost)
         return
       }
@@ -116,14 +129,13 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           .single()
         
         if (error) {
-          const baseCost = isKnightTransformation ? 1000000 : (isAceTransformation ? 500 : 50)
           setCurrentTransformationCost(baseCost)
         } else {
-          setCurrentTransformationCost(data.current_cost)
+          // Use dynamic cost if available, otherwise use base cost
+          setCurrentTransformationCost(data.current_cost || baseCost)
         }
       } catch (error) {
         console.error('Error loading transformation cost:', error)
-        const baseCost = isKnightTransformation ? 1000000 : (isAceTransformation ? 500 : 50)
         setCurrentTransformationCost(baseCost)
       }
     }

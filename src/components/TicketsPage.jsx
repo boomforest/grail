@@ -207,22 +207,24 @@ function TicketsPage({
     }
   }
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString, timezone = 'America/Mexico_City') => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: timezone
     })
   }
 
-  const formatTime = (dateString) => {
+  const formatTime = (dateString, timezone = 'America/Mexico_City') => {
     const date = new Date(dateString)
     return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
+      timeZone: timezone
     })
   }
 
@@ -461,11 +463,11 @@ function TicketsPage({
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Calendar size={16} />
-                        {formatDate(ticket.event_date)}
+                        {formatDate(ticket.event_date, ticket.timezone)}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Clock size={16} />
-                        {formatTime(ticket.event_date)}
+                        {formatTime(ticket.event_date, ticket.timezone)}
                       </div>
                       {ticket.location && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -690,11 +692,11 @@ function TicketsPage({
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Calendar size={18} />
-                        {formatDate(userTicket.event_tickets.event_date)}
+                        {formatDate(userTicket.event_tickets.event_date, userTicket.event_tickets.timezone)}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Clock size={18} />
-                        {formatTime(userTicket.event_tickets.event_date)}
+                        {formatTime(userTicket.event_tickets.event_date, userTicket.event_tickets.timezone)}
                       </div>
                       {userTicket.event_tickets.location && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
