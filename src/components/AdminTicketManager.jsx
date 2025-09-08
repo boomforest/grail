@@ -7,7 +7,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingTicket, setEditingTicket] = useState(null)
   const [uploadingImage, setUploadingImage] = useState(false)
-  
+
   const [formData, setFormData] = useState({
     event_name: '',
     description: '',
@@ -20,23 +20,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
     partner_username: '',
     partner_palomas_per_ticket: '',
     image_file: null,
-    timezone: 'America/Mexico_City' // Default to Mexico City
   })
-
-  // Common timezones for events
-  const timezones = [
-    { value: 'America/Mexico_City', label: 'Mexico City' },
-    { value: 'America/New_York', label: 'New York (ET)' },
-    { value: 'America/Chicago', label: 'Chicago (CT)' },
-    { value: 'America/Denver', label: 'Denver (MT)' },
-    { value: 'America/Los_Angeles', label: 'Los Angeles (PT)' },
-    { value: 'America/Phoenix', label: 'Phoenix (AZ)' },
-    { value: 'Europe/London', label: 'London' },
-    { value: 'Europe/Paris', label: 'Paris' },
-    { value: 'Europe/Berlin', label: 'Berlin' },
-    { value: 'Asia/Tokyo', label: 'Tokyo' },
-    { value: 'UTC', label: 'UTC/GMT' }
-  ]
 
   // Check if user is admin (allow all users on localhost for development)
   const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -66,10 +50,21 @@ function AdminTicketManager({ profile, supabase, onBack }) {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }))
+    switch (name) {
+      case ('event_date'):
+        const utcDate = new Date(value)
+        const localDateString = utcDate.toISOString().slice(0, 16) // YYYY-MM-DDTHH:MM format
+        console.log(localDateString)
+        setFormData(prev => ({
+          ...prev,
+          [name]: localDateString
+        }))
+      default:
+        setFormData(prev => ({
+          ...prev,
+          [name]: type === 'checkbox' ? checked : value
+        }))
+    }
   }
 
   const handleImageChange = (e) => {
@@ -79,7 +74,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
         alert('Please select an image file')
         return
       }
-      
+
       if (file.size > 5 * 1024 * 1024) {
         alert('Image must be smaller than 5MB')
         return
@@ -100,7 +95,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
 
     console.log('Starting upload for file:', file.name, 'Size:', file.size)
     setUploadingImage(true)
-    
+
     try {
       const fileExt = file.name.split('.').pop()
       const fileName = `ticket-${Date.now()}.${fileExt}`
@@ -139,7 +134,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!formData.event_name.trim() || !formData.event_date || !formData.price_palomas) {
       alert('Please fill in all required fields')
       return
@@ -147,24 +142,27 @@ function AdminTicketManager({ profile, supabase, onBack }) {
 
     try {
       let imageUrl = formData.event_image
-      
+
       // Upload new image if file is selected
       if (formData.image_file) {
         imageUrl = await uploadImage(formData.image_file)
         if (!imageUrl) return // Upload failed
       }
 
+      // Add Mexico City timezone offset to the datetime
+      // Mexico City is UTC-6 (or UTC-5 during DST)
+      const eventDateWithTimezone = formData.event_date + '-06:00'
+      
       const ticketData = {
         event_name: formData.event_name.trim(),
         description: formData.description ? formData.description.trim() : null,
-        event_date: formData.event_date,
+        event_date: eventDateWithTimezone, // Store with Mexico City timezone offset
         location: formData.location ? formData.location.trim() : null,
         price_palomas: parseInt(formData.price_palomas),
         max_tickets: formData.max_tickets ? parseInt(formData.max_tickets) : null,
         event_image: imageUrl || null,
         is_active: formData.is_active,
         tickets_sold: editingTicket ? editingTicket.tickets_sold : 0,
-        timezone: formData.timezone || 'America/Mexico_City',
         partner_username: formData.partner_username ? formData.partner_username.trim().toUpperCase() : null,
         partner_palomas_per_ticket: formData.partner_palomas_per_ticket ? parseInt(formData.partner_palomas_per_ticket) : null
       }
@@ -197,8 +195,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
     setFormData({
       event_name: ticket.event_name,
       description: ticket.description || '',
-      event_date: ticket.event_date.slice(0, 16), // Format for datetime-local input
-      timezone: ticket.timezone || 'America/Mexico_City',
+      event_date: ticket.event_date, // Simple: just show stored time
       location: ticket.location || '',
       price_palomas: ticket.price_palomas.toString(),
       max_tickets: ticket.max_tickets ? ticket.max_tickets.toString() : '',
@@ -228,7 +225,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
         .eq('id', ticketId)
 
       if (error) throw error
-      
+
       fetchTickets()
     } catch (error) {
       console.error('Error deleting ticket:', error)
@@ -255,14 +252,16 @@ function AdminTicketManager({ profile, supabase, onBack }) {
   }
 
   const formatDate = (dateString) => {
+    // Simple: just format the date as Mexico City time
     const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
+      timeZone: 'America/Mexico_City'
     })
   }
 
@@ -448,32 +447,6 @@ function AdminTicketManager({ profile, supabase, onBack }) {
 
             <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                Timezone *
-              </label>
-              <select
-                name="timezone"
-                value={formData.timezone}
-                onChange={handleInputChange}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  fontSize: '0.9rem',
-                  backgroundColor: 'white'
-                }}
-                required
-              >
-                {timezones.map(tz => (
-                  <option key={tz.value} value={tz.value}>
-                    {tz.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
                 Location
               </label>
               <input
@@ -538,7 +511,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
                 Event Image (for ticket verification)
               </label>
-              
+
               {/* Image Upload */}
               <input
                 type="file"
@@ -558,15 +531,15 @@ function AdminTicketManager({ profile, supabase, onBack }) {
               </p>
 
               {/* OR divider */}
-              <div style={{ 
-                textAlign: 'center', 
-                margin: '1rem 0', 
+              <div style={{
+                textAlign: 'center',
+                margin: '1rem 0',
                 position: 'relative',
                 color: '#666',
                 fontSize: '0.8rem'
               }}>
-                <span style={{ 
-                  background: 'white', 
+                <span style={{
+                  background: 'white',
                   padding: '0 1rem',
                   position: 'relative',
                   zIndex: 1
@@ -774,8 +747,8 @@ function AdminTicketManager({ profile, supabase, onBack }) {
         ) : (
           <div>
             {tickets.map((ticket, index) => (
-              <div 
-                key={ticket.id} 
+              <div
+                key={ticket.id}
                 style={{
                   padding: '1rem',
                   borderBottom: index < tickets.length - 1 ? '1px solid #eee' : 'none',
@@ -798,7 +771,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
                       }}
                     />
                   )}
-                  
+
                   <div>
                     <h4 style={{ margin: '0 0 0.25rem', color: '#333' }}>
                       {ticket.event_name}
@@ -826,7 +799,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
                       )}
                     </p>
                     <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: '500', color: '#28a745' }}>
-                      {ticket.price_palomas} Palomas • 
+                      {ticket.price_palomas} Palomas •
                       {ticket.tickets_sold || 0}/{ticket.max_tickets || '∞'} sold
                     </p>
                   </div>

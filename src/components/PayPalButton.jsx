@@ -47,11 +47,16 @@ const PayPalButton = ({ user, onSuccess, onError, profile, syncCupsFromPalomas }
             custom_id: user.id,
             invoice_id: `palomas-${user.id}-${Date.now()}`
           }],
+          payment_method: {
+            payee_preferred: 'UNRESTRICTED'
+          },
           application_context: {
             brand_name: 'Casa de Copas',
             locale: 'en-US',
             landing_page: 'BILLING',
-            user_action: 'PAY_NOW'
+            user_action: 'PAY_NOW',
+            return_url: window.location.origin,
+            cancel_url: window.location.origin
           }
         })
       },

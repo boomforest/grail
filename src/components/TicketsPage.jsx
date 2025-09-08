@@ -25,11 +25,15 @@ function TicketsPage({
   const loadTickets = async () => {
     try {
       // Load available event tickets
+      // Use a more permissive date filter to account for timezone differences
+      const oneDayAgo = new Date()
+      oneDayAgo.setDate(oneDayAgo.getDate() - 1)
+      
       const { data: events, error: eventsError } = await supabase
         .from('event_tickets')
         .select('*')
         .eq('is_active', true)
-        .gte('event_date', new Date().toISOString())
+        .gte('event_date', oneDayAgo.toISOString())
         .order('event_date', { ascending: true })
 
       if (eventsError) throw eventsError
@@ -207,24 +211,24 @@ function TicketsPage({
     }
   }
 
-  const formatDate = (dateString, timezone = 'America/Mexico_City') => {
+  const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
       year: 'numeric',
-      timeZone: timezone
+      timeZone: 'America/Mexico_City'
     })
   }
 
-  const formatTime = (dateString, timezone = 'America/Mexico_City') => {
+  const formatTime = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
-      timeZone: timezone
+      timeZone: 'America/Mexico_City'
     })
   }
 
@@ -463,11 +467,11 @@ function TicketsPage({
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Calendar size={16} />
-                        {formatDate(ticket.event_date, ticket.timezone)}
+                        {formatDate(ticket.event_date)}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Clock size={16} />
-                        {formatTime(ticket.event_date, ticket.timezone)}
+                        {formatTime(ticket.event_date)}
                       </div>
                       {ticket.location && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -692,11 +696,11 @@ function TicketsPage({
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Calendar size={18} />
-                        {formatDate(userTicket.event_tickets.event_date, userTicket.event_tickets.timezone)}
+                        {formatDate(userTicket.event_tickets.event_date)}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Clock size={18} />
-                        {formatTime(userTicket.event_tickets.event_date, userTicket.event_tickets.timezone)}
+                        {formatTime(userTicket.event_tickets.event_date)}
                       </div>
                       {userTicket.event_tickets.location && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
