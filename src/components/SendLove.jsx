@@ -2,23 +2,11 @@ import React, { useState, useEffect } from 'react'
 
 function SendLove({ profile, supabase, onClose, onSuccess }) {
   const [recipient, setRecipient] = useState('')
-  const [message, setMessage] = useState('')
+  const [amount, setAmount] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const [recentRecipients, setRecentRecipients] = useState([])
 
-  const loveMessages = [
-    '🌟 You brighten our community!',
-    '💫 Your energy is magical!',
-    '🌈 Thank you for being you!',
-    '✨ You make Casa de Copas special!',
-    '🎨 Your creativity inspires us!',
-    '🌺 You bring beauty to our space!',
-    '🎵 Your presence is music to our ears!',
-    '🌞 You radiate positive vibes!',
-    '🦋 Your transformation is beautiful!',
-    '🌙 You light up the night!'
-  ]
 
   // Fetch recent love recipients
   useEffect(() => {
@@ -64,6 +52,11 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
       return
     }
 
+    if (!amount || parseInt(amount) <= 0) {
+      setError('Please enter a valid amount')
+      return
+    }
+
     setSending(true)
     setError('')
 
@@ -87,12 +80,12 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
         return
       }
 
-      // Create a love notification
+      // Create a love notification with amount
       const loveNotification = {
         user_id: recipientProfile.id,
         username: recipientProfile.username,
-        amount: 0,
-        message: message.trim() || loveMessages[Math.floor(Math.random() * loveMessages.length)],
+        amount: parseInt(amount),
+        message: `${profile.username} sent you ${amount} Love! 💝`,
         type: 'love',
         from_username: profile.username,
         created_at: new Date().toISOString()
@@ -112,12 +105,12 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
 
       // Success
       if (onSuccess) {
-        onSuccess(`Love sent to ${recipientProfile.username}! 💝`)
+        onSuccess(`${amount} Love sent to ${recipientProfile.username}! 💝`)
       }
       
       // Reset form
       setRecipient('')
-      setMessage('')
+      setAmount('')
       
       // Close after a short delay
       setTimeout(() => {
@@ -194,7 +187,7 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
             marginTop: '0.5rem',
             opacity: 0.8
           }}>
-            Share appreciation with a community member
+            Send love tokens to a community member
           </p>
         </div>
 
@@ -298,25 +291,24 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
               fontSize: '0.9rem',
               fontWeight: '500'
             }}>
-              Message (optional):
+              Amount of Love to send:
             </label>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Add a personal message... or we'll pick a random one!"
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Enter amount"
+              min="1"
               disabled={sending}
-              rows={3}
               style={{
                 width: '100%',
                 padding: '0.75rem',
                 border: '2px solid #f8bbd0',
                 borderRadius: '12px',
-                fontSize: '0.95rem',
+                fontSize: '1rem',
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 transition: 'border-color 0.2s',
-                outline: 'none',
-                resize: 'vertical',
-                fontFamily: 'inherit'
+                outline: 'none'
               }}
               onFocus={(e) => e.target.style.borderColor = '#e91e63'}
               onBlur={(e) => e.target.style.borderColor = '#f8bbd0'}
@@ -409,38 +401,6 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
           </div>
         </form>
 
-        {/* Sample messages */}
-        <div style={{
-          marginTop: '1.5rem',
-          padding: '1rem',
-          background: 'rgba(255, 255, 255, 0.5)',
-          borderRadius: '12px',
-          fontSize: '0.8rem',
-          color: '#ad1457',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontWeight: '500', marginBottom: '0.5rem' }}>
-            Sample messages:
-          </div>
-          <div style={{ 
-            display: 'flex', 
-            flexWrap: 'wrap', 
-            gap: '0.25rem',
-            justifyContent: 'center',
-            fontSize: '0.75rem',
-            opacity: 0.8
-          }}>
-            {['✨ Amazing work!', '🌟 Keep shining!', '💖 Thank you!'].map((msg, i) => (
-              <span key={i} style={{
-                padding: '0.25rem 0.5rem',
-                background: 'rgba(233, 30, 99, 0.1)',
-                borderRadius: '8px'
-              }}>
-                {msg}
-              </span>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Animation for spinner */}

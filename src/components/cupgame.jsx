@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react'
 
 // Helper functions for tarot system
-const getTarotCardName = (level) => {
+const getTarotCardName = (level, username = '') => {
+  // Special case for JPR333 - Knight of the Grail
+  if (username === 'JPR333' || username === 'jpr333') {
+    return 'Knight of the Grail'
+  }
+  
   const swordCards = [
     'King of Swords', 'Queen of Swords', 'Knight of Swords', 'Page of Swords',
     'Ten of Swords', 'Nine of Swords', 'Eight of Swords', 'Seven of Swords',
@@ -19,7 +24,18 @@ const getTarotCardName = (level) => {
   return 'Knight of Cups'
 }
 
-const getCardImage = (level, supabaseInstance = null) => {
+const getCardImage = (level, supabaseInstance = null, username = '') => {
+  // Special case for JPR333 - Knight of the Grail
+  if (username === 'JPR333' || username === 'jpr333') {
+    if (!supabaseInstance) {
+      return `https://via.placeholder.com/200x350/8B4513/FFFFFF?text=Knight+of+Grail`
+    }
+    const { data: { publicUrl } } = supabaseInstance.storage
+      .from('tarot-cards')
+      .getPublicUrl('knightG.png')
+    return publicUrl
+  }
+  
   const cardNames = {
     1: 'KingS.png', 2: 'QueenS.png', 3: 'KnightS.png', 4: 'PageS.png',
     5: 'TenS.png', 6: 'NineS.png', 7: 'EightS.png', 8: 'SevenS.png',
@@ -42,7 +58,12 @@ const getCardImage = (level, supabaseInstance = null) => {
   return publicUrl
 }
 
-const getCardMeaning = (level) => {
+const getCardMeaning = (level, username = '') => {
+  // Special case for JPR333 - Knight of the Grail
+  if (username === 'JPR333' || username === 'jpr333') {
+    return "Knight of the Grail - Guardian of Casa de Copas, keeper of the sacred vessel. One who has transcended both sword and cup to become the living embodiment of service, creativity, and love. The architect of transformation, building bridges between worlds."
+  }
+  
   if (level <= 14) {
     const meanings = [
       "The pinnacle of extractive success - wealth built on others' suffering, yet haunted by the knowledge of what it cost.",
@@ -402,8 +423,8 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div style={{ position: 'relative', marginBottom: '1rem' }}>
               <img
-                src={getCardImage(profile?.tarot_level || 1, supabase)}
-                alt={getTarotCardName(profile?.tarot_level || 1)}
+                src={getCardImage(profile?.tarot_level || 1, supabase, profile?.username)}
+                alt={getTarotCardName(profile?.tarot_level || 1, profile?.username)}
                 style={cardImageStyle}
                 onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
                 onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
@@ -433,10 +454,12 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             </div>
             
             <h1 style={cardTitleStyle}>
-              {getTarotCardName(profile?.tarot_level || 1)}
+              {getTarotCardName(profile?.tarot_level || 1, profile?.username)}
             </h1>
             <div style={cardLevelStyle}>
-              Level {profile?.tarot_level || 1} {isMaxLevel && '• COMPLETE'}
+              {(profile?.username === 'JPR333' || profile?.username === 'jpr333') 
+                ? 'Guardian of Casa de Copas' 
+                : `Level ${profile?.tarot_level || 1} ${isMaxLevel ? '• COMPLETE' : ''}`}
             </div>
           </div>
 
@@ -451,7 +474,19 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
               Next Transformation
             </div>
             
-            {isMaxLevel ? (
+            {(profile?.username === 'JPR333' || profile?.username === 'jpr333') ? (
+              <div style={{
+                background: 'linear-gradient(135deg, #8b4513, #d2691e)',
+                color: 'white',
+                borderRadius: '0.75rem',
+                padding: '1rem',
+                textAlign: 'center',
+                boxShadow: '0 4px 15px rgba(139, 69, 19, 0.3)'
+              }}>
+                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '0.25rem' }}>Eternal Guardian</div>
+                <div style={{ fontSize: '0.7rem', opacity: 0.9 }}>Knight of the Grail</div>
+              </div>
+            ) : isMaxLevel ? (
               <div style={{
                 background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
                 color: 'white',
@@ -575,7 +610,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             lineHeight: '1.5',
             margin: 0
           }}>
-            {getCardMeaning(profile?.tarot_level || 1)}
+            {getCardMeaning(profile?.tarot_level || 1, profile?.username)}
           </p>
         </details>
 
