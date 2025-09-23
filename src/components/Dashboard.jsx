@@ -1329,7 +1329,21 @@ function Dashboard({
             }}
             title="Cup Game"
           >
-            🏆
+            <img 
+              src={supabase ? 
+                supabase.storage.from('tarot-cards').getPublicUrl('LOV.png').data.publicUrl 
+                : '/placeholder-trophy.png'
+              }
+              alt="Cup Game"
+              style={{
+                width: '2rem',
+                height: '2rem',
+                objectFit: 'contain'
+              }}
+              onError={(e) => {
+                e.target.outerHTML = '🏆'
+              }}
+            />
             <div style={{
               fontSize: '0.7rem',
               fontWeight: '500',
@@ -1365,7 +1379,21 @@ function Dashboard({
               e.target.style.transform = 'scale(1)'
             }}
           >
-            🎫
+            <img 
+              src={supabase ? 
+                supabase.storage.from('tarot-cards').getPublicUrl('TIX.png').data.publicUrl 
+                : '/placeholder-ticket.png'
+              }
+              alt="Tickets"
+              style={{
+                width: '2rem',
+                height: '2rem',
+                objectFit: 'contain'
+              }}
+              onError={(e) => {
+                e.target.outerHTML = '🎫'
+              }}
+            />
             <div style={{
               fontSize: '0.7rem',
               fontWeight: '500',
