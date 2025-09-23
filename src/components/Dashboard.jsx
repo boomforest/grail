@@ -1303,28 +1303,19 @@ function Dashboard({
           <button
             onClick={onShowCupGame}
             style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              border: '2px solid #d2691e',
-              borderRadius: '50%',
-              width: '70px',
-              height: '70px',
-              fontSize: '1.8rem',
+              background: 'none',
+              border: 'none',
               cursor: 'pointer',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)',
               transition: 'all 0.3s ease',
-              color: '#d2691e'
+              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
             }}
             onMouseOver={(e) => {
-              e.target.style.transform = 'scale(1.05)'
-              e.target.style.boxShadow = '0 6px 20px rgba(210, 105, 30, 0.4)'
+              e.target.style.transform = 'scale(1.1)'
+              e.target.style.filter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
             }}
             onMouseOut={(e) => {
               e.target.style.transform = 'scale(1)'
-              e.target.style.boxShadow = '0 4px 15px rgba(210, 105, 30, 0.3)'
+              e.target.style.filter = 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
             }}
             title="Cup Game"
           >
@@ -1335,47 +1326,33 @@ function Dashboard({
               }
               alt="Cup Game"
               style={{
-                width: '2rem',
-                height: '2rem',
+                width: '3rem',
+                height: '3rem',
                 objectFit: 'contain'
               }}
               onError={(e) => {
                 e.target.outerHTML = '🏆'
               }}
             />
-            <div style={{
-              fontSize: '0.7rem',
-              fontWeight: '500',
-              color: '#8b4513',
-              fontStyle: 'italic',
-              marginTop: '0.2rem'
-            }}>
-              Game
-            </div>
           </button>
 
           {/* Right - Tickets */}
           <button
             onClick={() => onShowTickets(false)} // Always go to user tickets page
             style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              border: '2px solid #d2691e',
-              borderRadius: '50%',
-              width: '70px',
-              height: '70px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.8rem',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
               transition: 'all 0.3s ease',
-              cursor: 'pointer'
+              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
             }}
             onMouseOver={(e) => {
-              e.target.style.transform = 'scale(1.05)'
+              e.target.style.transform = 'scale(1.1)'
+              e.target.style.filter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
             }}
             onMouseOut={(e) => {
               e.target.style.transform = 'scale(1)'
+              e.target.style.filter = 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
             }}
           >
             <img 
@@ -1385,23 +1362,14 @@ function Dashboard({
               }
               alt="Tickets"
               style={{
-                width: '2rem',
-                height: '2rem',
+                width: '3rem',
+                height: '3rem',
                 objectFit: 'contain'
               }}
               onError={(e) => {
                 e.target.outerHTML = '🎫'
               }}
             />
-            <div style={{
-              fontSize: '0.7rem',
-              fontWeight: '500',
-              color: '#8b4513',
-              fontStyle: 'italic',
-              marginTop: '0.2rem'
-            }}>
-              Tickets
-            </div>
           </button>
 
           {/* Settings Panel */}
