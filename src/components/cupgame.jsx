@@ -231,10 +231,40 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     return Math.round(percentage * 10) / 10
   }
 
+  // Get background image URL based on screen size
+  const getBackgroundImage = () => {
+    if (!supabase) return null
+    
+    const isMobile = window.innerWidth <= 768
+    const filename = isMobile ? 'backgroundmobile.png' : 'backgrounddesktop.png'
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('tarot-cards')
+      .getPublicUrl(filename)
+    
+    return publicUrl
+  }
+
+  const [backgroundUrl, setBackgroundUrl] = useState(getBackgroundImage())
+
+  // Update background on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setBackgroundUrl(getBackgroundImage())
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [supabase])
 
   const containerStyle = {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #fef7ed, #fed7aa)',
+    backgroundColor: '#fef7ed',
+    backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : 'linear-gradient(135deg, #fef7ed, #fed7aa)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'fixed',
     fontFamily: 'system-ui, -apple-system, sans-serif',
     padding: '1rem',
     color: '#92400e',
@@ -554,8 +584,23 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                   <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#92400e', marginBottom: '0.25rem' }}>
                     {getTarotCardName((profile?.tarot_level || 1) + 1)}
                   </div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ea580c', marginBottom: '0.25rem' }}>
-                    {Math.max(0, currentTransformationCost - (profile?.lov_balance || 0)).toLocaleString()} ❤️
+                  <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ea580c', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    {Math.max(0, currentTransformationCost - (profile?.lov_balance || 0)).toLocaleString()}
+                    <img 
+                      src={supabase ? 
+                        supabase.storage.from('tarot-cards').getPublicUrl('LOV.png').data.publicUrl 
+                        : '/placeholder-heart.png'
+                      }
+                      alt="Love"
+                      style={{
+                        width: '1.5rem',
+                        height: '1.5rem',
+                        objectFit: 'contain'
+                      }}
+                      onError={(e) => {
+                        e.target.outerHTML = '❤️'
+                      }}
+                    />
                   </div>
                   <div style={{ fontSize: '0.7rem', color: '#a16207' }}>
                     {(profile?.lov_balance || 0) >= currentTransformationCost ? 'Ready!' : 'Love needed'}
