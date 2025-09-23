@@ -1155,10 +1155,41 @@ function Dashboard({
     );
   }
 
+  // Get background image URL based on screen size
+  const getBackgroundImage = () => {
+    if (!supabase) return null
+    
+    const isMobile = window.innerWidth <= 768
+    const filename = isMobile ? 'backgroundmobile.png' : 'backgrounddesktop.png'
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('tarot-cards')
+      .getPublicUrl(filename)
+    
+    return publicUrl
+  }
+
+  const [backgroundUrl, setBackgroundUrl] = useState(getBackgroundImage())
+
+  // Update background on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setBackgroundUrl(getBackgroundImage())
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [supabase])
+
   return (
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#f5f5dc',
+      backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
       fontFamily: 'system-ui, -apple-system, sans-serif',
       padding: '1rem',
       position: 'relative',
