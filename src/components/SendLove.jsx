@@ -108,6 +108,34 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
         return
       }
 
+      // Update recipient's balance
+      const { data: currentProfile, error: fetchBalanceError } = await supabase
+        .from('profiles')
+        .select('total_palomas_collected')
+        .eq('id', recipientProfile.id)
+        .single()
+
+      if (fetchBalanceError) {
+        console.error('Error fetching recipient balance:', fetchBalanceError)
+        setError('Failed to update balance')
+        setSending(false)
+        return
+      }
+
+      const newBalance = (currentProfile.total_palomas_collected || 0) + parseInt(amount)
+      
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ total_palomas_collected: newBalance })
+        .eq('id', recipientProfile.id)
+
+      if (updateError) {
+        console.error('Error updating balance:', updateError)
+        setError('Failed to update balance')
+        setSending(false)
+        return
+      }
+
       // Success
       if (onSuccess) {
         onSuccess(`${amount} Love sent to ${recipientProfile.username}! 💝`)
