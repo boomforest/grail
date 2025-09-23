@@ -1541,15 +1541,37 @@ function Dashboard({
               e.currentTarget.style.transform = 'scale(1)'
             }}
           >
-            {/* Dove emoji - massive */}
-            <div style={{ 
-              fontSize: 'clamp(12rem, 30vw, 20rem)', // Huge responsive size
-              marginBottom: '0rem',
-              filter: 'drop-shadow(0 8px 30px rgba(0,0,0,0.2))',
+            {/* DOV image */}
+            <div style={{
               textAlign: 'center',
-              lineHeight: '0.9'
+              marginBottom: '0rem',
+              filter: 'drop-shadow(0 8px 30px rgba(0,0,0,0.2))'
             }}>
-              🕊️
+              <img 
+                src={supabase ? 
+                  supabase.storage.from('tarot-cards').getPublicUrl('DOV.png').data.publicUrl 
+                  : '/placeholder-dove.png'
+                }
+                alt="Palomas"
+                style={{
+                  width: 'clamp(12rem, 30vw, 20rem)',
+                  height: 'auto',
+                  maxWidth: '100%'
+                }}
+                onError={(e) => {
+                  e.target.style.display = 'none'
+                  e.target.nextSibling.style.display = 'block'
+                }}
+              />
+              <div style={{
+                fontSize: 'clamp(12rem, 30vw, 20rem)',
+                fontWeight: '700',
+                display: 'none',
+                textAlign: 'center',
+                lineHeight: '0.9'
+              }}>
+                🕊️
+              </div>
             </div>
             
             {/* Palomas count - big */}
