@@ -467,13 +467,13 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
 
                 <div style={{
                   padding: '1rem',
-                  background: '#faf5ff',
+                  background: '#fefbf0',
                   borderRadius: '0.75rem',
-                  border: '1px solid #c4b5fd'
+                  border: '1px solid #e6d3a3'
                 }}>
                   <p style={{
                     fontSize: '0.9rem',
-                    color: '#7c3aed',
+                    color: '#8b4513',
                     fontStyle: 'italic',
                     textAlign: 'center',
                     margin: 0
