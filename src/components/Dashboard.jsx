@@ -1556,11 +1556,11 @@ function Dashboard({
             <div style={{
               fontSize: 'clamp(4rem, 12vw, 7rem)', // Large responsive size
               fontWeight: '700',
-              color: '#d2691e',
+              color: '#f5f5dc', // Cream/ivory color
               fontStyle: 'italic',
               textAlign: 'center',
               lineHeight: '1',
-              textShadow: '0 2px 10px rgba(210, 105, 30, 0.2)'
+              textShadow: '0 4px 20px rgba(0, 0, 0, 0.6)' // Stronger shadow for better contrast
             }}>
               {formatNumber(profile?.total_palomas_collected || 0)}
             </div>
