@@ -108,6 +108,55 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
 
   const isMaxLevel = (profile?.tarot_level || 1) >= 26
 
+  // Check for automatic transformation
+  useEffect(() => {
+    const checkAutoTransformation = async () => {
+      if (!profile || !supabase || isMaxLevel) return
+      
+      const currentLevel = profile.tarot_level || 1
+      const lovBalance = profile.lov_balance || 0
+      
+      // Skip auto-transformation for Knight of the Grail (JPR333)
+      if (profile.username === 'JPR333' || profile.username === 'jpr333') return
+      
+      if (lovBalance >= currentTransformationCost && currentTransformationCost > 0) {
+        try {
+          // Deduct the LOV cost and advance to next level
+          const newLovBalance = lovBalance - currentTransformationCost
+          const newLevel = currentLevel + 1
+          
+          const { error } = await supabase
+            .from('profiles')
+            .update({ 
+              tarot_level: newLevel,
+              lov_balance: newLovBalance
+            })
+            .eq('id', profile.id)
+          
+          if (!error) {
+            // Update local profile
+            const updatedProfile = {
+              ...profile,
+              tarot_level: newLevel,
+              lov_balance: newLovBalance
+            }
+            
+            if (onProfileUpdate) {
+              onProfileUpdate(updatedProfile)
+            }
+            
+            setMessage(`Transformed to ${getTarotCardName(newLevel, profile.username)}!`)
+            setTimeout(() => setMessage(''), 3000)
+          }
+        } catch (error) {
+          console.error('Auto-transformation error:', error)
+        }
+      }
+    }
+    
+    checkAutoTransformation()
+  }, [profile?.lov_balance, currentTransformationCost, profile?.tarot_level])
+
   // Load current transformation cost
   useEffect(() => {
     const loadTransformationCost = async () => {
@@ -182,7 +231,6 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     return Math.round(percentage * 10) / 10
   }
 
-  const overallProgress = calculateMeritPercentage()
 
   const containerStyle = {
     minHeight: '100vh',
@@ -507,29 +555,13 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                     {getTarotCardName((profile?.tarot_level || 1) + 1)}
                   </div>
                   <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#ea580c', marginBottom: '0.25rem' }}>
-                    {currentTransformationCost.toLocaleString()} ❤️
+                    {Math.max(0, currentTransformationCost - (profile?.lov_balance || 0)).toLocaleString()} ❤️
                   </div>
                   <div style={{ fontSize: '0.7rem', color: '#a16207' }}>
-                    Love needed
+                    {(profile?.lov_balance || 0) >= currentTransformationCost ? 'Ready!' : 'Love needed'}
                   </div>
                 </div>
                 
-                {overallProgress >= 100 && (
-                  <div style={{
-                    marginTop: '0.5rem',
-                    background: '#d1fae5',
-                    border: '2px solid #6ee7b7',
-                    borderRadius: '0.5rem',
-                    padding: '0.5rem'
-                  }}>
-                    <div style={{ color: '#047857', fontWeight: 'bold', fontSize: '0.7rem' }}>
-                      ✅ Ready to Transform!
-                    </div>
-                    <div style={{ color: '#059669', fontSize: '0.6rem' }}>
-                      Visit Casa to complete
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </div>
