@@ -32,7 +32,7 @@ const getCardImage = (level, supabaseInstance = null, username = '') => {
     }
     const { data: { publicUrl } } = supabaseInstance.storage
       .from('tarot-cards')
-      .getPublicUrl('knightG.png')
+      .getPublicUrl('KnightG.png')
     return publicUrl
   }
   

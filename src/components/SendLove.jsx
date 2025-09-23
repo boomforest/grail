@@ -14,6 +14,9 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
       if (!supabase || !profile) return
 
       try {
+        // For now, skip fetching recent recipients due to database schema issues
+        // This feature can be re-enabled once the schema is updated
+        /*
         const { data, error } = await supabase
           .from('release_notifications')
           .select('username, created_at')
@@ -21,6 +24,9 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
           .eq('from_username', profile.username)
           .order('created_at', { ascending: false })
           .limit(5)
+        */
+        const data = null
+        const error = null
 
         if (!error && data) {
           // Get unique recipients (in case admin sent multiple to same person)
@@ -87,7 +93,6 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
         amount: parseInt(amount),
         message: `${profile.username} sent you ${amount} Love! 💝`,
         type: 'love',
-        from_username: profile.username,
         created_at: new Date().toISOString()
       }
 
