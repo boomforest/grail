@@ -1214,14 +1214,6 @@ function Dashboard({
           <div 
             onClick={() => setShowSettings(!showSettings)}
             style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              border: '2px solid #d2691e',
-              borderRadius: '50%',
-              padding: '0.4rem',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
               cursor: 'pointer',
               width: '70px',
               height: '70px',
@@ -1236,17 +1228,24 @@ function Dashboard({
               size="small"
               showUpload={false}
             />
+            {/* Username overlay */}
             <div style={{
-              fontSize: '0.7rem',
-              fontWeight: '500',
-              color: '#8b4513',
-              fontStyle: 'italic',
-              marginTop: '0.2rem',
+              position: 'absolute',
+              bottom: '0',
+              left: '0',
+              right: '0',
+              background: 'rgba(0, 0, 0, 0.7)',
+              color: 'white',
+              fontSize: '0.6rem',
+              fontWeight: '600',
               textAlign: 'center',
+              padding: '0.2rem',
+              borderBottomLeftRadius: '50%',
+              borderBottomRightRadius: '50%',
               lineHeight: '1'
             }}>
-              {(profile?.username || 'User').length > 6 
-                ? (profile?.username || 'User').substring(0, 6) + '...'
+              {(profile?.username || 'User').length > 8 
+                ? (profile?.username || 'User').substring(0, 8) + '...'
                 : (profile?.username || 'User')}
             </div>
             
