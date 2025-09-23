@@ -90,9 +90,9 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
       const loveNotification = {
         user_id: recipientProfile.id,
         username: recipientProfile.username,
+        token_type: 'LOVE',
         amount: parseInt(amount),
-        message: `${profile.username} sent you ${amount} Love! 💝`,
-        type: 'love',
+        reason: `${profile.username} sent you ${amount} Love! 💝`,
         created_at: new Date().toISOString()
       }
 
