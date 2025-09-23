@@ -108,25 +108,25 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
         return
       }
 
-      // Update recipient's balance
+      // Update recipient's LOV balance
       const { data: currentProfile, error: fetchBalanceError } = await supabase
         .from('profiles')
-        .select('total_palomas_collected')
+        .select('lov_balance')
         .eq('id', recipientProfile.id)
         .single()
 
       if (fetchBalanceError) {
-        console.error('Error fetching recipient balance:', fetchBalanceError)
+        console.error('Error fetching recipient LOV balance:', fetchBalanceError)
         setError('Failed to update balance')
         setSending(false)
         return
       }
 
-      const newBalance = (currentProfile.total_palomas_collected || 0) + parseInt(amount)
+      const newLovBalance = (currentProfile.lov_balance || 0) + parseInt(amount)
       
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ total_palomas_collected: newBalance })
+        .update({ lov_balance: newLovBalance })
         .eq('id', recipientProfile.id)
 
       if (updateError) {

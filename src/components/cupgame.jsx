@@ -176,9 +176,9 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
 
   const calculateMeritPercentage = () => {
     if (!profile || currentTransformationCost === 0) return 0
-    const palomasNeeded = currentTransformationCost
-    const palomasPurchased = profile.palomas_purchased || 0
-    const percentage = Math.min((palomasPurchased / palomasNeeded) * 100, 100)
+    const lovNeeded = currentTransformationCost
+    const lovBalance = profile.lov_balance || 0
+    const percentage = Math.min((lovBalance / lovNeeded) * 100, 100)
     return Math.round(percentage * 10) / 10
   }
 
