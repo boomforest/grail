@@ -6,6 +6,7 @@ function PalomasMenu({
   onShowSendForm,
   onShowReleaseForm,
   onPayPalClick,
+  onShowSendLove,
   onClose
 }) {
   const formatNumber = (num) => {
@@ -121,38 +122,74 @@ function PalomasMenu({
 
           {/* Send Palomas (Admin) or Give Palomas (Regular user) */}
           {isAdmin ? (
-            <button
-              onClick={() => {
-                onShowSendForm('DOV')
-                onClose()
-              }}
-              style={{
-                background: 'linear-gradient(45deg, #d2691e, #cd853f)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '15px',
-                padding: '1rem 1.5rem',
-                fontSize: '1.1rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem'
-              }}
-              onMouseOver={(e) => {
-                e.target.style.transform = 'translateY(-2px)'
-                e.target.style.boxShadow = '0 6px 20px rgba(210, 105, 30, 0.4)'
-              }}
-              onMouseOut={(e) => {
-                e.target.style.transform = 'translateY(0)'
-                e.target.style.boxShadow = '0 4px 15px rgba(210, 105, 30, 0.3)'
-              }}
-            >
-              ✉️ Send Palomas
-            </button>
+            <>
+              <button
+                onClick={() => {
+                  onShowSendForm('DOV')
+                  onClose()
+                }}
+                style={{
+                  background: 'linear-gradient(45deg, #d2691e, #cd853f)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '15px',
+                  padding: '1rem 1.5rem',
+                  fontSize: '1.1rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)'
+                  e.target.style.boxShadow = '0 6px 20px rgba(210, 105, 30, 0.4)'
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.boxShadow = '0 4px 15px rgba(210, 105, 30, 0.3)'
+                }}
+              >
+                ✉️ Send Palomas
+              </button>
+
+              {/* Send Love button - Admin only */}
+              <button
+                onClick={() => {
+                  onShowSendLove()
+                  onClose()
+                }}
+                style={{
+                  background: 'linear-gradient(45deg, #e91e63, #f06292)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '15px',
+                  padding: '1rem 1.5rem',
+                  fontSize: '1.1rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 15px rgba(233, 30, 99, 0.3)',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)'
+                  e.target.style.boxShadow = '0 6px 20px rgba(233, 30, 99, 0.4)'
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.boxShadow = '0 4px 15px rgba(233, 30, 99, 0.3)'
+                }}
+              >
+                💝 Send Love
+              </button>
+            </>
           ) : (
             <button
               onClick={() => {

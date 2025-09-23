@@ -1,0 +1,457 @@
+import React, { useState, useEffect } from 'react'
+
+function SendLove({ profile, supabase, onClose, onSuccess }) {
+  const [recipient, setRecipient] = useState('')
+  const [message, setMessage] = useState('')
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
+  const [recentRecipients, setRecentRecipients] = useState([])
+
+  const loveMessages = [
+    '🌟 You brighten our community!',
+    '💫 Your energy is magical!',
+    '🌈 Thank you for being you!',
+    '✨ You make Casa de Copas special!',
+    '🎨 Your creativity inspires us!',
+    '🌺 You bring beauty to our space!',
+    '🎵 Your presence is music to our ears!',
+    '🌞 You radiate positive vibes!',
+    '🦋 Your transformation is beautiful!',
+    '🌙 You light up the night!'
+  ]
+
+  // Fetch recent love recipients
+  useEffect(() => {
+    const fetchRecentRecipients = async () => {
+      if (!supabase || !profile) return
+
+      try {
+        const { data, error } = await supabase
+          .from('release_notifications')
+          .select('username, created_at')
+          .eq('type', 'love')
+          .eq('from_username', profile.username)
+          .order('created_at', { ascending: false })
+          .limit(5)
+
+        if (!error && data) {
+          // Get unique recipients (in case admin sent multiple to same person)
+          const uniqueRecipients = []
+          const seen = new Set()
+          
+          for (const item of data) {
+            if (!seen.has(item.username)) {
+              seen.add(item.username)
+              uniqueRecipients.push(item.username)
+            }
+          }
+          
+          setRecentRecipients(uniqueRecipients.slice(0, 5))
+        }
+      } catch (err) {
+        console.error('Error fetching recent recipients:', err)
+      }
+    }
+
+    fetchRecentRecipients()
+  }, [supabase, profile])
+
+  const handleSendLove = async (e) => {
+    e.preventDefault()
+    
+    if (!recipient.trim()) {
+      setError('Please enter a username')
+      return
+    }
+
+    setSending(true)
+    setError('')
+
+    try {
+      // Check if recipient exists
+      const { data: recipientProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .ilike('username', recipient.trim())
+        .single()
+
+      if (fetchError || !recipientProfile) {
+        setError('User not found')
+        setSending(false)
+        return
+      }
+
+      if (recipientProfile.username.toUpperCase() === profile.username.toUpperCase()) {
+        setError("You can't send love to yourself! 💝")
+        setSending(false)
+        return
+      }
+
+      // Create a love notification
+      const loveNotification = {
+        user_id: recipientProfile.id,
+        username: recipientProfile.username,
+        amount: 0,
+        message: message.trim() || loveMessages[Math.floor(Math.random() * loveMessages.length)],
+        type: 'love',
+        from_username: profile.username,
+        created_at: new Date().toISOString()
+      }
+
+      // Insert the love notification
+      const { error: insertError } = await supabase
+        .from('release_notifications')
+        .insert([loveNotification])
+
+      if (insertError) {
+        console.error('Error sending love:', insertError)
+        setError('Failed to send love')
+        setSending(false)
+        return
+      }
+
+      // Success
+      if (onSuccess) {
+        onSuccess(`Love sent to ${recipientProfile.username}! 💝`)
+      }
+      
+      // Reset form
+      setRecipient('')
+      setMessage('')
+      
+      // Close after a short delay
+      setTimeout(() => {
+        onClose()
+      }, 1500)
+
+    } catch (err) {
+      console.error('Error:', err)
+      setError('Something went wrong')
+      setSending(false)
+    }
+  }
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 10001,
+      padding: '1rem'
+    }}>
+      <div style={{
+        background: 'linear-gradient(135deg, #fff0f5, #ffe0ec)',
+        borderRadius: '25px',
+        padding: '2rem',
+        maxWidth: '450px',
+        width: '100%',
+        boxShadow: '0 20px 60px rgba(233, 30, 99, 0.3)',
+        border: '3px solid #e91e63',
+        position: 'relative'
+      }}>
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            background: 'none',
+            border: 'none',
+            fontSize: '1.5rem',
+            cursor: 'pointer',
+            color: '#e91e63',
+            opacity: 0.7,
+            transition: 'opacity 0.2s'
+          }}
+          onMouseOver={(e) => e.target.style.opacity = '1'}
+          onMouseOut={(e) => e.target.style.opacity = '0.7'}
+        >
+          ×
+        </button>
+
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>💝</div>
+          <h2 style={{
+            fontSize: '1.8rem',
+            color: '#e91e63',
+            margin: '0',
+            fontWeight: 'normal',
+            fontStyle: 'italic'
+          }}>
+            Send Love
+          </h2>
+          <p style={{
+            fontSize: '0.9rem',
+            color: '#ad1457',
+            marginTop: '0.5rem',
+            opacity: 0.8
+          }}>
+            Share appreciation with a community member
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSendLove}>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              color: '#ad1457',
+              fontSize: '0.9rem',
+              fontWeight: '500'
+            }}>
+              Send love to:
+            </label>
+            <input
+              type="text"
+              value={recipient}
+              onChange={(e) => setRecipient(e.target.value)}
+              placeholder="Enter username"
+              disabled={sending}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '2px solid #f8bbd0',
+                borderRadius: '12px',
+                fontSize: '1rem',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                transition: 'border-color 0.2s',
+                outline: 'none'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#e91e63'}
+              onBlur={(e) => e.target.style.borderColor = '#f8bbd0'}
+            />
+          </div>
+
+          {/* Recent Recipients */}
+          {recentRecipients.length > 0 && (
+            <div style={{ 
+              marginBottom: '1.5rem',
+              padding: '0.75rem',
+              background: 'rgba(255, 255, 255, 0.7)',
+              borderRadius: '12px',
+              border: '1px solid #f8bbd0'
+            }}>
+              <div style={{
+                fontSize: '0.8rem',
+                color: '#ad1457',
+                marginBottom: '0.5rem',
+                fontWeight: '500'
+              }}>
+                Recent recipients:
+              </div>
+              <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.5rem'
+              }}>
+                {recentRecipients.map((username, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => {
+                      setRecipient(username)
+                      setError('')
+                    }}
+                    style={{
+                      padding: '0.35rem 0.75rem',
+                      background: 'linear-gradient(45deg, #fce4ec, #f8bbd0)',
+                      border: '1px solid #e91e63',
+                      borderRadius: '20px',
+                      fontSize: '0.85rem',
+                      color: '#ad1457',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      fontWeight: '500'
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.background = 'linear-gradient(45deg, #e91e63, #f06292)'
+                      e.target.style.color = 'white'
+                      e.target.style.transform = 'scale(1.05)'
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.background = 'linear-gradient(45deg, #fce4ec, #f8bbd0)'
+                      e.target.style.color = '#ad1457'
+                      e.target.style.transform = 'scale(1)'
+                    }}
+                  >
+                    {username}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '0.5rem',
+              color: '#ad1457',
+              fontSize: '0.9rem',
+              fontWeight: '500'
+            }}>
+              Message (optional):
+            </label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Add a personal message... or we'll pick a random one!"
+              disabled={sending}
+              rows={3}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '2px solid #f8bbd0',
+                borderRadius: '12px',
+                fontSize: '0.95rem',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                transition: 'border-color 0.2s',
+                outline: 'none',
+                resize: 'vertical',
+                fontFamily: 'inherit'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#e91e63'}
+              onBlur={(e) => e.target.style.borderColor = '#f8bbd0'}
+            />
+          </div>
+
+          {/* Error message */}
+          {error && (
+            <div style={{
+              background: '#ffebee',
+              border: '1px solid #ffcdd2',
+              borderRadius: '10px',
+              padding: '0.75rem',
+              marginBottom: '1rem',
+              color: '#c62828',
+              fontSize: '0.9rem',
+              textAlign: 'center'
+            }}>
+              {error}
+            </div>
+          )}
+
+          {/* Buttons */}
+          <div style={{
+            display: 'flex',
+            gap: '1rem',
+            justifyContent: 'flex-end'
+          }}>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={sending}
+              style={{
+                padding: '0.75rem 1.5rem',
+                border: '2px solid #e91e63',
+                borderRadius: '12px',
+                background: 'transparent',
+                color: '#e91e63',
+                fontSize: '1rem',
+                fontWeight: '500',
+                cursor: sending ? 'not-allowed' : 'pointer',
+                opacity: sending ? 0.5 : 1,
+                transition: 'all 0.2s'
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={sending}
+              style={{
+                padding: '0.75rem 2rem',
+                border: 'none',
+                borderRadius: '12px',
+                background: sending 
+                  ? 'linear-gradient(45deg, #bdbdbd, #9e9e9e)'
+                  : 'linear-gradient(45deg, #e91e63, #f06292)',
+                color: 'white',
+                fontSize: '1rem',
+                fontWeight: '500',
+                cursor: sending ? 'not-allowed' : 'pointer',
+                boxShadow: sending 
+                  ? 'none'
+                  : '0 4px 15px rgba(233, 30, 99, 0.3)',
+                transition: 'all 0.3s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              {sending ? (
+                <>
+                  <span style={{
+                    display: 'inline-block',
+                    width: '14px',
+                    height: '14px',
+                    border: '2px solid white',
+                    borderTopColor: 'transparent',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite'
+                  }}></span>
+                  Sending...
+                </>
+              ) : (
+                <>
+                  💌 Send Love
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+
+        {/* Sample messages */}
+        <div style={{
+          marginTop: '1.5rem',
+          padding: '1rem',
+          background: 'rgba(255, 255, 255, 0.5)',
+          borderRadius: '12px',
+          fontSize: '0.8rem',
+          color: '#ad1457',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontWeight: '500', marginBottom: '0.5rem' }}>
+            Sample messages:
+          </div>
+          <div style={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: '0.25rem',
+            justifyContent: 'center',
+            fontSize: '0.75rem',
+            opacity: 0.8
+          }}>
+            {['✨ Amazing work!', '🌟 Keep shining!', '💖 Thank you!'].map((msg, i) => (
+              <span key={i} style={{
+                padding: '0.25rem 0.5rem',
+                background: 'rgba(233, 30, 99, 0.1)',
+                borderRadius: '8px'
+              }}>
+                {msg}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Animation for spinner */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  )
+}
+
+export default SendLove

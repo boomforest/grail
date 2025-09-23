@@ -16,6 +16,7 @@ import PayPalButton from './components/PayPalButton'
 import PalomasMenu from './components/PalomasMenu'
 import TicketsPage from './components/TicketsPage'
 import AdminTicketManager from './components/AdminTicketManager'
+import SendLove from './components/SendLove'
 
 function App() {
   // Core state
@@ -41,6 +42,7 @@ function App() {
   const [showPalomasMenu, setShowPalomasMenu] = useState(false) // Palomas management menu
   const [showTickets, setShowTickets] = useState(false) // Tickets page
   const [showAdminTickets, setShowAdminTickets] = useState(false) // Admin ticket management
+  const [showSendLove, setShowSendLove] = useState(false) // Send love feature
   
   // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
@@ -694,16 +696,18 @@ function App() {
             onShowSendForm={setShowSendForm}
             onShowReleaseForm={setShowReleaseForm}
             onPayPalClick={handlePayPalClick}
+            onShowSendLove={() => setShowSendLove(true)}
             onClose={() => setShowPalomasMenu(false)}
           />
         )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
           isOpen={showGPTChat} 
           onToggle={toggleGPTChat} 
           profile={profile} 
-        />
+        /> */}
       </>
     )
   }
@@ -818,16 +822,18 @@ function App() {
             onShowSendForm={setShowSendForm}
             onShowReleaseForm={setShowReleaseForm}
             onPayPalClick={handlePayPalClick}
+            onShowSendLove={() => setShowSendLove(true)}
             onClose={() => setShowPalomasMenu(false)}
           />
         )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
           isOpen={showGPTChat} 
           onToggle={toggleGPTChat} 
           profile={profile} 
-        />
+        /> */}
       </>
     )
   }
@@ -845,11 +851,12 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
           isOpen={showGPTChat} 
           onToggle={toggleGPTChat} 
           profile={profile} 
-        />
+        /> */}
       </>
     )
   }
@@ -871,11 +878,12 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
           isOpen={showGPTChat} 
           onToggle={toggleGPTChat} 
           profile={profile} 
-        />
+        /> */}
       </>
     )
   }
@@ -894,11 +902,12 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
           isOpen={showGPTChat} 
           onToggle={toggleGPTChat} 
           profile={profile} 
-        />
+        /> */}
       </>
     )
   }
@@ -914,11 +923,12 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
           isOpen={showGPTChat} 
           onToggle={toggleGPTChat} 
           profile={profile} 
-        />
+        /> */}
       </>
     )
   }
@@ -934,11 +944,12 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
           isOpen={showGPTChat} 
           onToggle={toggleGPTChat} 
           profile={profile} 
-        />
+        /> */}
       </>
     )
   }
@@ -957,11 +968,76 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
           isOpen={showGPTChat} 
           onToggle={toggleGPTChat} 
           profile={profile} 
+        /> */}
+      </>
+    )
+  }
+
+  // Send Love view (Admin only)
+  if (user && showSendLove && isAdmin) {
+    return (
+      <>
+        <SendLove
+          profile={profile}
+          supabase={supabase}
+          onClose={() => setShowSendLove(false)}
+          onSuccess={(msg) => {
+            setMessage(msg)
+            setTimeout(() => setMessage(''), 3000)
+          }}
         />
+        <Dashboard
+          profile={profile}
+          user={user}
+          supabase={supabase}
+          isAdmin={isAdmin}
+          showSettings={showSettings}
+          setShowSettings={setShowSettings}
+          onShowNotifications={() => setShowNotifications(true)}
+          onShowSendForm={setShowSendForm}
+          onShowReleaseForm={setShowReleaseForm}
+          onShowSendMeritsForm={() => setShowSendMeritsForm(true)}
+          onShowPalomasMenu={() => setShowPalomasMenu(true)}
+          onShowTickets={(isAdmin) => {
+            if (isAdmin) {
+              setShowAdminTickets(true)
+            } else {
+              setShowTickets(true)
+            }
+          }}
+          handlePalomasTransfer={handlePalomasTransfer}
+          transferData={transferData}
+          setTransferData={setTransferData}
+          isTransferring={isTransferring}
+          onLogout={handleLogout}
+          message={message}
+          onShowCupGame={() => setShowCupGame(true)}
+          onPayPalClick={handlePayPalClick}
+        />
+        {showPalomasMenu && (
+          <PalomasMenu
+            profile={profile}
+            isAdmin={isAdmin}
+            onShowSendForm={setShowSendForm}
+            onShowReleaseForm={setShowReleaseForm}
+            onPayPalClick={handlePayPalClick}
+            onShowSendLove={() => setShowSendLove(true)}
+            onClose={() => setShowPalomasMenu(false)}
+          />
+        )}
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        {/* GPTChatWindow disabled - moved to standalone page
+        <GPTChatWindow 
+          isOpen={showGPTChat} 
+          onToggle={toggleGPTChat} 
+          profile={profile} 
+        /> */}
       </>
     )
   }
@@ -983,11 +1059,12 @@ function App() {
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
           isOpen={showGPTChat} 
           onToggle={toggleGPTChat} 
           profile={profile} 
-        />
+        /> */}
       </>
     )
   }
@@ -1029,16 +1106,18 @@ function App() {
             onShowSendForm={setShowSendForm}
             onShowReleaseForm={setShowReleaseForm}
             onPayPalClick={handlePayPalClick}
+            onShowSendLove={() => setShowSendLove(true)}
             onClose={() => setShowPalomasMenu(false)}
           />
         )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+        {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
           isOpen={showGPTChat} 
           onToggle={toggleGPTChat} 
           profile={profile} 
-        />
+        /> */}
       </>
     )
   }

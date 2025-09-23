@@ -82,7 +82,7 @@ const getCardMeaning = (level) => {
 
 function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   const [showEraModal, setShowEraModal] = useState(null)
-  const [currentTransformationCost, setCurrentTransformationCost] = useState(50)
+  const [currentTransformationCost, setCurrentTransformationCost] = useState(300)
   const [message, setMessage] = useState('')
 
   const isMaxLevel = (profile?.tarot_level || 1) >= 26
@@ -110,11 +110,19 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
         if (level <= 24) return 27   // Levels 21-24: 27 each = 108
         if (level === 25) return 0   // Already at Page
         if (level === 26) return 1000000  // Knight transformation remains special
-        return 50  // Fallback
+        return 300  // Fallback - default to early level cost
       }
 
       const baseCost = getBaseCost(nextLevel)
       
+      // Always use the base cost from our defined structure
+      // The database table might have old/incorrect values
+      setCurrentTransformationCost(baseCost)
+      
+      // Skip database query for now - it seems to have incorrect data
+      return
+      
+      /* Disabled database query - using hardcoded values instead
       // If no supabase connection (like in dev mode), use fallback costs
       if (!supabase) {
         setCurrentTransformationCost(baseCost)
@@ -138,6 +146,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
         console.error('Error loading transformation cost:', error)
         setCurrentTransformationCost(baseCost)
       }
+      */
     }
     
     loadTransformationCost()
