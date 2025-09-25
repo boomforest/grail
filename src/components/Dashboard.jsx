@@ -46,6 +46,7 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
   }, [user, supabase])
 
   const loadPurchaseHistory = async () => {
+    console.log('Loading purchase history for user:', user.id)
     try {
       const { data, error } = await supabase
         .from('user_purchase_history')
@@ -55,9 +56,12 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
 
       if (error) {
         console.error('Error loading purchase history:', error)
+        // Set loading to false even on error so we show the empty state
+        setLoading(false)
         return
       }
 
+      console.log('Purchase history loaded:', data)
       setPurchases(data || [])
     } catch (error) {
       console.error('Error loading purchase history:', error)
@@ -1446,7 +1450,7 @@ function Dashboard({
                 currentWallet={profile?.wallet_address}
               />
 
-              {/* Purchase History Button */}
+              {/* Purchase History Button - Hidden until database table exists
               <button
                 onClick={() => {
                   setShowSettings(false);
@@ -1465,7 +1469,7 @@ function Dashboard({
                 }}
               >
                 📋 Purchase History
-              </button>
+              </button> */}
 
               {/* Admin Product Management Button */}
               {isAdmin && (
