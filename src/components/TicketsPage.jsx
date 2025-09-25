@@ -16,6 +16,32 @@ function TicketsPage({
   const [purchaseMessage, setPurchaseMessage] = useState('')
   const [showTearModal, setShowTearModal] = useState(null) // For ticket tearing modal
 
+  // Get background image URL based on screen size
+  const getBackgroundImage = () => {
+    if (!supabase) return null
+    
+    const isMobile = window.innerWidth <= 768
+    const filename = isMobile ? 'backgroundmobile.png' : 'backgrounddesktop.png'
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('tarot-cards')
+      .getPublicUrl(filename)
+    
+    return publicUrl
+  }
+
+  const [backgroundUrl, setBackgroundUrl] = useState(getBackgroundImage())
+
+  // Update background on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setBackgroundUrl(getBackgroundImage())
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [supabase])
+
   useEffect(() => {
     if (user && supabase) {
       loadTickets()
@@ -237,6 +263,11 @@ function TicketsPage({
       <div style={{
         minHeight: '100vh',
         backgroundColor: '#f5f5dc',
+        backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
         padding: '2rem 1rem',
         display: 'flex',
         alignItems: 'center',
@@ -262,6 +293,11 @@ function TicketsPage({
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#f5f5dc',
+      backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : 'none',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
       padding: '1rem'
     }}>
       <div style={{
@@ -499,9 +535,27 @@ function TicketsPage({
                         <div style={{
                           fontSize: '1.5rem',
                           fontWeight: 'bold',
-                          color: '#d2691e'
+                          color: '#d2691e',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
                         }}>
-                          🕊️ {ticket.price_palomas}
+                          <img 
+                            src={supabase ? 
+                              supabase.storage.from('tarot-cards').getPublicUrl('DOV.png').data.publicUrl 
+                              : '/placeholder-dove.png'
+                            }
+                            alt="Palomas"
+                            style={{
+                              width: '1.5rem',
+                              height: '1.5rem',
+                              objectFit: 'contain'
+                            }}
+                            onError={(e) => {
+                              e.target.outerHTML = '🕊️'
+                            }}
+                          />
+                          {ticket.price_palomas}
                         </div>
                         <div style={{
                           fontSize: '0.8rem',
