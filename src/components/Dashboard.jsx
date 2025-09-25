@@ -7,11 +7,12 @@ const formatNumber = (num) => {
   return new Intl.NumberFormat().format(num || 0)
 }
 
-// Purchase History Component
-const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
-  const [purchases, setPurchases] = useState([])
+// Love History Component (renamed from Purchase History)
+const LoveHistory = ({ user, profile, supabase, onBack }) => {
+  console.log('LoveHistory component rendered with user:', user?.id, 'profile:', profile?.username)
+  const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selectedPurchase, setSelectedPurchase] = useState(null)
+  const [selectedTransaction, setSelectedTransaction] = useState(null)
   
   // Get background image URL based on screen size
   const getBackgroundImage = () => {
@@ -41,30 +42,49 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
 
   useEffect(() => {
     if (user && supabase) {
-      loadPurchaseHistory()
+      loadLoveHistory()
     }
   }, [user, supabase])
 
-  const loadPurchaseHistory = async () => {
-    console.log('Loading purchase history for user:', user.id)
+  const loadLoveHistory = async () => {
+    console.log('Loading love history for user:', user.id)
+    setLoading(true)
     try {
       const { data, error } = await supabase
-        .from('user_purchase_history')
+        .from('love_transactions')
         .select('*')
-        .eq('user_id', user.id)
-        .order('purchase_date', { ascending: false })
+        .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
+        .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Error loading purchase history:', error)
-        // Set loading to false even on error so we show the empty state
-        setLoading(false)
-        return
+        console.error('Error loading love history:', error)
+        // Continue even with error to show the UI
       }
 
-      console.log('Purchase history loaded:', data)
-      setPurchases(data || [])
+      console.log('Love history loaded:', data)
+      
+      // Calculate running balance
+      let runningBalance = profile?.lov_balance || 0
+      const transactionsWithBalance = (data || []).map((transaction, index) => {
+        // For the first transaction, the balance is the current balance
+        if (index === 0) {
+          return { ...transaction, running_balance: runningBalance }
+        }
+        
+        // Work backwards to calculate what the balance was at this transaction
+        const prevTransaction = data[index - 1]
+        if (prevTransaction.sender_id === user.id) {
+          runningBalance += prevTransaction.amount // Add back what was sent
+        } else {
+          runningBalance -= prevTransaction.amount // Remove what was received
+        }
+        
+        return { ...transaction, running_balance: runningBalance }
+      })
+      
+      setTransactions(transactionsWithBalance)
     } catch (error) {
-      console.error('Error loading purchase history:', error)
+      console.error('Error loading love history:', error)
     } finally {
       setLoading(false)
     }
@@ -134,14 +154,14 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
             animation: 'spin 1s linear infinite',
             margin: '0 auto 1rem'
           }}></div>
-          <span>Loading purchase history...</span>
+          <span>Loading love history...</span>
         </div>
       </div>
     )
   }
 
-  // Receipt Detail Modal
-  if (selectedPurchase) {
+  // Transaction Detail Modal
+  if (selectedTransaction) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -164,7 +184,7 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
             marginBottom: '2rem'
           }}>
             <button
-              onClick={() => setSelectedPurchase(null)}
+              onClick={() => setSelectedTransaction(null)}
               style={{
                 background: 'rgba(255, 255, 255, 0.9)',
                 border: 'none',
@@ -190,14 +210,14 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
             boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)',
             border: '2px solid #d2691e'
           }}>
-            {/* Receipt Header */}
+            {/* Transaction Header */}
             <div style={{
               textAlign: 'center',
               marginBottom: '2rem',
               borderBottom: '2px dashed #d2691e',
               paddingBottom: '1rem'
             }}>
-              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🏠</div>
+              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💝</div>
               <h2 style={{
                 margin: '0 0 0.5rem',
                 color: '#8b4513',
@@ -211,20 +231,20 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
                 fontSize: '0.9rem',
                 fontStyle: 'italic'
               }}>
-                Gift Store Receipt
+                Love Transaction Receipt
               </p>
             </div>
 
-            {/* Receipt Details */}
+            {/* Transaction Details */}
             <div style={{ marginBottom: '1.5rem' }}>
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 marginBottom: '0.5rem'
               }}>
-                <span style={{ color: '#666' }}>Receipt #:</span>
+                <span style={{ color: '#666' }}>Transaction #:</span>
                 <span style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
-                  {selectedPurchase.receipt_number}
+                  {selectedTransaction.id?.slice(-8) || 'N/A'}
                 </span>
               </div>
               
@@ -234,7 +254,7 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
                 marginBottom: '0.5rem'
               }}>
                 <span style={{ color: '#666' }}>Date:</span>
-                <span>{formatDate(selectedPurchase.purchase_date)}</span>
+                <span>{formatDate(selectedTransaction.created_at)}</span>
               </div>
               
               <div style={{
@@ -242,12 +262,25 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
                 justifyContent: 'space-between',
                 marginBottom: '0.5rem'
               }}>
-                <span style={{ color: '#666' }}>Customer:</span>
-                <span>{selectedPurchase.username}</span>
+                <span style={{ color: '#666' }}>Type:</span>
+                <span>{selectedTransaction.sender_id === user.id ? 'Love Sent' : 'Love Received'}</span>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '0.5rem'
+              }}>
+                <span style={{ color: '#666' }}>Other Party:</span>
+                <span>
+                  {selectedTransaction.sender_id === user.id 
+                    ? selectedTransaction.recipient_username 
+                    : selectedTransaction.sender_username}
+                </span>
               </div>
             </div>
 
-            {/* Item Details */}
+            {/* Love Details */}
             <div style={{
               border: '1px solid #e2e8f0',
               borderRadius: '10px',
@@ -261,14 +294,14 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
                 marginBottom: '0.5rem'
               }}>
                 <span style={{ fontSize: '1.5rem' }}>
-                  {getCategoryIcon(selectedPurchase.item_category)}
+                  {selectedTransaction.sender_id === user.id ? '💝' : '💖'}
                 </span>
                 <h3 style={{
                   margin: 0,
                   color: '#8b4513',
                   fontSize: '1.1rem'
                 }}>
-                  {selectedPurchase.item_name}
+                  Love Transaction
                 </h3>
               </div>
               
@@ -279,17 +312,34 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
               }}>
                 <span style={{
                   fontSize: '0.8rem',
-                  color: '#666',
-                  textTransform: 'capitalize'
+                  color: '#666'
                 }}>
-                  {selectedPurchase.item_category}
+                  {selectedTransaction.description || 'Love transaction'}
                 </span>
                 <span style={{
                   fontSize: '1.2rem',
                   fontWeight: 'bold',
-                  color: '#d2691e'
+                  color: selectedTransaction.sender_id === user.id ? '#dc3545' : '#28a745',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem'
                 }}>
-                  🪙 {selectedPurchase.palomas_spent}
+                  {selectedTransaction.sender_id === user.id ? '-' : '+'}{selectedTransaction.amount}
+                  <img 
+                    src={supabase ? 
+                      supabase.storage.from('tarot-cards').getPublicUrl('LOV.png').data.publicUrl 
+                      : '/placeholder-love.png'
+                    }
+                    alt="Love"
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      objectFit: 'contain'
+                    }}
+                    onError={(e) => {
+                      e.target.outerHTML = '❤️'
+                    }}
+                  />
                 </span>
               </div>
             </div>
@@ -299,26 +349,24 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
               textAlign: 'center',
               padding: '1rem',
               borderRadius: '10px',
-              backgroundColor: `${getStatusColor(selectedPurchase.status)}20`,
-              border: `2px solid ${getStatusColor(selectedPurchase.status)}40`
+              backgroundColor: selectedTransaction.sender_id === user.id ? '#fff5f5' : '#f0fff4',
+              border: `2px solid ${selectedTransaction.sender_id === user.id ? '#fed7d7' : '#c6f6d5'}`
             }}>
               <div style={{
                 fontSize: '1rem',
                 fontWeight: 'bold',
-                color: getStatusColor(selectedPurchase.status),
+                color: selectedTransaction.sender_id === user.id ? '#c53030' : '#2f855a',
                 marginBottom: '0.25rem'
               }}>
-                {getStatusText(selectedPurchase.status)}
+                {selectedTransaction.sender_id === user.id ? 'Love Sent' : 'Love Received'}
               </div>
-              {selectedPurchase.status === 'purchased' && (
-                <div style={{
-                  fontSize: '0.8rem',
-                  color: '#666',
-                  fontStyle: 'italic'
-                }}>
-                  Show this receipt at Casa for pickup
-                </div>
-              )}
+              <div style={{
+                fontSize: '0.8rem',
+                color: '#666',
+                fontStyle: 'italic'
+              }}>
+                Transaction completed successfully
+              </div>
             </div>
 
             {/* Footer */}
@@ -381,14 +429,14 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
             margin: 0,
             fontWeight: 'normal'
           }}>
-            Purchase History
+            Transaction History
           </h1>
           
           <div style={{ width: '80px' }} />
         </div>
 
-        {/* Purchase List */}
-        {purchases.length === 0 ? (
+        {/* Transaction List - Table Format */}
+        {transactions.length === 0 ? (
           <div style={{
             textAlign: 'center',
             padding: '3rem 1rem',
@@ -397,101 +445,198 @@ const PurchaseHistory = ({ user, profile, supabase, onBack }) => {
             border: '2px solid #d2691e'
           }}>
             <Package size={48} style={{ color: '#ccc', marginBottom: '1rem' }} />
-            <h3 style={{ color: '#8b4513', marginBottom: '0.5rem' }}>No Purchases Yet</h3>
+            <h3 style={{ color: '#8b4513', marginBottom: '0.5rem' }}>No Love Sent Yet</h3>
             <p style={{ color: '#666', margin: 0 }}>
-              Your gift store purchases will appear here
+              Your love transactions will appear here
             </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {purchases.map((purchase) => (
-              <div
-                key={purchase.id}
-                onClick={() => setSelectedPurchase(purchase)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.9)',
-                  borderRadius: '20px',
-                  padding: '1.5rem',
-                  border: '2px solid #d2691e',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(210, 105, 30, 0.2)'
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(210, 105, 30, 0.1)'
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  marginBottom: '1rem'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontSize: '1.5rem' }}>
-                      {getCategoryIcon(purchase.item_category)}
-                    </span>
-                    <div>
-                      <h3 style={{
-                        margin: '0 0 0.25rem',
-                        color: '#8b4513',
-                        fontSize: '1.1rem'
-                      }}>
-                        {purchase.item_name}
-                      </h3>
-                      <p style={{
-                        margin: 0,
-                        fontSize: '0.8rem',
-                        color: '#666',
-                        textTransform: 'capitalize'
-                      }}>
-                        {purchase.item_category}
-                      </p>
-                    </div>
+          <div style={{
+            background: 'linear-gradient(145deg, rgba(255, 248, 220, 0.95), rgba(250, 235, 215, 0.95))',
+            borderRadius: '20px',
+            border: '2px solid #d2691e',
+            overflow: 'hidden',
+            boxShadow: '0 4px 20px rgba(210, 105, 30, 0.2)'
+          }}>
+            {/* Table Header */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '100px 120px 120px 80px 100px',
+              gap: '0.5rem',
+              padding: '1rem',
+              background: 'linear-gradient(135deg, #d2691e, #cd853f, #daa520)',
+              color: 'white',
+              fontSize: '0.85rem',
+              fontWeight: '600'
+            }}>
+              <div>Date</div>
+              <div>From</div>
+              <div>To</div>
+              <div style={{ textAlign: 'right' }}>Amount</div>
+              <div style={{ textAlign: 'right' }}>Balance</div>
+            </div>
+            
+            {/* Transaction Rows */}
+            {transactions.map((transaction, index) => {
+              const isSent = transaction.sender_id === user.id
+              return (
+                <div
+                  key={transaction.id}
+                  onClick={() => setSelectedTransaction(transaction)}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '100px 120px 120px 80px 100px',
+                    gap: '0.5rem',
+                    padding: '1rem',
+                    borderBottom: index < transactions.length - 1 ? '1px solid #f0f0f0' : 'none',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                    fontSize: '0.9rem'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 248, 220, 0.8), rgba(245, 222, 179, 0.8))'
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
+                >
+                  {/* Date */}
+                  <div style={{
+                    fontSize: '0.8rem',
+                    color: '#666'
+                  }}>
+                    {new Date(transaction.created_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                   </div>
                   
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{
-                      fontSize: '1rem',
-                      fontWeight: 'bold',
-                      color: '#d2691e',
-                      marginBottom: '0.25rem'
-                    }}>
-                      🪙 {purchase.palomas_spent}
-                    </div>
-                    <div style={{
-                      fontSize: '0.8rem',
-                      color: getStatusColor(purchase.status),
-                      fontWeight: '500'
-                    }}>
-                      {getStatusText(purchase.status)}
-                    </div>
+                  {/* From */}
+                  <div style={{
+                    fontWeight: transaction.sender_id === user.id ? '600' : '400',
+                    color: transaction.sender_id === user.id ? '#8b4513' : '#666',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {transaction.sender_username}
+                    {transaction.sender_id === user.id && ' (You)'}
+                  </div>
+                  
+                  {/* To */}
+                  <div style={{
+                    fontWeight: transaction.recipient_id === user.id ? '600' : '400',
+                    color: transaction.recipient_id === user.id ? '#8b4513' : '#666',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {transaction.recipient_username}
+                    {transaction.recipient_id === user.id && ' (You)'}
+                  </div>
+                  
+                  {/* Amount */}
+                  <div style={{
+                    textAlign: 'right',
+                    fontWeight: '600',
+                    color: isSent ? '#dc3545' : '#28a745',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: '0.25rem'
+                  }}>
+                    {isSent ? '-' : '+'}{transaction.amount}
+                    <img 
+                      src={supabase ? 
+                        supabase.storage.from('tarot-cards').getPublicUrl('LOV.png').data.publicUrl 
+                        : '/placeholder-love.png'
+                      }
+                      alt="Love"
+                      style={{
+                        width: '14px',
+                        height: '14px',
+                        objectFit: 'contain'
+                      }}
+                      onError={(e) => {
+                        e.target.outerHTML = '❤️'
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Running Balance */}
+                  <div style={{
+                    textAlign: 'right',
+                    fontWeight: '500',
+                    color: '#e91e63',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: '0.25rem'
+                  }}>
+                    {transaction.running_balance || profile?.lov_balance || 0}
+                    <img 
+                      src={supabase ? 
+                        supabase.storage.from('tarot-cards').getPublicUrl('LOV.png').data.publicUrl 
+                        : '/placeholder-love.png'
+                      }
+                      alt="Love"
+                      style={{
+                        width: '12px',
+                        height: '12px',
+                        objectFit: 'contain'
+                      }}
+                      onError={(e) => {
+                        e.target.outerHTML = '❤️'
+                      }}
+                    />
                   </div>
                 </div>
-
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  fontSize: '0.8rem',
-                  color: '#666'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Calendar size={14} />
-                    {formatDate(purchase.purchase_date)}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Receipt size={14} />
-                    {purchase.receipt_number}
-                  </div>
-                </div>
+              )
+            })}
+            
+            {/* Current Balance Summary */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '100px 120px 120px 80px 100px',
+              gap: '0.5rem',
+              padding: '1rem',
+              background: 'linear-gradient(135deg, rgba(255, 248, 220, 0.9), rgba(255, 228, 196, 0.9))',
+              borderTop: '2px solid #d2691e',
+              fontWeight: '600'
+            }}>
+              <div></div>
+              <div></div>
+              <div></div>
+              <div style={{ textAlign: 'right', color: '#8b4513' }}>Current:</div>
+              <div style={{
+                textAlign: 'right',
+                color: '#e91e63',
+                fontSize: '1.1rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                gap: '0.25rem'
+              }}>
+                {profile?.lov_balance || 0}
+                <img 
+                  src={supabase ? 
+                    supabase.storage.from('tarot-cards').getPublicUrl('LOV.png').data.publicUrl 
+                    : '/placeholder-love.png'
+                  }
+                  alt="Love"
+                  style={{
+                    width: '14px',
+                    height: '14px',
+                    objectFit: 'contain'
+                  }}
+                  onError={(e) => {
+                    e.target.outerHTML = '❤️'
+                  }}
+                />
               </div>
-            ))}
+            </div>
           </div>
         )}
       </div>
@@ -1177,29 +1322,6 @@ function Dashboard({
   const [showProductManager, setShowProductManager] = useState(false);
   const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
 
-  // If showing purchase history, render that instead
-  if (showPurchaseHistory) {
-    return (
-      <PurchaseHistory 
-        user={user}
-        profile={profile}
-        supabase={supabase}
-        onBack={() => setShowPurchaseHistory(false)}
-      />
-    );
-  }
-
-  // If showing product manager, render that instead
-  if (showProductManager) {
-    return (
-      <AdminProductManager 
-        profile={profile}
-        supabase={supabase}
-        onBack={() => setShowProductManager(false)}
-      />
-    );
-  }
-
   // Get background image URL based on screen size
   const getBackgroundImage = () => {
     if (!supabase) return null
@@ -1225,6 +1347,29 @@ function Dashboard({
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [supabase])
+
+  // If showing love history, render that instead
+  if (showPurchaseHistory) {
+    return (
+      <LoveHistory 
+        user={user}
+        profile={profile}
+        supabase={supabase}
+        onBack={() => setShowPurchaseHistory(false)}
+      />
+    );
+  }
+
+  // If showing product manager, render that instead
+  if (showProductManager) {
+    return (
+      <AdminProductManager 
+        profile={profile}
+        supabase={supabase}
+        onBack={() => setShowProductManager(false)}
+      />
+    );
+  }
 
   return (
     <div style={{
@@ -1444,13 +1589,13 @@ function Dashboard({
                   showUpload={true}
                 />
               </div>
-              
+
               <WalletInput 
                 onWalletSave={onWalletSave}
                 currentWallet={profile?.wallet_address}
               />
 
-              {/* Purchase History Button - Hidden until database table exists
+              {/* Transaction History Button */}
               <button
                 onClick={() => {
                   setShowSettings(false);
@@ -1459,17 +1604,18 @@ function Dashboard({
                 style={{
                   width: '100%',
                   padding: '0.75rem 1rem',
-                  backgroundColor: '#7c3aed',
+                  background: 'linear-gradient(135deg, #d2691e, #cd853f)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '10px',
                   cursor: 'pointer',
                   fontWeight: '500',
-                  marginBottom: '0.5rem'
+                  marginBottom: '0.5rem',
+                  boxShadow: '0 2px 8px rgba(210, 105, 30, 0.3)'
                 }}
               >
-                📋 Purchase History
-              </button> */}
+                Transaction History
+              </button>
 
               {/* Admin Product Management Button */}
               {isAdmin && (
@@ -1482,16 +1628,17 @@ function Dashboard({
                     style={{
                       width: '100%',
                       padding: '0.75rem 1rem',
-                      backgroundColor: '#d2691e',
+                      background: 'linear-gradient(135deg, #b8860b, #daa520)',
                       color: 'white',
                       border: 'none',
                       borderRadius: '10px',
                       cursor: 'pointer',
                       fontWeight: '500',
-                      marginBottom: '0.5rem'
+                      marginBottom: '0.5rem',
+                      boxShadow: '0 2px 8px rgba(184, 134, 11, 0.3)'
                     }}
                   >
-                    🛍️ Manage Products
+                    Manage Products
                   </button>
                   
                   <button
@@ -1502,34 +1649,38 @@ function Dashboard({
                     style={{
                       width: '100%',
                       padding: '0.75rem 1rem',
-                      backgroundColor: '#9b59b6',
+                      background: 'linear-gradient(135deg, #cd853f, #f4a460)',
                       color: 'white',
                       border: 'none',
                       borderRadius: '10px',
                       cursor: 'pointer',
                       fontWeight: '500',
-                      marginBottom: '0.5rem'
+                      marginBottom: '0.5rem',
+                      boxShadow: '0 2px 8px rgba(205, 133, 63, 0.3)'
                     }}
                   >
-                    🎫 Manage Tickets
+                    Manage Tickets
                   </button>
                 </>
               )}
               
+              {/* Logout Button */}
               <button
                 onClick={onLogout}
                 style={{
                   width: '100%',
                   padding: '0.75rem 1rem',
-                  backgroundColor: 'transparent',
-                  color: '#ef4444',
+                  background: 'linear-gradient(135deg, #8b4513, #a0522d)',
+                  color: 'white',
                   border: 'none',
                   borderRadius: '10px',
                   cursor: 'pointer',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  boxShadow: '0 2px 8px rgba(139, 69, 19, 0.3)',
+                  opacity: 0.8
                 }}
               >
-                🚪 Logout
+                Logout
               </button>
             </div>
           )}

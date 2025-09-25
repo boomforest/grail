@@ -136,6 +136,26 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
         return
       }
 
+      // Record the transaction in love_transactions table
+      const { error: transactionError } = await supabase
+        .from('love_transactions')
+        .insert([
+          {
+            sender_id: profile.id,
+            sender_username: profile.username,
+            recipient_id: recipientProfile.id,
+            recipient_username: recipientProfile.username,
+            amount: parseInt(amount),
+            transaction_type: 'sent',
+            description: `Sent ${amount} Love to ${recipientProfile.username}`
+          }
+        ])
+
+      if (transactionError) {
+        console.error('Error recording transaction:', transactionError)
+        // Don't fail the whole operation if just the transaction record fails
+      }
+
       // Success
       if (onSuccess) {
         onSuccess(`${amount} Love sent to ${recipientProfile.username}! 💝`)
