@@ -646,7 +646,6 @@ function App() {
     }
     closeWelcome() // Close welcome modal when opening PayPal
     setShowPayPal(true)
-    setMessage('Use the PayPal checkout below to purchase Palomas. Your tokens will be credited automatically!')
   }
 
   // FOR DEVELOPMENT: Make all users admin for testing

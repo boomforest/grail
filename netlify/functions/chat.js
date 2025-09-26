@@ -115,7 +115,7 @@ IMPORTANT CONTEXT:
             content: message
           }
         ],
-        max_tokens: 150,
+        max_tokens: 500,
         temperature: 0.7
       })
     });
