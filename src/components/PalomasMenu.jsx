@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
+import SimpleSendPalomas from './SimpleSendPalomas'
+import { useLanguage } from '../contexts/LanguageContext'
 
 function PalomasMenu({ 
   profile,
@@ -7,8 +9,13 @@ function PalomasMenu({
   onShowReleaseForm,
   onPayPalClick,
   onShowSendLove,
-  onClose
+  onClose,
+  supabase
 }) {
+  const [showSendPalomas, setShowSendPalomas] = useState(false) // Explicitly false
+  const [successMessage, setSuccessMessage] = useState('')
+  const { t } = useLanguage()
+  
   const formatNumber = (num) => {
     return new Intl.NumberFormat().format(num || 0)
   }
@@ -58,30 +65,10 @@ function PalomasMenu({
           ×
         </button>
 
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h2 style={{
-            fontSize: '2rem',
-            color: '#d2691e',
-            margin: '0 0 0.5rem 0',
-            fontWeight: 'normal',
-            fontStyle: 'italic'
-          }}>
-            Palomas
-          </h2>
-          <div style={{
-            fontSize: '1.8rem',
-            fontWeight: '600',
-            color: '#8b4513',
-            fontStyle: 'italic'
-          }}>
-            {formatNumber(profile?.total_palomas_collected || 0)}
-          </div>
-        </div>
-
-        {/* Action buttons - Clean Get/Send */}
+        {/* Action buttons - Clean Get/Send stacked */}
         <div style={{ 
           display: 'flex', 
+          flexDirection: 'column',
           gap: '1rem' 
         }}>
           {/* Get Button */}
@@ -104,7 +91,7 @@ function PalomasMenu({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              flex: 1
+              width: '100%'
             }}
             onMouseOver={(e) => {
               e.target.style.transform = 'translateY(-2px)'
@@ -115,18 +102,13 @@ function PalomasMenu({
               e.target.style.boxShadow = '0 4px 15px rgba(70, 130, 180, 0.3)'
             }}
           >
-            Get
+            {t('palomasMenu.get')}
           </button>
 
           {/* Send Button */}
           <button
             onClick={() => {
-              if (isAdmin) {
-                onShowSendForm('DOV')
-              } else {
-                onShowReleaseForm('DOV')
-              }
-              onClose()
+              setShowSendPalomas(true)
             }}
             style={{
               background: 'linear-gradient(135deg, #d2691e, #cd853f)',
@@ -142,7 +124,7 @@ function PalomasMenu({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              flex: 1
+              width: '100%'
             }}
             onMouseOver={(e) => {
               e.target.style.transform = 'translateY(-2px)'
@@ -153,22 +135,26 @@ function PalomasMenu({
               e.target.style.boxShadow = '0 4px 15px rgba(210, 105, 30, 0.3)'
             }}
           >
-            Send
+            {t('palomasMenu.send')}
           </button>
         </div>
-
-        {/* Info text */}
-        <div style={{
-          marginTop: '1.5rem',
-          textAlign: 'center',
-          fontSize: '0.85rem',
-          color: '#8b4513',
-          fontStyle: 'italic',
-          opacity: 0.8
-        }}>
-          Get Palomas with PayPal • Send to community members
-        </div>
       </div>
+      
+      {/* SimpleSendPalomas Modal */}
+      {showSendPalomas && (
+        <SimpleSendPalomas
+          profile={profile}
+          supabase={supabase}
+          onClose={() => setShowSendPalomas(false)}
+          onSuccess={(msg) => {
+            setSuccessMessage(msg)
+            setTimeout(() => {
+              setSuccessMessage('')
+              onClose()
+            }, 2000)
+          }}
+        />
+      )}
     </div>
   )
 }

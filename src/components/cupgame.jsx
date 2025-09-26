@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useLanguage } from '../contexts/LanguageContext'
 
 // Helper functions for tarot system
 const getTarotCardName = (level, username = '') => {
@@ -102,6 +103,7 @@ const getCardMeaning = (level, username = '') => {
 }
 
 function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
+  const { t } = useLanguage()
   const [showEraModal, setShowEraModal] = useState(null)
   const [currentTransformationCost, setCurrentTransformationCost] = useState(300)
   const [message, setMessage] = useState('')
@@ -145,7 +147,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
               onProfileUpdate(updatedProfile)
             }
             
-            setMessage(`Transformed to ${getTarotCardName(newLevel, profile.username)}!`)
+            setMessage(t('cupGame.transformedTo', { cardName: getTarotCardName(newLevel, profile.username) }))
             setTimeout(() => setMessage(''), 3000)
           }
         } catch (error) {
@@ -371,8 +373,8 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             ...modalContentStyle,
             background: showEraModal === 'swords' 
               ? 'linear-gradient(135deg, #f3f4f6, #e5e7eb)' 
-              : 'linear-gradient(135deg, #f3e8ff, #e0e7ff)',
-            borderColor: showEraModal === 'swords' ? '#6b7280' : '#8b5cf6'
+              : 'linear-gradient(135deg, #FFF8DC, #FFEFD5)',
+            borderColor: showEraModal === 'swords' ? '#6b7280' : '#FFD700'
           }}>
             <button
               onClick={() => setShowEraModal(null)}
@@ -401,10 +403,10 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                 fontSize: '0.9rem',
                 fontWeight: '600',
                 marginBottom: '1rem',
-                background: showEraModal === 'swords' ? '#374151' : '#8b5cf6',
+                background: showEraModal === 'swords' ? '#374151' : 'linear-gradient(135deg, #FFD700, #FFA500)',
                 color: 'white'
               }}>
-                {showEraModal === 'swords' ? '⚔️ Era of Swords' : '🏆 Era of Cups'}
+                {showEraModal === 'swords' ? '⚔️ ' + t('cupGame.eraOfSwords') : '🏆 ' + t('cupGame.eraOfCups')}
               </div>
             </div>
 
@@ -416,7 +418,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                   textAlign: 'center',
                   marginBottom: '1rem'
                 }}>
-                  "When Arthur pulled the sword from the stone..."
+                  {t('cupGame.swordsQuote')}
                 </div>
                 
                 <div style={{
@@ -425,7 +427,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                   lineHeight: '1.6',
                   marginBottom: '1.5rem'
                 }}>
-                  A dark era began where man used intellect to defend attacks and gain as much as possible. For centuries, no remedy existed for this endless cycle of extraction and pain.
+                  {t('cupGame.swordsDescription')}
                 </div>
 
                 <div style={{
@@ -441,44 +443,44 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                     textAlign: 'center',
                     margin: 0
                   }}>
-                    <strong>The age of taking.</strong> Sword-holders defend what they've seized, trapped in endless cycles of fear and accumulation.
+                    {t('cupGame.swordsSummary')}
                   </p>
                 </div>
               </div>
             ) : (
-              <div style={{ color: '#7c3aed' }}>
+              <div style={{ color: '#B8860B' }}>
                 <div style={{
                   fontSize: '1.1rem',
                   fontWeight: '500',
                   textAlign: 'center',
                   marginBottom: '1rem'
                 }}>
-                  "Learn the power of unclenching the sword and holding the cup."
+                  {t('cupGame.cupsQuote')}
                 </div>
                 
                 <div style={{
-                  color: '#8b5cf6',
+                  color: '#DAA520',
                   fontStyle: 'italic',
                   lineHeight: '1.6',
                   marginBottom: '1.5rem'
                 }}>
-                  The game of cups teaches the joy of giving for the sake of giving. Break free from the endless cycle. Entry grows more difficult as early participants become exponentially rare.
+                  {t('cupGame.cupsDescription')}
                 </div>
 
                 <div style={{
                   padding: '1rem',
-                  background: '#fefbf0',
+                  background: 'linear-gradient(135deg, #FFF8DC, #FFEBCD)',
                   borderRadius: '0.75rem',
-                  border: '1px solid #e6d3a3'
+                  border: '1px solid #FFD700'
                 }}>
                   <p style={{
                     fontSize: '0.9rem',
-                    color: '#8b4513',
+                    color: '#B8860B',
                     fontStyle: 'italic',
                     textAlign: 'center',
                     margin: 0
                   }}>
-                    <strong>The cup holders shape tomorrow.</strong> Position yourself while the path remains open.
+                    {t('cupGame.cupsSummary')}
                   </p>
                 </div>
               </div>
@@ -490,7 +492,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
       {/* Header */}
       <div style={headerStyle}>
         <button onClick={onBack} style={backButtonStyle}>
-          ← Back
+          ← {t('common.back')}
         </button>
       </div>
 
@@ -536,8 +538,8 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             </h1>
             <div style={cardLevelStyle}>
               {(profile?.username === 'JPR333' || profile?.username === 'jpr333') 
-                ? 'Guardian of Casa de Copas' 
-                : `Level ${profile?.tarot_level || 1} ${isMaxLevel ? '• COMPLETE' : ''}`}
+                ? t('cupGame.guardianRole')
+                : `${t('cupGame.level')} ${profile?.tarot_level || 1} ${isMaxLevel ? '• ' + t('cupGame.complete') : ''}`}
             </div>
           </div>
 
@@ -549,7 +551,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
               fontSize: '0.9rem',
               textAlign: 'center'
             }}>
-              Next Transformation
+              {t('cupGame.nextTransformation')}
             </div>
             
             {(profile?.username === 'JPR333' || profile?.username === 'jpr333') ? (
@@ -561,8 +563,8 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                 textAlign: 'center',
                 boxShadow: '0 4px 15px rgba(139, 69, 19, 0.3)'
               }}>
-                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '0.25rem' }}>Eternal Guardian</div>
-                <div style={{ fontSize: '0.7rem', opacity: 0.9 }}>Knight of the Grail</div>
+                <div style={{ fontWeight: 'bold', fontSize: '0.9rem', marginBottom: '0.25rem' }}>{t('cupGame.eternalGuardian')}</div>
+                <div style={{ fontSize: '0.7rem', opacity: 0.9 }}>{t('cupGame.knightOfGrail')}</div>
               </div>
             ) : isMaxLevel ? (
               <div style={{
@@ -574,13 +576,13 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                 boxShadow: '0 4px 15px rgba(251, 191, 36, 0.3)'
               }}>
                 <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>👑</div>
-                <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Journey Complete!</div>
-                <div style={{ fontSize: '0.7rem', opacity: 0.9 }}>Knight of Cups Achieved</div>
+                <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{t('cupGame.journeyComplete')}</div>
+                <div style={{ fontSize: '0.7rem', opacity: 0.9 }}>{t('cupGame.knightAchieved')}</div>
               </div>
             ) : (
               <div style={{ textAlign: 'center' }}>
                 <div style={costBoxStyle}>
-                  <div style={{ fontSize: '0.7rem', color: '#a16207', marginBottom: '0.25rem' }}>Cost to reach</div>
+                  <div style={{ fontSize: '0.7rem', color: '#a16207', marginBottom: '0.25rem' }}>{t('cupGame.costToReach')}</div>
                   <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#92400e', marginBottom: '0.25rem' }}>
                     {getTarotCardName((profile?.tarot_level || 1) + 1)}
                   </div>
@@ -603,7 +605,7 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
                     />
                   </div>
                   <div style={{ fontSize: '0.7rem', color: '#a16207' }}>
-                    {(profile?.lov_balance || 0) >= currentTransformationCost ? 'Ready!' : 'Love needed'}
+                    {(profile?.lov_balance || 0) >= currentTransformationCost ? t('cupGame.ready') : t('cupGame.loveNeeded')}
                   </div>
                 </div>
                 
@@ -638,58 +640,58 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
             onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
             onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
           >
-            ⚔️ Era of Swords
+            ⚔️ {t('cupGame.eraOfSwords')}
           </button>
           
           <button
             onClick={() => setShowEraModal('cups')}
             style={{
-              background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
+              background: 'linear-gradient(135deg, #FFD700, #FFA500)',
               color: 'white',
               padding: '0.5rem 1rem',
               borderRadius: '0.75rem',
               fontWeight: '600',
               cursor: 'pointer',
               border: 'none',
-              boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)',
+              boxShadow: '0 4px 15px rgba(255, 215, 0, 0.4)',
               fontSize: '0.85rem',
               transition: 'transform 0.2s ease'
             }}
             onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
             onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
           >
-            🏆 Era of Cups
+            🏆 {t('cupGame.eraOfCups')}
           </button>
         </div>
 
         {/* Card Meaning */}
-        <details style={{
+        <div style={{
           background: 'rgba(255, 255, 255, 0.6)',
           borderRadius: '0.75rem',
-          padding: '0.75rem',
+          padding: '1rem',
           border: '1px solid #fb923c',
-          cursor: 'pointer',
           maxWidth: '100%',
           marginBottom: '1rem'
         }}>
-          <summary style={{
+          <h3 style={{
             fontWeight: '600',
             color: '#ea580c',
-            marginBottom: '0.5rem',
-            fontSize: '0.9rem'
+            marginTop: 0,
+            marginBottom: '0.75rem',
+            fontSize: '1rem'
           }}>
-            Card Meaning
-          </summary>
+            {t('cupGame.cardMeaning')}
+          </h3>
           <p style={{
-            fontSize: '0.8rem',
+            fontSize: '0.85rem',
             color: '#92400e',
             fontStyle: 'italic',
-            lineHeight: '1.5',
+            lineHeight: '1.6',
             margin: 0
           }}>
             {getCardMeaning(profile?.tarot_level || 1, profile?.username)}
           </p>
-        </details>
+        </div>
 
         {/* Message Display */}
         {message && (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
+import { LanguageProvider } from './contexts/LanguageContext'
 import LoginForm from './components/LoginForm'
 import ResetPassword from './components/ResetPassword'
 import Dashboard from './components/Dashboard'
@@ -698,6 +699,7 @@ function App() {
             onPayPalClick={handlePayPalClick}
             onShowSendLove={() => setShowSendLove(true)}
             onClose={() => setShowPalomasMenu(false)}
+            supabase={supabase}
           />
         )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
@@ -824,6 +826,7 @@ function App() {
             onPayPalClick={handlePayPalClick}
             onShowSendLove={() => setShowSendLove(true)}
             onClose={() => setShowPalomasMenu(false)}
+            supabase={supabase}
           />
         )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
@@ -1028,6 +1031,7 @@ function App() {
             onPayPalClick={handlePayPalClick}
             onShowSendLove={() => setShowSendLove(true)}
             onClose={() => setShowPalomasMenu(false)}
+            supabase={supabase}
           />
         )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
@@ -1108,6 +1112,7 @@ function App() {
             onPayPalClick={handlePayPalClick}
             onShowSendLove={() => setShowSendLove(true)}
             onClose={() => setShowPalomasMenu(false)}
+            supabase={supabase}
           />
         )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
@@ -1157,4 +1162,8 @@ function App() {
   )
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />)
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <LanguageProvider>
+    <App />
+  </LanguageProvider>
+)

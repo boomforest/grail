@@ -290,7 +290,7 @@ function SendPalomas({ profile, supabase, onClose, onSuccess }) {
               marginTop: '0.5rem',
               margin: '0.5rem 0 0'
             }}>
-              Your balance: {profile?.dov_balance || 0} Palomas
+              Your balance: {profile?.total_palomas_collected || 0} Palomas
             </p>
           </div>
 

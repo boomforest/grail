@@ -1,7 +1,38 @@
 import React, { useState } from 'react'
+import { useLanguage } from '../contexts/LanguageContext'
 
 // Username component with two separate fields
 function UsernameInput({ username, onUsernameChange }) {
+  const { t, translations } = useLanguage()
+  
+  // Helper function to display Spanish first with English in italics
+  const dualText = (translationKey) => {
+    const spanishText = translations?.es ? translations.es : {}
+    const englishText = translations?.en ? translations.en : {}
+    
+    const getNestedValue = (obj, path) => {
+      return path.split('.').reduce((current, key) => current?.[key], obj)
+    }
+    
+    const spanish = getNestedValue(spanishText, translationKey)
+    const english = getNestedValue(englishText, translationKey)
+    
+    if (!spanish || !english) return t(translationKey)
+    
+    return (
+      <span>
+        {spanish}
+        <span style={{ 
+          marginLeft: '0.5rem', 
+          fontStyle: 'italic', 
+          opacity: 0.6, 
+          fontSize: '0.9em' 
+        }}>
+          ({english})
+        </span>
+      </span>
+    )
+  }
   const letters = username.replace(/[^A-Za-z]/g, '').slice(0, 3);
   const numbers = username.replace(/[^0-9]/g, '').slice(0, 3);
 
@@ -26,7 +57,7 @@ function UsernameInput({ username, onUsernameChange }) {
           margin: '0 0 0.5rem 0',
           textAlign: 'left'
         }}>
-          Your username will be: <span style={{ 
+          {dualText('login.usernameWillBe')}: <span style={{ 
             fontFamily: 'monospace', 
             fontWeight: 'bold', 
             color: '#d2691e',
@@ -47,7 +78,7 @@ function UsernameInput({ username, onUsernameChange }) {
             marginBottom: '0.25rem',
             textAlign: 'left'
           }}>
-            3 Letters
+            {dualText('login.threeLetters')}
           </label>
           <input
             type="text"
@@ -58,7 +89,7 @@ function UsernameInput({ username, onUsernameChange }) {
             style={{
               width: '100%',
               padding: '1rem',
-              border: '2px solid #e0e0e0',
+              border: '2px solid rgba(210, 105, 30, 0.3)',
               borderRadius: '15px',
               boxSizing: 'border-box',
               fontSize: '1.2rem',
@@ -66,7 +97,9 @@ function UsernameInput({ username, onUsernameChange }) {
               textAlign: 'center',
               fontFamily: 'monospace',
               fontWeight: 'bold',
-              backgroundColor: letters.length === 3 ? '#f0f8f0' : 'white'
+              backgroundColor: letters.length === 3 ? 'rgba(254, 247, 237, 0.9)' : 'rgba(255, 255, 255, 0.8)',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
             }}
           />
         </div>
@@ -90,7 +123,7 @@ function UsernameInput({ username, onUsernameChange }) {
             marginBottom: '0.25rem',
             textAlign: 'left'
           }}>
-            3 Numbers
+            {dualText('login.threeNumbers')}
           </label>
           <input
             type="text"
@@ -101,7 +134,7 @@ function UsernameInput({ username, onUsernameChange }) {
             style={{
               width: '100%',
               padding: '1rem',
-              border: '2px solid #e0e0e0',
+              border: '2px solid rgba(210, 105, 30, 0.3)',
               borderRadius: '15px',
               boxSizing: 'border-box',
               fontSize: '1.2rem',
@@ -109,7 +142,9 @@ function UsernameInput({ username, onUsernameChange }) {
               textAlign: 'center',
               fontFamily: 'monospace',
               fontWeight: 'bold',
-              backgroundColor: numbers.length === 3 ? '#f0f8f0' : 'white'
+              backgroundColor: numbers.length === 3 ? 'rgba(254, 247, 237, 0.9)' : 'rgba(255, 255, 255, 0.8)',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
             }}
           />
         </div>
@@ -121,13 +156,60 @@ function UsernameInput({ username, onUsernameChange }) {
         marginTop: '0.5rem',
         textAlign: 'left'
       }}>
-        ✓ Letters only (A-Z) • ✓ Numbers only (0-9) • ✓ Exactly 3 of each
+        {dualText('login.usernameRules')}
       </div>
     </div>
   );
 }
 
 function LoginForm({ supabase, onLogin, onRegister }) {
+  const { t, translations } = useLanguage()
+  
+  // Helper function to display Spanish first with English in italics
+  const dualText = (translationKey) => {
+    const spanishText = translations?.es ? translations.es : {}
+    const englishText = translations?.en ? translations.en : {}
+    
+    const getNestedValue = (obj, path) => {
+      return path.split('.').reduce((current, key) => current?.[key], obj)
+    }
+    
+    const spanish = getNestedValue(spanishText, translationKey)
+    const english = getNestedValue(englishText, translationKey)
+    
+    if (!spanish || !english) return t(translationKey)
+    
+    return (
+      <span>
+        {spanish}
+        <span style={{ 
+          marginLeft: '0.5rem', 
+          fontStyle: 'italic', 
+          opacity: 0.6, 
+          fontSize: '0.9em' 
+        }}>
+          ({english})
+        </span>
+      </span>
+    )
+  }
+  
+  // Helper for placeholder text (plain text version)
+  const dualTextPlain = (translationKey) => {
+    const spanishText = translations?.es ? translations.es : {}
+    const englishText = translations?.en ? translations.en : {}
+    
+    const getNestedValue = (obj, path) => {
+      return path.split('.').reduce((current, key) => current?.[key], obj)
+    }
+    
+    const spanish = getNestedValue(spanishText, translationKey)
+    const english = getNestedValue(englishText, translationKey)
+    
+    if (!spanish || !english) return t(translationKey)
+    
+    return `${spanish} (${english})`
+  }
   // All state managed internally
   const [activeTab, setActiveTab] = useState('login');
   const [formData, setFormData] = useState({
@@ -142,7 +224,7 @@ function LoginForm({ supabase, onLogin, onRegister }) {
   // Handle forgot password functionality
   const handleForgotPassword = async () => {
     if (!formData.email) {
-      setMessage('Please enter your email address');
+      setMessage(t('login.pleaseEnterEmail'));
       return;
     }
 
@@ -153,16 +235,22 @@ function LoginForm({ supabase, onLogin, onRegister }) {
       });
 
       if (error) {
-        setMessage(`Reset failed: ${error.message}`);
+        setMessage(t('login.resetFailed', { error: error.message }));
       } else {
-        setMessage('Password reset email sent! Check your inbox.');
-        // Switch back to login tab after successful email send
+        setMessage(t('login.resetEmailSent'));
+        // Start slide animation after 2 seconds
         setTimeout(() => {
-          setActiveTab('login');
+          setIsSliding(true);
+          // Clear message and switch tab after animation completes
+          setTimeout(() => {
+            setMessage('');
+            setIsSliding(false);
+            setActiveTab('login');
+          }, 300); // Animation duration
         }, 2000);
       }
     } catch (error) {
-      setMessage('An error occurred. Please try again.');
+      setMessage(t('login.errorOccurred'));
     } finally {
       setLoading(false);
     }
@@ -171,7 +259,7 @@ function LoginForm({ supabase, onLogin, onRegister }) {
   // Handle login
   const handleLogin = async () => {
     if (!formData.email || !formData.password) {
-      setMessage('Please fill in all fields.');
+      setMessage(t('login.pleaseFillFields'));
       return;
     }
 
@@ -185,13 +273,12 @@ function LoginForm({ supabase, onLogin, onRegister }) {
       });
 
       if (error) {
-        setMessage(`Login failed: ${error.message}`);
+        setMessage(t('login.loginFailed', { error: error.message }));
       } else {
-        setMessage('Login successful!');
         if (onLogin) onLogin(data);
       }
     } catch (error) {
-      setMessage('An unexpected error occurred. Please try again.');
+      setMessage(t('login.unexpectedError'));
     } finally {
       setLoading(false);
     }
@@ -200,7 +287,7 @@ function LoginForm({ supabase, onLogin, onRegister }) {
   // Handle registration
   const handleRegister = async () => {
     if (!formData.email || !formData.password || !formData.username || formData.username.length !== 6) {
-      setMessage('Please fill in all required fields and ensure username is 6 characters.');
+      setMessage(t('login.fillRequiredFields'));
       return;
     }
 
@@ -220,87 +307,94 @@ function LoginForm({ supabase, onLogin, onRegister }) {
       });
 
       if (error) {
-        setMessage(`Registration failed: ${error.message}`);
+        setMessage(t('login.registrationFailed', { error: error.message }));
       } else {
-        setMessage('Registration successful! Please check your email to verify your account.');
         if (onRegister) onRegister(data);
       }
     } catch (error) {
-      setMessage('An unexpected error occurred. Please try again.');
+      setMessage(t('login.unexpectedError'));
     } finally {
       setLoading(false);
     }
   };
 
+  const getBackgroundImage = () => {
+    if (!supabase) return null
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('tarot-cards')
+      .getPublicUrl('BackgroundLogin.png')
+    
+    return publicUrl
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
-      backgroundColor: '#f5f5dc',
+      backgroundImage: getBackgroundImage() ? `url(${getBackgroundImage()})` : 'linear-gradient(135deg, #fef7ed, #fed7aa)',
+      backgroundSize: 'contain',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundColor: '#fef7ed',
       fontFamily: 'system-ui, -apple-system, sans-serif',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '1rem'
+      padding: '2rem'
     }}>
       <div style={{
-        background: 'rgba(255, 255, 255, 0.95)',
-        borderRadius: '25px',
-        padding: '2rem',
+        padding: '3rem 2rem',
         width: '100%',
-        maxWidth: '400px',
-        textAlign: 'center',
-        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)'
+        maxWidth: '450px',
+        textAlign: 'center'
       }}>
-        <h1 style={{
-          fontSize: '2.5rem',
-          fontWeight: 'bold',
-          margin: '0 0 0.5rem 0',
-          color: '#d2691e'
-        }}>
-          GRAIL
-        </h1>
-        <p style={{ color: '#8b4513', margin: '0 0 2rem 0' }}>Token Exchange</p>
 
-        <div style={{ display: 'flex', marginBottom: '1.5rem', borderRadius: '20px', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', marginBottom: '2rem', gap: '1rem' }}>
           <button
             onClick={() => setActiveTab('login')}
             style={{
               flex: 1,
-              padding: '1rem',
-              backgroundColor: activeTab === 'login' ? '#d2691e' : '#f0f0f0',
-              color: activeTab === 'login' ? 'white' : '#8b4513',
-              border: 'none',
+              padding: '0.75rem 1.5rem',
+              backgroundColor: activeTab === 'login' ? 'rgba(210, 105, 30, 0.8)' : 'rgba(255, 255, 255, 0.2)',
+              color: activeTab === 'login' ? 'white' : 'rgba(139, 69, 19, 0.8)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '25px',
               cursor: 'pointer',
-              fontWeight: '500'
+              fontWeight: '500',
+              fontSize: '0.95rem',
+              transition: 'all 0.3s ease',
+              backdropFilter: 'blur(10px)'
             }}
           >
-            Login
+            {dualText('login.signIn')}
           </button>
           <button
             onClick={() => setActiveTab('register')}
             style={{
               flex: 1,
-              padding: '1rem',
-              backgroundColor: activeTab === 'register' ? '#d2691e' : '#f0f0f0',
-              color: activeTab === 'register' ? 'white' : '#8b4513',
-              border: 'none',
+              padding: '0.75rem 1.5rem',
+              backgroundColor: activeTab === 'register' ? 'rgba(210, 105, 30, 0.8)' : 'rgba(255, 255, 255, 0.2)',
+              color: activeTab === 'register' ? 'white' : 'rgba(139, 69, 19, 0.8)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '25px',
               cursor: 'pointer',
-              fontWeight: '500'
+              fontWeight: '500',
+              fontSize: '0.95rem',
+              transition: 'all 0.3s ease',
+              backdropFilter: 'blur(10px)'
             }}
           >
-            Register
+            {dualText('login.signUp')}
           </button>
         </div>
 
-        {message && (
+        {message && message.includes('failed') && (
           <div style={{
             padding: '1rem',
             borderRadius: '15px',
             marginBottom: '1rem',
-            backgroundColor: message.includes('successful') || message.includes('sent') ? '#d4edda' : 
-                           message.includes('failed') ? '#f8d7da' : '#fff3cd',
-            color: message.includes('successful') || message.includes('sent') ? '#155724' : 
-                   message.includes('failed') ? '#721c24' : '#856404',
+            backgroundColor: 'rgba(248, 215, 218, 0.9)',
+            color: '#721c24',
             fontSize: '0.9rem'
           }}>
             {message}
@@ -312,10 +406,10 @@ function LoginForm({ supabase, onLogin, onRegister }) {
           <>
             <div style={{ marginBottom: '1.5rem', textAlign: 'left' }}>
               <h2 style={{ fontSize: '1.5rem', color: '#8b4513', margin: '0 0 0.5rem 0' }}>
-                Reset Password
+                {dualText('login.resetPassword')}
               </h2>
               <p style={{ fontSize: '0.9rem', color: '#8b4513', margin: 0 }}>
-                Enter your email address and we'll send you a link to reset your password.
+                {dualText('login.resetPasswordInstructions')}
               </p>
             </div>
 
@@ -323,16 +417,19 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="Enter your email address"
+              placeholder={dualTextPlain('login.enterEmail')}
               style={{
                 width: '100%',
                 padding: '1rem',
-                border: '2px solid #e0e0e0',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '15px',
                 marginBottom: '1rem',
                 boxSizing: 'border-box',
                 fontSize: '1rem',
-                outline: 'none'
+                outline: 'none',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
               }}
             />
 
@@ -341,20 +438,22 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               disabled={loading || !supabase || !formData.email}
               style={{
                 width: '100%',
-                padding: '1rem',
-                background: 'linear-gradient(45deg, #d2691e, #cd853f)',
+                padding: '1rem 2rem',
+                background: 'rgba(210, 105, 30, 0.8)',
                 color: 'white',
-                border: 'none',
-                borderRadius: '15px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '25px',
                 cursor: 'pointer',
-                fontWeight: '600',
+                fontWeight: '500',
                 fontSize: '1rem',
                 opacity: (loading || !supabase || !formData.email) ? 0.5 : 1,
-                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)',
+                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s ease',
                 marginBottom: '1rem'
               }}
             >
-              {loading ? 'Sending...' : 'Send Reset Link'}
+              {loading ? dualText('login.sending') : dualText('login.sendResetLink')}
             </button>
 
             <button
@@ -370,7 +469,7 @@ function LoginForm({ supabase, onLogin, onRegister }) {
                 padding: 0
               }}
             >
-              ← Back to Login
+              ← {dualText('login.backToLogin')}
             </button>
           </>
         )}
@@ -382,16 +481,19 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="Email"
+              placeholder={dualTextPlain('login.email')}
               style={{
                 width: '100%',
                 padding: '1rem',
-                border: '2px solid #e0e0e0',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '15px',
                 marginBottom: '1rem',
                 boxSizing: 'border-box',
                 fontSize: '1rem',
-                outline: 'none'
+                outline: 'none',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
               }}
             />
 
@@ -399,16 +501,19 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder="Password"
+              placeholder={dualTextPlain('login.password')}
               style={{
                 width: '100%',
                 padding: '1rem',
-                border: '2px solid #e0e0e0',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '15px',
                 marginBottom: '0.5rem',
                 boxSizing: 'border-box',
                 fontSize: '1rem',
-                outline: 'none'
+                outline: 'none',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
               }}
             />
 
@@ -427,7 +532,7 @@ function LoginForm({ supabase, onLogin, onRegister }) {
                   padding: 0
                 }}
               >
-                Forgot Password?
+                {dualText('login.forgotPassword')}
               </button>
             </div>
 
@@ -436,19 +541,21 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               disabled={loading || !supabase}
               style={{
                 width: '100%',
-                padding: '1rem',
-                background: 'linear-gradient(45deg, #d2691e, #cd853f)',
+                padding: '1rem 2rem',
+                background: 'rgba(210, 105, 30, 0.8)',
                 color: 'white',
-                border: 'none',
-                borderRadius: '15px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '25px',
                 cursor: 'pointer',
-                fontWeight: '600',
+                fontWeight: '500',
                 fontSize: '1rem',
                 opacity: (loading || !supabase) ? 0.5 : 1,
-                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)'
+                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s ease'
               }}
             >
-              {loading ? 'Loading...' : 'Login'}
+              {loading ? dualText('login.loading') : dualText('login.signIn')}
             </button>
           </>
         )}
@@ -460,16 +567,19 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="Email"
+              placeholder={dualTextPlain('login.email')}
               style={{
                 width: '100%',
                 padding: '1rem',
-                border: '2px solid #e0e0e0',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '15px',
                 marginBottom: '1rem',
                 boxSizing: 'border-box',
                 fontSize: '1rem',
-                outline: 'none'
+                outline: 'none',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
               }}
             />
 
@@ -477,16 +587,19 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder="Password"
+              placeholder={dualTextPlain('login.password')}
               style={{
                 width: '100%',
                 padding: '1rem',
-                border: '2px solid #e0e0e0',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '15px',
                 marginBottom: '1rem',
                 boxSizing: 'border-box',
                 fontSize: '1rem',
-                outline: 'none'
+                outline: 'none',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
               }}
             />
 
@@ -494,16 +607,19 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Display Name (optional)"
+              placeholder={dualTextPlain('login.displayNameOptional')}
               style={{
                 width: '100%',
                 padding: '1rem',
-                border: '2px solid #e0e0e0',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '15px',
                 marginBottom: '1rem',
                 boxSizing: 'border-box',
                 fontSize: '1rem',
-                outline: 'none'
+                outline: 'none',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
               }}
             />
             
@@ -518,19 +634,21 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               disabled={loading || !supabase || (!formData.username || formData.username.length !== 6)}
               style={{
                 width: '100%',
-                padding: '1rem',
-                background: 'linear-gradient(45deg, #d2691e, #cd853f)',
+                padding: '1rem 2rem',
+                background: 'rgba(210, 105, 30, 0.8)',
                 color: 'white',
-                border: 'none',
-                borderRadius: '15px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '25px',
                 cursor: 'pointer',
-                fontWeight: '600',
+                fontWeight: '500',
                 fontSize: '1rem',
                 opacity: (loading || !supabase || (!formData.username || formData.username.length !== 6)) ? 0.5 : 1,
-                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)'
+                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s ease'
               }}
             >
-              {loading ? 'Loading...' : 'Register'}
+              {loading ? dualText('login.loading') : dualText('login.signUp')}
             </button>
           </>
         )}

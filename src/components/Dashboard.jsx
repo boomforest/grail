@@ -4,6 +4,7 @@ import WalletInput from './WalletInput'
 import ProfilePicture from './ProfilePicture'
 import SendPalomas from './SendPalomas'
 import RequestCashout from './RequestCashout'
+import { useLanguage } from '../contexts/LanguageContext'
 
 const formatNumber = (num) => {
   return new Intl.NumberFormat().format(num || 0)
@@ -1326,6 +1327,8 @@ function Dashboard({
   const [showSendPalomas, setShowSendPalomas] = useState(false);
   const [showRequestCashout, setShowRequestCashout] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  
+  const { language, toggleLanguage, t } = useLanguage();
 
   // Get background image URL based on screen size
   const getBackgroundImage = () => {
@@ -1607,6 +1610,32 @@ function Dashboard({
                 currentWallet={profile?.wallet_address}
               />
 
+              {/* Language Toggle */}
+              <button
+                onClick={toggleLanguage}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  background: 'linear-gradient(135deg, #8b0000, #dc143c)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  marginBottom: '0.5rem',
+                  boxShadow: '0 2px 8px rgba(139, 0, 0, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                <span style={{ fontSize: '1.2rem' }}>
+                  {language === 'en' ? '🇺🇸' : '🇲🇽'}
+                </span>
+                {language === 'en' ? 'Switch to Spanish' : 'Cambiar a Inglés'}
+              </button>
+
               {/* Send Palomas Button */}
               <button
                 onClick={() => {
@@ -1626,7 +1655,7 @@ function Dashboard({
                   boxShadow: '0 2px 8px rgba(210, 105, 30, 0.3)'
                 }}
               >
-                Send Palomas
+                {t('dashboard.sendPalomas')}
               </button>
 
               {/* Request Cashout Button */}
@@ -1648,7 +1677,7 @@ function Dashboard({
                   boxShadow: '0 2px 8px rgba(70, 130, 180, 0.3)'
                 }}
               >
-                Request Cashout
+                {t('dashboard.requestCashout')}
               </button>
 
               {/* Transaction History Button */}
@@ -1670,7 +1699,7 @@ function Dashboard({
                   boxShadow: '0 2px 8px rgba(210, 105, 30, 0.3)'
                 }}
               >
-                Transaction History
+                {t('dashboard.transactionHistory')}
               </button>
 
               {/* Admin Product Management Button */}
@@ -1736,7 +1765,7 @@ function Dashboard({
                   opacity: 0.8
                 }}
               >
-                Logout
+                {t('dashboard.logout')}
               </button>
             </div>
           )}
