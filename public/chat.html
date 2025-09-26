@@ -297,7 +297,10 @@
                 const response = await fetch('/.netlify/functions/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
+                    body: JSON.stringify({ 
+                        message: text,
+                        profile: null // No profile data for standalone chat
+                    })
                 });
                 
                 if (!response.ok) {
@@ -308,7 +311,7 @@
                 
                 // Hide typing and add response
                 hideTyping();
-                addMessage(data.message || data.response || 'I received your message but had trouble responding.');
+                addMessage(data.response || data.message || 'I received your message but had trouble responding.');
                 
             } catch (error) {
                 console.error('Error:', error);
