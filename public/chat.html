@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casa de Copas Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'system-ui', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #fef7ed, #fed7aa);
+            min-height: 100vh;
+            padding: 2rem;
+            color: #92400e;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(210, 105, 30, 0.3);
+            border: 3px solid rgba(210, 105, 30, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #d2691e;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #8b4513;
+            margin-bottom: 2rem;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        #messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 2px solid rgba(210, 105, 30, 0.3);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #d2691e, #cd853f);
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .assistant-message {
+            background: rgba(255, 255, 255, 0.8);
+            color: #8b4513;
+            border: 1px solid rgba(210, 105, 30, 0.3);
+        }
+
+        .message-header {
+            font-weight: 600;
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 0.25rem;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        #input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid rgba(210, 105, 30, 0.3);
+            border-radius: 15px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #input:focus {
+            border-color: #d2691e;
+            box-shadow: 0 0 0 3px rgba(210, 105, 30, 0.1);
+        }
+
+        #send {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #d2691e, #cd853f);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(210, 105, 30, 0.3);
+        }
+
+        #send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(210, 105, 30, 0.4);
+        }
+
+        #send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 0.2rem;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #d2691e;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #8b4513;
+            font-style: italic;
+            opacity: 0.7;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            #messages {
+                height: 300px;
+            }
+            
+            .input-container {
+                flex-direction: column;
+            }
+            
+            #input, #send {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Casa de Copas</h1>
+        <p class="subtitle">AI Assistant</p>
+        
+        <div id="messages">
+            <div class="welcome-message">
+                Welcome! I'm here to help answer questions about Casa de Copas, our community, tokens, and events. What would you like to know?
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="input" 
+                placeholder="Ask me anything about Casa de Copas..."
+                autocomplete="off"
+            >
+            <button id="send">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const messages = document.getElementById('messages');
+        const input = document.getElementById('input');
+        const sendBtn = document.getElementById('send');
+        let isTyping = false;
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'message-header';
+            headerDiv.textContent = isUser ? 'You' : 'Casa de Copas Assistant';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(headerDiv);
+            messageDiv.appendChild(contentDiv);
+            messages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function showTyping() {
+            if (isTyping) return;
+            isTyping = true;
+            
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message assistant-message typing';
+            typingDiv.id = 'typing-indicator';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'message-header';
+            headerDiv.textContent = 'Casa de Copas Assistant';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.innerHTML = `
+                <span>Thinking</span>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            
+            typingDiv.appendChild(headerDiv);
+            typingDiv.appendChild(contentDiv);
+            messages.appendChild(typingDiv);
+            
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+            isTyping = false;
+        }
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text || isTyping) return;
+
+            // Add user message
+            addMessage(text, true);
+            input.value = '';
+            sendBtn.disabled = true;
+            
+            // Show typing indicator
+            showTyping();
+
+            try {
+                const response = await fetch('/.netlify/functions/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Hide typing and add response
+                hideTyping();
+                addMessage(data.message || data.response || 'I received your message but had trouble responding.');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                hideTyping();
+                addMessage('I apologize, but I\'m having trouble connecting right now. Please try again in a moment.');
+            } finally {
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+
+        // Event listeners
+        sendBtn.addEventListener('click', sendMessage);
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Focus input on load
+        window.addEventListener('load', () => {
+            input.focus();
+        });
+    </script>
+</body>
+</html>
