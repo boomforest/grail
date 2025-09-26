@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Upload, Plus, Edit, Trash2, Save, X, Coffee, ArrowLeft, Receipt, Calendar, Package } from 'lucide-react'
 import WalletInput from './WalletInput'
 import ProfilePicture from './ProfilePicture'
+import SendPalomas from './SendPalomas'
+import RequestCashout from './RequestCashout'
 
 const formatNumber = (num) => {
   return new Intl.NumberFormat().format(num || 0)
@@ -1321,6 +1323,9 @@ function Dashboard({
 }) {
   const [showProductManager, setShowProductManager] = useState(false);
   const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
+  const [showSendPalomas, setShowSendPalomas] = useState(false);
+  const [showRequestCashout, setShowRequestCashout] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Get background image URL based on screen size
   const getBackgroundImage = () => {
@@ -1369,6 +1374,13 @@ function Dashboard({
         onBack={() => setShowProductManager(false)}
       />
     );
+  }
+
+  // Handle success messages from modals
+  const handleSuccess = (msg) => {
+    setSuccessMessage(msg)
+    // Clear the message after 5 seconds
+    setTimeout(() => setSuccessMessage(''), 5000)
   }
 
   return (
@@ -1595,6 +1607,50 @@ function Dashboard({
                 currentWallet={profile?.wallet_address}
               />
 
+              {/* Send Palomas Button */}
+              <button
+                onClick={() => {
+                  setShowSettings(false);
+                  setShowSendPalomas(true);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  background: 'linear-gradient(135deg, #d2691e, #cd853f)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  marginBottom: '0.5rem',
+                  boxShadow: '0 2px 8px rgba(210, 105, 30, 0.3)'
+                }}
+              >
+                Send Palomas
+              </button>
+
+              {/* Request Cashout Button */}
+              <button
+                onClick={() => {
+                  setShowSettings(false);
+                  setShowRequestCashout(true);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  background: 'linear-gradient(135deg, #4682b4, #5f9ea0)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  marginBottom: '0.5rem',
+                  boxShadow: '0 2px 8px rgba(70, 130, 180, 0.3)'
+                }}
+              >
+                Request Cashout
+              </button>
+
               {/* Transaction History Button */}
               <button
                 onClick={() => {
@@ -1687,19 +1743,19 @@ function Dashboard({
         </div>
 
         {/* Message Display */}
-        {message && (
+        {(message || successMessage) && (
           <div style={{
             padding: '0.8rem',
             marginBottom: '1.5rem',
-            backgroundColor: message.includes('successful') || message.includes('Sent') || message.includes('Released') || message.includes('connected') ? '#d4edda' : 
-                           message.includes('failed') ? '#f8d7da' : '#fff3cd',
-            color: message.includes('successful') || message.includes('Sent') || message.includes('Released') || message.includes('connected') ? '#155724' : 
-                   message.includes('failed') ? '#721c24' : '#856404',
+            backgroundColor: (message || successMessage).includes('successful') || (message || successMessage).includes('Sent') || (message || successMessage).includes('Released') || (message || successMessage).includes('connected') ? '#d4edda' : 
+                           (message || successMessage).includes('failed') ? '#f8d7da' : '#fff3cd',
+            color: (message || successMessage).includes('successful') || (message || successMessage).includes('Sent') || (message || successMessage).includes('Released') || (message || successMessage).includes('connected') ? '#155724' : 
+                   (message || successMessage).includes('failed') ? '#721c24' : '#856404',
             borderRadius: '15px',
             fontSize: '0.8rem',
             fontStyle: 'italic'
           }}>
-            {message}
+            {successMessage || message}
           </div>
         )}
 
@@ -1780,6 +1836,26 @@ function Dashboard({
           </div>
         </div>
       </div>
+
+      {/* SendPalomas Modal */}
+      {showSendPalomas && (
+        <SendPalomas
+          profile={profile}
+          supabase={supabase}
+          onClose={() => setShowSendPalomas(false)}
+          onSuccess={handleSuccess}
+        />
+      )}
+
+      {/* RequestCashout Modal */}
+      {showRequestCashout && (
+        <RequestCashout
+          profile={profile}
+          supabase={supabase}
+          onClose={() => setShowRequestCashout(false)}
+          onSuccess={handleSuccess}
+        />
+      )}
     </div>
   )
 }
