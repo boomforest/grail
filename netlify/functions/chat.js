@@ -103,6 +103,30 @@ exports.handler = async (event, context) => {
 
 ${CASA_CODEX}
 
+FORMATTING RULES:
+
+## USE BULLET POINTS when your response contains:
+- Multiple distinct elements (benefits, features, steps)
+- Lists of comparable items
+- Structured or categorized information
+- Options or alternatives
+- Requirements or criteria
+
+Format bullets as:
+• **Key concept**: Detailed explanation of the point.
+• **Second concept**: Clear and specific description.
+
+## USE PARAGRAPHS when your response is:
+- Explaining a single concept
+- Telling a story or narrative
+- Deep analysis of a topic
+- Casual/empathetic conversation
+- Describing complex processes
+- Philosophical or reflective response
+
+## GOLDEN RULE:
+Before responding ask yourself: "Am I giving a LIST of distinct things (bullets) or EXPLAINING a concept (paragraphs)?"
+
 IMPORTANT CONTEXT:
 - Love tokens represent the exact amount of energy brought to the project (donations minus costs)
 - The journey is 3,333 love tokens total to reach Page of Cups

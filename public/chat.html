@@ -237,7 +237,24 @@
             headerDiv.textContent = isUser ? 'You' : 'Casa de Copas Assistant';
             
             const contentDiv = document.createElement('div');
-            contentDiv.textContent = content;
+            
+            if (!isUser) {
+                // Process markdown-like formatting for assistant messages
+                let formattedContent = content
+                    // Convert bullet points
+                    .replace(/^• /gm, '<span style="color: #d2691e; font-size: 1.1em;">•</span> ')
+                    // Convert bold text
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #8b4513;">$1</strong>')
+                    // Convert line breaks
+                    .replace(/\n\n/g, '</p><p style="margin: 0.8em 0;">')
+                    .replace(/\n/g, '<br>');
+                
+                // Wrap in paragraph tags
+                formattedContent = '<p style="margin: 0;">' + formattedContent + '</p>';
+                contentDiv.innerHTML = formattedContent;
+            } else {
+                contentDiv.textContent = content;
+            }
             
             messageDiv.appendChild(headerDiv);
             messageDiv.appendChild(contentDiv);
