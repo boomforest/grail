@@ -316,7 +316,7 @@
             } catch (error) {
                 console.error('Error:', error);
                 hideTyping();
-                addMessage('I apologize, but I\'m having trouble connecting right now. Please try again in a moment.');
+                addMessage(`Connection error: ${error.message}. Please try again in a moment.`);
             } finally {
                 sendBtn.disabled = false;
                 input.focus();
