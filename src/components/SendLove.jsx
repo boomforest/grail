@@ -81,7 +81,7 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
       }
 
       if (recipientProfile.username.toUpperCase() === profile.username.toUpperCase()) {
-        setError("You can't send love to yourself! 💝")
+        setError("You can't send love to yourself!")
         setSending(false)
         return
       }
@@ -92,7 +92,7 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
         username: recipientProfile.username,
         token_type: 'LOVE',
         amount: parseInt(amount),
-        reason: `${profile.username} sent you ${amount} Love! 💝`,
+        reason: `${profile.username} sent you ${amount} Love!`,
         created_at: new Date().toISOString()
       }
 
@@ -158,7 +158,7 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
 
       // Success
       if (onSuccess) {
-        onSuccess(`${amount} Love sent to ${recipientProfile.username}! 💝`)
+        onSuccess(`${amount} Love sent to ${recipientProfile.username}!`)
       }
       
       // Reset form
@@ -224,7 +224,6 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>💝</div>
           <h2 style={{
             fontSize: '1.8rem',
             color: '#e91e63',
@@ -447,7 +446,7 @@ function SendLove({ profile, supabase, onClose, onSuccess }) {
                 </>
               ) : (
                 <>
-                  💌 Send Love
+                  Send Love
                 </>
               )}
             </button>

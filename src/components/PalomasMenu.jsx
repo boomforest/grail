@@ -170,7 +170,7 @@ function PalomasMenu({
                 e.target.style.boxShadow = '0 4px 15px rgba(233, 30, 99, 0.3)'
               }}
             >
-              💝 Send Love
+              Send Love
             </button>
           )}
         </div>
