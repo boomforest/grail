@@ -554,6 +554,29 @@ No. The symbols (cups, doves, tarot) are metaphors — playful anchors that help
 
 Because Casa is more than a venue. A venue sells tickets and serves drinks. A sanctuary protects its vibe and its people. Events are just one expression of Casa's larger mission: to sustain artists with dignity and community.
 
+## Supporting Casa from Anywhere
+
+**Can I support Casa if I'm not in Mexico City?**
+
+Yes. Casa is a movement, not just a building — and you can support it from anywhere in the world.
+
+You can create fundraising opportunities for Casa in your own community:
+
+• Bake sales
+• Car washes
+• Charity shows
+• Any creative way of raising support
+
+Simply submit the proceeds to Casa de Copas and send an email with your username at copas.app. The contribution will be added to your account, and you'll receive credits tracked in perpetuity.
+
+**What does that mean?**
+
+It means your support will be remembered forever — not just in Mexico City, but in every future Casa that may exist. When new Houses open in other cities, your contributions will follow you. Recognition is not local; it is global and permanent.
+
+**Will there be other Casas in other cities?**
+
+That is our hope. One day we imagine Casas in many cities, each aligned with the same mission: supporting artists with dignity and reciprocity. By supporting Casa now — whether in CDMX or from abroad — you are laying the foundation for that future.
+
 ## Questions & Clarity
 
 If you have a question that isn't clearly answered in this knowledge base, please email jp@casadecopas.com with your question. This helps us improve clarity and ensure the knowledge base serves everyone better.
