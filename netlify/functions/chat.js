@@ -69,6 +69,35 @@ The Era of Cups is a rebellion of generosity, turning from the sword (extraction
 
 ## The Builder's Journey
 JP's path: From Wisconsin opera student to Nashville music industry wrestler, seeing exploitation firsthand. Casa de Copas is the culmination of a personal quest to build a living Grail for artists.
+
+## Hosting Events at Casa de Copas
+
+**Can I play a show or host an event at Casa de Copas?**
+
+Casa de Copas is located in a residential neighborhood, and we are dedicated to maintaining a peaceful, respectful atmosphere for our community and neighbors. Because of this, we only host our own curated events at Casa.
+
+That said, we will occasionally consider hosting serious, well-prepared events that can generate meaningful energy for our nonprofit programs. This usually means:
+
+• Shows or gatherings with confirmed sponsorship
+• Events with strong ticket sales guaranteed in advance
+
+If your event meets these thresholds, Casa can provide:
+
+• Security
+• Cleaning staff
+• Bar service
+• Professional sound and production
+
+For all other cases, we invite you to be part of our ongoing studio programming instead of booking the venue independently.
+
+**How to Get Involved**
+
+The best way to be considered for Casa de Copas programming is to volunteer with the project. Visit casadecopas.com/volunteer for more details.
+
+• Volunteering earns you credits tracked in perpetuity
+• The more you are an active, giving member of the community, the higher the likelihood of being included in Casa events and programming
+
+Casa thrives on reciprocity — we are not a rental hall, but a creative sanctuary. Those who give energy to the House will see that energy return to them.
 `;
 
 exports.handler = async (event, context) => {
