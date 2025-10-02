@@ -1,284 +1,384 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Casa de Copas Assistant</title>
-  <style>
-    /* Reset */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Casa de Copas Assistant</title>
+    <style>
+        /* Reset */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    /* Carola */
-    @font-face {
-      font-family: "Carola";
-      src: local("Carola Regular"), local("Carola-Regular"),
-           url("carola.otf") format("opentype");
-      font-weight: 400;
-      font-style: normal;
-      font-display: swap;
-    }
+        /* Carola */
+        @font-face {
+            font-family: "Carola";
+            src: local("Carola Regular"), local("Carola-Regular"),
+                url("carola.otf") format("opentype");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
 
-    :root{
-      --text: #f7f5f2;
-      --muted: #d6c7bb;
-      --accent: #d2691e;
-      --card-bg: #0a0a0a;       /* black cards */
-      --maxw: 1100px;           /* bigger layout */
-      --gap: 20px;
-    }
+        :root {
+            --text: #f7f5f2;
+            --muted: #d6c7bb;
+            --accent: #d2691e;
+            --card-bg: #0a0a0a;
+            /* black cards */
+            --maxw: 800px;
+            /* bigger layout */
+            --gap: 20px;
+        }
 
-    html, body { height: 100%; }
-    body{
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      color: var(--text);
-      min-height: 100vh;
-      background-image: url('bg.jpg');
-      background-attachment: fixed;
-      background-position:-100% 200%; /* centered vertically, nudged right */
-      padding-bottom: 120px;  /* room for floating input */
-      font-size: 100px;
-    }
+        html,
+        body {
+            height: 100%;
+        }
 
-    /* Subtle dark overlay for readability */
-    body::before{
-      content: "";
-      position: fixed; inset: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.55));
-      pointer-events: none;
-      z-index: 0;
-    }
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            background-image: url('bg.jpg');
+            background-attachment: fixed;
+            background-position: -100% 200%;
+            /* centered vertically, nudged right */
+            padding-bottom: 120px;
+            /* room for floating input */
+            font-size: 28px;
+            color: var(--accent);
+            font-family: 'PP Editorial New';
+        }
 
-    .page{
-      position: relative;
-      z-index: 1;
-      max-width: var(--maxw);
-      padding: 4rem;
-      margin: 0 auto;
-      max-width: 50vw;
-      background: rgba(0,0,0,.10);
-      height: 100vh;
-      backdrop-filter: blur(40px);
-      border-radius: 100px 100px 0 0;
+        /* Subtle dark overlay for readability */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, .55));
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: var(--maxw);
+            padding: 4rem;
+            margin: 0 auto;
+            max-width: 50vw;
+            background: rgba(0, 0, 0, .05);
+            height: 100vh;
+            backdrop-filter: blur(10px);
+            border-radius: 100px 100px 0 0;
             overflow: auto;
-    }
+        }
 
-    /* Header (logo/title on the left) */
-    .header{
-      margin-bottom: 24px;
-    }
-    .title{
-      font-family: "Carola", ui-serif, Georgia, serif;
-      font-size: clamp(48px, 9vw, 120px);   /* big */
-      line-height: 0.95;
-      letter-spacing: 0.06em;
-      color: var(--accent);
-      text-transform: none;                  /* Title Case as typed */
-      text-align: center;                      /* left logo */
-    }
-    button {
-        font-family: "Carola", ui-serif, Georgia, serif;
-        font-size: 24px;
-    }
-    .subtitle{
-      margin-top: 8px;
-      font-style: italic;
-      color: var(--muted);
-      font-size: clamp(14px, 2.4vw, 18px);
-      opacity: .9;
-    }
+        /* Header (logo/title on the left) */
+        .header {
+            margin-bottom: 24px;
+        }
 
-    /* Messages */
-    #messages{
-      display: flex;
-      flex-direction: column;
-      gap: var(--gap);
-      max-width: var(--maxw);
-      margin: 28px auto 0;
-      padding-bottom: 24px;
-    }
+        .title {
+            font-family: "Carola", ui-serif, Georgia, serif;
+            font-size: clamp(48px, 9vw, 120px);
+            /* big */
+            line-height: 0.95;
+            letter-spacing: 0.06em;
+            color: var(--accent);
+            text-transform: none;
+            /* Title Case as typed */
+            text-align: center;
+            /* left logo */
+        }
 
-    .message{
-      width: fit-content;
-      max-width: min(900px, 90vw);
-      padding: 18px 20px;
-      border-radius: 14px;
-      line-height: 1.6;
-      font-size: clamp(18px, 2.4vw, 18px);
-      background: var(--card-bg);    /* black cards */
-      color: var(--text);
-    }
-    .message.user{
-      margin-left: auto;
-      background: #141414;           /* slight contrast for user */
-    }
-    .message .who{
-      display: block;
-      font-size: .8em;
-      opacity: .7;
-      margin-bottom: 6px;
-      color: var(--muted);
-    }
+        button {
+            font-family: "Carola", ui-serif, Georgia, serif;
+            font-size: 24px;
+        }
 
-    /* Floating input like ChatGPT */
-    .input-wrap{
-      position: fixed;
-      left: 0; right: 0; bottom: 0;
-      z-index: 10;
-      padding: 16px;
-      display: flex;
-      justify-content: center;
-      background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.55) 35%, rgba(0,0,0,.75) 100%);
-      backdrop-filter: blur(4px);
-    }
+        .subtitle {
+            margin-top: 8px;
+            font-style: italic;
+            color: var(--muted);
+            font-size: clamp(14px, 2.4vw, 18px);
+            opacity: .9;
+            color: var(--accent);
+            text-align: center;
+        }
 
-    .input-bar{
-      width: min(var(--maxw), 100%);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #0c0c0c;
-      padding: 12px;
-      border-radius: 16px;
-    }
+        /* Messages */
+        #messages {
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap);
+            max-width: var(--maxw);
+            margin: 28px auto 0;
+            padding-bottom: 24px;
+        }
 
-    #input{
-      flex: 1;
-      font-size: 22px;            /* bigger */
-      color: var(--text);
-      background: transparent;
-      border: none;
-      outline: none;
-      padding: 10px 2px;
-    }
+        .message {
+            width: fit-content;
+            max-width: min(900px, 90vw);
+            padding: 18px 20px;
+            border-radius: 14px;
+            line-height: 1.6;
+            font-size: clamp(18px, 2.4vw, 18px);
+            background: var(--card-bg);
+            /* black cards */
+            color: var(--text);
+        }
 
-    #send{
-      appearance: none;
-      border: none;
-      border-radius: 12px;
-      padding: 12px 18px;
-      font-weight: 700;
-      font-size: 16px;
-      color: #0a0a0a;
-      background: var(--accent);
-      cursor: pointer;
-      transition: transform .1s ease;
-    }
-    #send:hover{ transform: translateY(-1px); }
-    #send:disabled{ opacity: .6; cursor: not-allowed; transform: none; }
+        .message.user {
+            margin-left: auto;
+            background: #141414;
+            /* slight contrast for user */
+        }
 
-    /* Typing indicator */
-    .typing{ display: inline-flex; align-items: center; gap: 8px; opacity: .85; }
-    .dot{ width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: b 1.4s infinite ease-in-out; }
-    .dot:nth-child(2){ animation-delay: .15s; }
-    .dot:nth-child(3){ animation-delay: .3s; }
-    @keyframes b { 0%,80%,100%{ transform: scale(0);} 40%{ transform: scale(1);} }
+        .message .who {
+            display: block;
+            font-size: .8em;
+            opacity: .7;
+            margin-bottom: 6px;
+            color: var(--muted);
+            text-align: center;
+            
+        }
 
-    @media (max-width: 768px){
-      .page{ padding: 28px 14px 0; }
-      .input-wrap{ padding: 12px; }
-      .input-bar{ border-radius: 14px; }
-    }
-  </style>
+        .welcome-message {
+            font-size: clamp(18px, 2.4vw, 20px);
+            line-height: 1.6;
+            background: rgba(0, 0, 0, .10);
+            padding: 24px 28px;
+            border-radius: 16px;
+            color: var(--accent);
+        }
+
+        /* Floating input like ChatGPT */
+        .input-wrap {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .input-bar {
+            width: min(var(--maxw), 100%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #0c0c0c;
+            padding: 12px;
+            border-radius: 16px;
+        }
+
+        #input {
+            flex: 1;
+            font-size: 22px;
+            /* bigger */
+            color: var(--text);
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 10px 2px;
+        }
+
+        #send {
+            appearance: none;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #0a0a0a;
+            background: var(--accent);
+            cursor: pointer;
+            transition: transform .1s ease;
+        }
+
+        #send:hover {
+            transform: translateY(-1px);
+        }
+
+        #send:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Typing indicator */
+        .typing {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            opacity: .85;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--muted);
+            animation: b 1.4s infinite ease-in-out;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: .15s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: .3s;
+        }
+
+        @keyframes b {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page {
+                padding: 28px 14px 0;
+            }
+
+            .input-wrap {
+                padding: 12px;
+            }
+
+            .input-bar {
+                border-radius: 14px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <main class="page">
-    <header class="header">
-      <h1 class="title">Casa de Copas</h1>
-      <p class="subtitle">Virgil — Your Guide</p>
-    </header>
+    <main class="page">
+        <header class="header">
+            <h1 class="title">Casa de Copas</h1>
+            <p class="subtitle">Introducing Virgil — Your Guide</p>
+        </header>
 
-    <section id="messages">
-      <div class="message">
-        <span class="who">Virgil</span>
-        Hello, I’m Virgil — your guide and collaborator. I’m here to help you navigate ideas, strategy, and execution,
-        whether you need clarity about Casa de Copas, our community, or creative building. What would you like to explore?
-      </div>
-    </section>
-    
-</main>
-<!-- Floating input -->
-<div class="input-wrap">
-  <div class="input-bar">
-    <input id="input" type="text" placeholder="Ask me anything about Casa de Copas…" autocomplete="off" />
-    <button id="send">Send</button>
-  </div>
-</div>
+        <section id="messages">
+            <div class="welcome-message">
+                I'm Virgil — Casa de Copas' resident guide. I'm a living knowledge base, writer, and organizer built on
+                ChatGPT technology. My voice and spirit are modeled after Virgil, the guardian and guide from Dante's
+                Inferno: steady, clear-eyed, and protective.<br><br>
 
-  <script>
-    const messages = document.getElementById('messages');
-    const input = document.getElementById('input');
-    const sendBtn = document.getElementById('send');
-    let isTyping = false;
+                I exist to help translate the vision of Casa de Copas into action. For newcomers, I serve as a companion
+                and explainer. You can ask me about Casa's ethos, programs, currencies, and paths of
+                participation.<br><br>
 
-    function addMessage(content, fromUser = false){
-      const msg = document.createElement('div');
-      msg.className = `message${fromUser ? ' user' : ''}`;
+                I'm not a decision-maker, not a gatekeeper, and not a substitute for the human community at Casa. I'm a
+                bridge — a guardian of knowledge, here to help you find your own path within the House.<br><br>
 
-      const who = document.createElement('span');
-      who.className = 'who';
-      who.textContent = fromUser ? 'You' : 'Virgil';
+                What would you like to know about Casa de Copas?
+            </div>
+        </section>
 
-      const text = document.createElement('div');
-      text.innerHTML = fromUser ? content : content
-        .replace(/^• /gm, '<span>•</span> ')
-        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br>');
-      msg.appendChild(who);
-      msg.appendChild(text);
-      messages.appendChild(msg);
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }
+    </main>
+    <!-- Floating input -->
+    <div class="input-wrap">
+        <div class="input-bar">
+            <input id="input" type="text" placeholder="Ask me anything about Casa de Copas…" autocomplete="off" />
+            <button id="send">Send</button>
+        </div>
+    </div>
 
-    function showTyping(){
-      if(isTyping) return;
-      isTyping = true;
-      const wrap = document.createElement('div');
-      wrap.id = 'typing';
-      wrap.className = 'message';
-      wrap.innerHTML = `<span class="who">Virgil</span><span class="typing">Thinking
+    <script>
+        const messages = document.getElementById('messages');
+        const input = document.getElementById('input');
+        const sendBtn = document.getElementById('send');
+        let isTyping = false;
+
+        function addMessage(content, fromUser = false) {
+            const msg = document.createElement('div');
+            msg.className = `message${fromUser ? ' user' : ''}`;
+
+            const who = document.createElement('span');
+            who.className = 'who';
+            who.textContent = fromUser ? 'You' : 'Virgil';
+
+            const text = document.createElement('div');
+            text.innerHTML = fromUser ? content : content
+                .replace(/^• /gm, '<span>•</span> ')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+            msg.appendChild(who);
+            msg.appendChild(text);
+            messages.appendChild(msg);
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function showTyping() {
+            if (isTyping) return;
+            isTyping = true;
+            const wrap = document.createElement('div');
+            wrap.id = 'typing';
+            wrap.className = 'message';
+            wrap.innerHTML = `<span class="who">Virgil</span><span class="typing">Thinking
         <span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
-      messages.appendChild(wrap);
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }
+            messages.appendChild(wrap);
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
 
-    function hideTyping(){
-      const t = document.getElementById('typing');
-      if(t) t.remove();
-      isTyping = false;
-    }
+        function hideTyping() {
+            const t = document.getElementById('typing');
+            if (t) t.remove();
+            isTyping = false;
+        }
 
-    async function sendMessage(){
-      const text = input.value.trim();
-      if(!text || isTyping) return;
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text || isTyping) return;
 
-      addMessage(text, true);
-      input.value = '';
-      input.focus();
-      sendBtn.disabled = true;
-      showTyping();
+            addMessage(text, true);
+            input.value = '';
+            input.focus();
+            sendBtn.disabled = true;
+            showTyping();
 
-      try{
-        const res = await fetch('/.netlify/functions/chat', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ message: text, profile: null })
-        });
-        const data = await res.json();
-        hideTyping();
-        addMessage(data.response || data.message || 'I received your message but had trouble responding.');
-      }catch(err){
-        hideTyping();
-        addMessage(`Connection error: ${err.message}. Please try again in a moment.`);
-      }finally{
-        sendBtn.disabled = false;
-      }
-    }
+            try {
+                const res = await fetch('/.netlify/functions/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text, profile: null })
+                });
+                const data = await res.json();
+                hideTyping();
+                addMessage(data.response || data.message || 'I received your message but had trouble responding.');
+            } catch (err) {
+                hideTyping();
+                addMessage(`Connection error: ${err.message}. Please try again in a moment.`);
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
 
-    sendBtn.addEventListener('click', sendMessage);
-    input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }});
+        sendBtn.addEventListener('click', sendMessage);
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
-    window.addEventListener('load', ()=> input.focus());
-  </script>
+        window.addEventListener('load', () => input.focus());
+    </script>
 </body>
+
 </html>

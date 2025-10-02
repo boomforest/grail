@@ -603,26 +603,6 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               }}
             />
 
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder={dualTextPlain('login.displayNameOptional')}
-              style={{
-                width: '100%',
-                padding: '1rem',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '15px',
-                marginBottom: '1rem',
-                boxSizing: 'border-box',
-                fontSize: '1rem',
-                outline: 'none',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                transition: 'all 0.3s ease',
-                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
-              }}
-            />
-            
             {/* Username Component */}
             <UsernameInput 
               username={formData.username || ''}
