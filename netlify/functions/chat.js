@@ -466,6 +466,94 @@ It means Casa is alive. The House remembers who gives and who drains. Protecting
 
 Both. The symbols give structure and story to Casa's systems. They are playful metaphors, but also serious anchors. They remind us that art and community are sacred — and that building a new world can still feel like a game.
 
+## Practical Life Questions
+
+**Can I smoke at Casa?**
+
+Smoking is only permitted in designated outdoor areas. Inside the House, studios, and performance spaces, smoking is not allowed.
+
+**Do you allow drugs or psychedelics?**
+
+Casa does not endorse or provide substances. We expect everyone to act with responsibility, consent, and respect. Anyone whose behavior harms the vibe will lose access, regardless of what they've consumed.
+
+**Is Casa kid-friendly or family-friendly?**
+
+Some daytime events and programs are family-friendly, but most Casa programming is adult-focused. Check each event's announcement for clarity.
+
+**Is Casa wheelchair accessible?**
+
+Yes — most of Casa is accessible. The building has ramps and wide hallways, though some older areas are still being improved. If you have accessibility needs, let us know and we'll do everything possible to support you.
+
+**Is there parking nearby?**
+
+There is limited street parking in the neighborhood. We recommend ride-sharing, biking, or public transport when possible to respect our residential context.
+
+**Can I bring my dog?**
+
+No. Casa is full of instruments, delicate equipment, and shared spaces. Please leave pets at home.
+
+## Membership & Belonging
+
+**What does it mean to be a member of Casa?**
+
+Membership isn't a subscription or a fee. It's recognition of your contributions — volunteering, donations, mentorship, or care for the House. Members are those who give energy, not just those who attend.
+
+**Do I need to live in Mexico City to be considered part of the community?**
+
+No. International artists and supporters are part of Casa, too. You can contribute from anywhere through donations, remote collaboration, or helping connect us with sponsors.
+
+**Can I bring a guest with me if I'm invited?**
+
+Yes, but you are responsible for your guests. If they disrespect the House or the vibe, it reflects on you.
+
+**What if my guest doesn't vibe? Am I responsible?**
+
+Yes. Guests are your responsibility — they share your bond. If they drain energy instead of adding to it, your credits may be affected.
+
+**How long does it take before I'm trusted with more access?**
+
+Trust builds through contribution. There's no fixed timeline — the more you give, the more Casa opens to you.
+
+## Programs & Opportunities (Additional)
+
+**Do you record live sessions or film events?**
+
+Yes. Casa often records sessions, performances, and workshops. These archives feed into our programs and help artists gain visibility.
+
+**How do artists get mentoring?**
+
+Mentoring happens naturally through Casa's community. Experienced producers, engineers, and artists mentor emerging ones in exchange for credits and contribution.
+
+**Can I propose a workshop or class I want to teach?**
+
+Yes. If you have a skill or gift that aligns with Casa's mission, you can propose a workshop by writing to jp@casadecopas.com. Approved workshops earn credits and help enrich the community.
+
+**What's the Artist of the Month program and when will the next one open?**
+
+Artist of the Month is Casa's flagship spotlight program in collaboration with Goner Music and media partners. Submissions open on casadecopas.com when cycles are active. If no portal is open, stay tuned for the next round.
+
+**Do you accept visual artists, writers, or dancers, or just musicians?**
+
+Casa is primarily music-focused, but we welcome all creators — visual artists, writers, dancers, filmmakers — especially in collaborative programming. Contribution and vibe are what matter most.
+
+## Boundaries & Culture (Additional)
+
+**Why so many rules? Isn't art supposed to be free?**
+
+The rules exist so art can be free. Without structure, the House is drained by people who only take. With boundaries, the vibe is protected and artists can create without distraction.
+
+**What happens if people don't like Casa's way of doing things?**
+
+That's fine. Casa isn't for everyone. If our system doesn't resonate, there are many other venues in the city. No hard feelings.
+
+**Do I have to believe in Tarot or spirituality to participate?**
+
+No. The symbols (cups, doves, tarot) are metaphors — playful anchors that help organize the program. You don't have to "believe" in them. You only need to respect the system.
+
+**Why do you call Casa a sanctuary if it's also a venue?**
+
+Because Casa is more than a venue. A venue sells tickets and serves drinks. A sanctuary protects its vibe and its people. Events are just one expression of Casa's larger mission: to sustain artists with dignity and community.
+
 ## Questions & Clarity
 
 If you have a question that isn't clearly answered in this knowledge base, please email jp@casadecopas.com with your question. This helps us improve clarity and ensure the knowledge base serves everyone better.
