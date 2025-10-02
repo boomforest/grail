@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,32 +12,51 @@
             box-sizing: border-box;
         }
 
+        @font-face {
+            font-family: "Carola";
+            src: local("Carola Regular"), local("Carola-Regular"),
+                url("carola.otf") format("opentype");
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
         body {
             font-family: 'system-ui', -apple-system, sans-serif;
             background: linear-gradient(135deg, #fef7ed, #fed7aa);
             min-height: 100vh;
             padding: 2rem;
             color: #92400e;
+            background: url('bg.jpg') center center;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Carola', serif;
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.9);
-            border-radius: 25px;
+            border-top-left-radius: 100px;
+            border-top-right-radius: 100px;
             padding: 2rem;
-            box-shadow: 0 20px 60px rgba(210, 105, 30, 0.3);
-            border: 3px solid rgba(210, 105, 30, 0.4);
-            backdrop-filter: blur(10px);
+            height: 100vh;
+
         }
 
         h1 {
             text-align: center;
             color: #d2691e;
             margin-bottom: 2rem;
-            font-size: 2.5rem;
-            font-weight: 300;
+            font-size: 4rem;
             letter-spacing: 0.1em;
+            text-transform: none;
         }
 
         .subtitle {
@@ -157,12 +177,25 @@
             animation: typing 1.4s infinite ease-in-out;
         }
 
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        .typing-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
 
         @keyframes typing {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
         }
 
         .welcome-message {
@@ -177,47 +210,46 @@
             body {
                 padding: 1rem;
             }
-            
+
             .container {
                 padding: 1rem;
             }
-            
+
             h1 {
                 font-size: 2rem;
             }
-            
+
             #messages {
                 height: 300px;
             }
-            
+
             .input-container {
                 flex-direction: column;
             }
-            
-            #input, #send {
+
+            #input,
+            #send {
                 width: 100%;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Casa de Copas</h1>
         <p class="subtitle">Virgil - Your Guide</p>
-        
+
         <div id="messages">
             <div class="welcome-message">
-                Hello, I'm Virgil — your guide and collaborator. I'm here to help you navigate ideas, strategy, and execution, whether you need clarity about Casa de Copas, our community, or creative building. What would you like to explore?
+                Hello, I'm Virgil — your guide and collaborator. I'm here to help you navigate ideas, strategy, and
+                execution, whether you need clarity about Casa de Copas, our community, or creative building. What would
+                you like to explore?
             </div>
         </div>
-        
+
         <div class="input-container">
-            <input 
-                type="text" 
-                id="input" 
-                placeholder="Ask me anything about Casa de Copas..."
-                autocomplete="off"
-            >
+            <input type="text" id="input" placeholder="Ask me anything about Casa de Copas..." autocomplete="off">
             <button id="send">Send</button>
         </div>
     </div>
@@ -231,13 +263,13 @@
         function addMessage(content, isUser = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
-            
+
             const headerDiv = document.createElement('div');
             headerDiv.className = 'message-header';
             headerDiv.textContent = isUser ? 'You' : 'Virgil';
-            
+
             const contentDiv = document.createElement('div');
-            
+
             if (!isUser) {
                 // Process markdown-like formatting for assistant messages
                 let formattedContent = content
@@ -248,18 +280,18 @@
                     // Convert line breaks
                     .replace(/\n\n/g, '</p><p style="margin: 0.8em 0;">')
                     .replace(/\n/g, '<br>');
-                
+
                 // Wrap in paragraph tags
                 formattedContent = '<p style="margin: 0;">' + formattedContent + '</p>';
                 contentDiv.innerHTML = formattedContent;
             } else {
                 contentDiv.textContent = content;
             }
-            
+
             messageDiv.appendChild(headerDiv);
             messageDiv.appendChild(contentDiv);
             messages.appendChild(messageDiv);
-            
+
             // Scroll to bottom
             messages.scrollTop = messages.scrollHeight;
         }
@@ -267,15 +299,15 @@
         function showTyping() {
             if (isTyping) return;
             isTyping = true;
-            
+
             const typingDiv = document.createElement('div');
             typingDiv.className = 'message assistant-message typing';
             typingDiv.id = 'typing-indicator';
-            
+
             const headerDiv = document.createElement('div');
             headerDiv.className = 'message-header';
             headerDiv.textContent = 'Virgil';
-            
+
             const contentDiv = document.createElement('div');
             contentDiv.innerHTML = `
                 <span>Thinking</span>
@@ -285,11 +317,11 @@
                     <div class="typing-dot"></div>
                 </div>
             `;
-            
+
             typingDiv.appendChild(headerDiv);
             typingDiv.appendChild(contentDiv);
             messages.appendChild(typingDiv);
-            
+
             messages.scrollTop = messages.scrollHeight;
         }
 
@@ -309,7 +341,7 @@
             addMessage(text, true);
             input.value = '';
             sendBtn.disabled = true;
-            
+
             // Show typing indicator
             showTyping();
 
@@ -317,22 +349,22 @@
                 const response = await fetch('/.netlify/functions/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         message: text,
                         profile: null // No profile data for standalone chat
                     })
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
-                
+
                 // Hide typing and add response
                 hideTyping();
                 addMessage(data.response || data.message || 'I received your message but had trouble responding.');
-                
+
             } catch (error) {
                 console.error('Error:', error);
                 hideTyping();
@@ -358,4 +390,5 @@
         });
     </script>
 </body>
+
 </html>
