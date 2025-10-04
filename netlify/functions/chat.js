@@ -554,6 +554,59 @@ No. The symbols (cups, doves, tarot) are metaphors — playful anchors that help
 
 Because Casa is more than a venue. A venue sells tickets and serves drinks. A sanctuary protects its vibe and its people. Events are just one expression of Casa's larger mission: to sustain artists with dignity and community.
 
+## Supporting Casa from Anywhere
+
+**Can I support Casa if I'm not in Mexico City?**
+
+Yes. Casa is a movement, not just a building — and you can support it from anywhere in the world.
+
+You can create fundraising opportunities for Casa in your own community:
+
+• Bake sales
+• Car washes
+• Charity shows
+• Any creative way of raising support
+
+Simply submit the proceeds to Casa de Copas and send an email with your username at copas.app. The contribution will be added to your account, and you'll receive credits tracked in perpetuity.
+
+**What does that mean?**
+
+It means your support will be remembered forever — not just in Mexico City, but in every future Casa that may exist. When new Houses open in other cities, your contributions will follow you. Recognition is not local; it is global and permanent.
+
+**Will there be other Casas in other cities?**
+
+That is our hope. One day we imagine Casas in many cities, each aligned with the same mission: supporting artists with dignity and reciprocity. By supporting Casa now — whether in CDMX or from abroad — you are laying the foundation for that future.
+
+## Real Talk FAQ
+
+**I have a studio, hotel, or space I'd like to offer to the Casa network. Can I do that?**
+
+Yes. Reach out to jp@casadecopas.com and pitch your idea. Casa's system is flexible and global. Adding your space to the Casa network through copas.app can be a powerful way to connect with like-minded people — with a small percentage of each transaction staying with Casa as a gesture of support.
+
+**How do donations from abroad work?**
+
+When you contribute from outside Mexico, your donation will be added to your account as a mix of Palomas and Love tokens, depending on the size of the donation and your involvement in the House. The exact split will be explained inside the Cup Game on copas.app.
+
+**Is the app global?**
+
+Yes — the app is already web-based and available anywhere in the world. A native app is coming soon, and in time it will include an opt-in Web3 feature for those who want to integrate wallets and on-chain engagement. We embrace everyone, with an eye toward the future.
+
+**What if I want to start my own Casa in another city?**
+
+We encourage it. Casa isn't meant to stay locked in one place. As our systems mature, we'll release open-source tools and infrastructure to help you build your own sanctuary. Supporting Casa CDMX now lays the foundation for every future Casa.
+
+**Why don't you just let people rent the place like a normal venue?**
+
+Because Casa is not a rental hall. Renting makes the House transactional. Casa is reciprocal: you contribute, and the House remembers. Access and opportunities grow with your participation.
+
+**What if I just want to join for the parties?**
+
+You're welcome at events — but over time, Casa's public experiences will only be available to the most contributive members. If you never give back, your access won't deepen. Casa is for those who sustain the vibe, not just consume it.
+
+**Isn't this a bit cult-y?**
+
+It might look unusual from the outside — but Casa is built on choice, consent, and reciprocity, not dogma or control. If it doesn't vibe with you, there are many other spaces in the city. No hard feelings.
+
 ## Questions & Clarity
 
 If you have a question that isn't clearly answered in this knowledge base, please email jp@casadecopas.com with your question. This helps us improve clarity and ensure the knowledge base serves everyone better.
