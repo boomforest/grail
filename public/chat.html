@@ -5,28 +5,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Casa de Copas Assistant</title>
-
-    <div data-us-project="2QnFIRhsamieinf6e0OV" style="width:100vw; height: 100vh"></div>
-    <script type="text/javascript">
-        !function () { if (!window.UnicornStudio) { window.UnicornStudio = { isInitialized: !1 }; var i = document.createElement("script"); i.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.31/dist/unicornStudio.umd.js", i.onload = function () { window.UnicornStudio.isInitialized || (UnicornStudio.init(), window.UnicornStudio.isInitialized = !0) }, (document.head || document.body).appendChild(i) } }();</script>
     <style>
-        /* Reset */
         *,
         *::before,
         *::after {
             box-sizing: border-box;
             margin: 0;
-            padding: 0;
+            padding: 0
         }
 
-        /* Carola */
         @font-face {
             font-family: "Carola";
-            src: local("Carola Regular"), local("Carola-Regular"),
-                url("carola.otf") format("opentype");
+            src: local("Carola Regular"), local("Carola-Regular"), url("carola.otf") format("opentype");
             font-weight: 400;
             font-style: normal;
-            font-display: swap;
+            font-display: swap
         }
 
         :root {
@@ -34,100 +27,94 @@
             --muted: #d6c7bb;
             --accent: #d2691e;
             --card-bg: #0a0a0a;
-            /* black cards */
             --maxw: 800px;
-            /* bigger layout */
-            --gap: 20px;
+            --gap: 20px
         }
 
         html,
         body {
-            height: 100%;
+            height: 100%
         }
 
         body {
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-            color: var(--text);
             min-height: 100vh;
             background-image: url('bg.jpg');
             background-attachment: fixed;
             background-position: -100% 200%;
-            /* centered vertically, nudged right */
             padding-bottom: 120px;
-            /* room for floating input */
             font-size: 28px;
             color: var(--accent);
-            font-family: 'PP Editorial New';
+            font-family: 'Cambria', 'Times New Roman', Times, serif;
         }
 
-        /* Subtle dark overlay for readability */
         body::before {
             content: "";
             position: fixed;
             inset: 0;
             background: linear-gradient(180deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, .55));
             pointer-events: none;
+            z-index: 1
+        }
+
+        #hero {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
             z-index: 0;
+            pointer-events: none
         }
 
         .page {
-            position: relative;
-            z-index: 1;
-            max-width: var(--maxw);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            max-width: 50vw;
             padding: 4rem;
             margin: 0 auto;
-            max-width: 50vw;
-            background: rgba(0, 0, 0, .05);
+            /* background: rgba(0, 0, 0, .05); */
             height: 100vh;
-            backdrop-filter: blur(10px);
+            /* backdrop-filter: blur(10px); */
             border-radius: 100px 100px 0 0;
             overflow: auto;
-            z-index: 110000;
-            position: fixed;
-            top: 0; left: 0;
         }
 
-        /* Header (logo/title on the left) */
         .header {
-            margin-bottom: 24px;
+            margin-bottom: 24px
         }
 
         .title {
             font-family: "Carola", ui-serif, Georgia, serif;
             font-size: clamp(48px, 9vw, 120px);
-            /* big */
-            line-height: 0.95;
-            letter-spacing: 0.06em;
+            line-height: .95;
+            letter-spacing: .06em;
             color: var(--accent);
             text-transform: none;
-            /* Title Case as typed */
-            text-align: center;
-            /* left logo */
+            text-align: center
         }
 
         button {
             font-family: "Carola", ui-serif, Georgia, serif;
-            font-size: 24px;
+            font-size: 24px
         }
 
         .subtitle {
             margin-top: 8px;
             font-style: italic;
-            color: var(--muted);
+            color: var(--accent);
             font-size: clamp(14px, 2.4vw, 18px);
             opacity: .9;
-            color: var(--accent);
-            text-align: center;
+            text-align: center
         }
 
-        /* Messages */
         #messages {
             display: flex;
             flex-direction: column;
             gap: var(--gap);
             max-width: var(--maxw);
             margin: 28px auto 0;
-            padding-bottom: 24px;
+            padding-bottom: 100px;
         }
 
         .message {
@@ -138,14 +125,12 @@
             line-height: 1.6;
             font-size: clamp(18px, 2.4vw, 18px);
             background: var(--card-bg);
-            /* black cards */
-            color: var(--text);
+            color: var(--text)
         }
 
         .message.user {
             margin-left: auto;
-            background: #141414;
-            /* slight contrast for user */
+            background: #141414
         }
 
         .message .who {
@@ -154,8 +139,7 @@
             opacity: .7;
             margin-bottom: 6px;
             color: var(--muted);
-            text-align: center;
-
+            text-align: center
         }
 
         .welcome-message {
@@ -164,21 +148,19 @@
             background: rgba(0, 0, 0, .10);
             padding: 24px 28px;
             border-radius: 16px;
-            color: var(--accent);
+            color: var(--accent)
         }
 
-        /* Floating input like ChatGPT */
         .input-wrap {
             position: fixed;
             left: 0;
             right: 50%;
             bottom: 0;
-            z-index: 10;
+            z-index: 3;
             padding: 16px;
             display: flex;
             justify-content: center;
             backdrop-filter: blur(4px);
-            z-index: 100;
         }
 
         .input-bar {
@@ -188,13 +170,12 @@
             gap: 12px;
             background: #0c0c0c;
             padding: 12px;
-            border-radius: 16px;
+            border-radius: 16px
         }
 
         #input {
             flex: 1;
-            font-size: 22px;
-            /* bigger */
+            font-size: 18px;
             color: var(--text);
             background: transparent;
             border: none;
@@ -208,29 +189,28 @@
             border-radius: 12px;
             padding: 12px 18px;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 14px;
             color: #0a0a0a;
             background: var(--accent);
             cursor: pointer;
-            transition: transform .1s ease;
+            transition: transform .1s ease
         }
 
         #send:hover {
-            transform: translateY(-1px);
+            transform: translateY(-1px)
         }
 
         #send:disabled {
             opacity: .6;
             cursor: not-allowed;
-            transform: none;
+            transform: none
         }
 
-        /* Typing indicator */
         .typing {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            opacity: .85;
+            opacity: .85
         }
 
         .dot {
@@ -238,15 +218,15 @@
             height: 6px;
             border-radius: 50%;
             background: var(--muted);
-            animation: b 1.4s infinite ease-in-out;
+            animation: b 1.4s infinite ease-in-out
         }
 
         .dot:nth-child(2) {
-            animation-delay: .15s;
+            animation-delay: .15s
         }
 
         .dot:nth-child(3) {
-            animation-delay: .3s;
+            animation-delay: .3s
         }
 
         @keyframes b {
@@ -254,31 +234,42 @@
             0%,
             80%,
             100% {
-                transform: scale(0);
+                transform: scale(0)
             }
 
             40% {
-                transform: scale(1);
+                transform: scale(1)
             }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width:768px) {
             .page {
+                max-width: 92vw;
+                width: 92vw;
+                left: 4vw;
                 padding: 28px 14px 0;
+                border-radius: 28px 28px 0 0;
             }
 
             .input-wrap {
-                padding: 12px;
+                left: 4vw;
+                right: 4vw;
+                padding: 12px
             }
 
             .input-bar {
-                border-radius: 14px;
+                border-radius: 14px
+            }
+
+            .message {
+                max-width: 86vw
             }
         }
     </style>
 </head>
 
 <body>
+    <div id="hero" data-us-project="2QnFIRhsamieinf6e0OV"></div>
 
     <main class="page">
         <header class="header">
@@ -291,20 +282,16 @@
                 I'm Virgil — Casa de Copas' resident guide. I'm a living knowledge base, writer, and organizer built on
                 ChatGPT technology. My voice and spirit are modeled after Virgil, the guardian and guide from Dante's
                 Inferno: steady, clear-eyed, and protective.<br><br>
-
                 I exist to help translate the vision of Casa de Copas into action. For newcomers, I serve as a companion
                 and explainer. You can ask me about Casa's ethos, programs, currencies, and paths of
                 participation.<br><br>
-
                 I'm not a decision-maker, not a gatekeeper, and not a substitute for the human community at Casa. I'm a
                 bridge — a guardian of knowledge, here to help you find your own path within the House.<br><br>
-
                 What would you like to know about Casa de Copas?
             </div>
         </section>
-
     </main>
-    <!-- Floating input -->
+
     <div class="input-wrap">
         <div class="input-bar">
             <input id="input" type="text" placeholder="Ask me anything about Casa de Copas…" autocomplete="off" />
@@ -313,29 +300,40 @@
     </div>
 
     <script>
+        (function () {
+            if (!window.UnicornStudio) {
+                window.UnicornStudio = { isInitialized: false };
+                var s = document.createElement("script");
+                s.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.31/dist/unicornStudio.umd.js";
+                s.onload = function () { if (!window.UnicornStudio.isInitialized) { UnicornStudio.init(); window.UnicornStudio.isInitialized = true; } };
+                (document.head || document.body).appendChild(s);
+            }
+        })();
+
+        const pageEl = document.querySelector('.page');
         const messages = document.getElementById('messages');
         const input = document.getElementById('input');
         const sendBtn = document.getElementById('send');
         let isTyping = false;
 
+        function scrollToBottom() {
+            requestAnimationFrame(() => { pageEl.scrollTo({ top: pageEl.scrollHeight, behavior: 'smooth' }); });
+        }
+
         function addMessage(content, fromUser = false) {
             const msg = document.createElement('div');
             msg.className = `message${fromUser ? ' user' : ''}`;
-
             const who = document.createElement('span');
             who.className = 'who';
             who.textContent = fromUser ? 'You' : 'Virgil';
-
             const text = document.createElement('div');
             text.innerHTML = fromUser ? content : content
                 .replace(/^• /gm, '<span>•</span> ')
                 .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
                 .replace(/\n\n/g, '</p><p>')
                 .replace(/\n/g, '<br>');
-            msg.appendChild(who);
-            msg.appendChild(text);
-            messages.appendChild(msg);
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            msg.appendChild(who); msg.appendChild(text); messages.appendChild(msg);
+            scrollToBottom();
         }
 
         function showTyping() {
@@ -344,28 +342,23 @@
             const wrap = document.createElement('div');
             wrap.id = 'typing';
             wrap.className = 'message';
-            wrap.innerHTML = `<span class="who">Virgil</span><span class="typing">Thinking
-        <span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+            wrap.innerHTML = `<span class="who">Virgil</span><span class="typing">Thinking <span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
             messages.appendChild(wrap);
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            scrollToBottom();
         }
 
         function hideTyping() {
             const t = document.getElementById('typing');
             if (t) t.remove();
             isTyping = false;
+            scrollToBottom();
         }
 
         async function sendMessage() {
             const text = input.value.trim();
             if (!text || isTyping) return;
-
             addMessage(text, true);
-            input.value = '';
-            input.focus();
-            sendBtn.disabled = true;
-            showTyping();
-
+            input.value = ''; input.focus(); sendBtn.disabled = true; showTyping();
             try {
                 const res = await fetch('/.netlify/functions/chat', {
                     method: 'POST',
@@ -385,8 +378,7 @@
 
         sendBtn.addEventListener('click', sendMessage);
         input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-
-        window.addEventListener('load', () => input.focus());
+        window.addEventListener('load', () => { input.focus(); scrollToBottom(); });
     </script>
 </body>
 
