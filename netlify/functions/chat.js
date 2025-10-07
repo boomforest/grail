@@ -665,6 +665,49 @@ The living memory of Casa, tracked through the Casa App. It records all contribu
 • Equipment/property donations: Yes — receive tax receipts for full value, items go to guardians of appropriate rank
 • Exiting the program: Always possible — you keep your IP but forfeit standing and benefits; can re-enter but start from beginning
 
+## Marriage & The Era of Cups
+
+**How does marriage fit into the Cups philosophy?**
+
+Under the Cups Manifesto, marriage isn't abolished — it's reborn. Here's how each of the 7 Rules transforms the institution:
+
+**I. Cup Before Sword**
+
+Marriage must be founded on mutual overflow, not need. Two vessels already full, choosing to pour into each other — not to extract or possess. If based on fear, dependence, or domination, it belongs to the Swords.
+
+**II. No One Belongs to Anyone**
+
+The bond is voluntary and renewable by the soul, not by the state. You can take vows — but they must be living ones: revisited, renewed, rewritten as both partners evolve. Love must remain earned, not owed.
+
+**III. Overflow, Don't Extract**
+
+Marriage based on scarcity ("I need you to complete me") will rot. But built on abundance ("I'm so full I can't help but share") it becomes generative. The point is not to merge into one body but to circulate waters between two full wells.
+
+**IV. Guard the Sanctuary**
+
+Even as a free union, marriage must protect its sanctity. Keep out noise, gossip, performative sharing, and emotional pollution. Guard your ritual space like a temple so the mystery can keep breathing.
+
+**V. Beauty Is a Form of Truth**
+
+A Cup marriage is about reverence, not optimization. Beauty in gesture, word, ritual, and shared creation proves sincerity. When partners act beautifully toward each other, the truth remains visible even through conflict.
+
+**VI. All Exchanges Must Be Voluntary and Conscious**
+
+Marriage is no longer a default state — it's a conscious exchange of vows, labor, affection, and freedom. No passive roles. A Cup marriage might last a lifetime or a single season; its worth lies in the awareness with which it is entered, tended, and if needed, released.
+
+**VII. Love Is a Ceremony, Not a Contract**
+
+The paper doesn't sanctify the union; the ritual does. Two people can hold a marriage without the state, without religion, without witnesses — if they stand before each other with full consent and say, "I see you, I choose you, and I free you." The power is in the ceremony, not the bureaucracy.
+
+**In Summary**
+
+Marriage becomes:
+• A ceremony of choice, not a cage of permanence
+• A dance of mutual overflow, not a ledger of duties
+• A living art form, renewed through beauty and awareness
+
+Not "till death do us part," but "as long as love remains true between us."
+
 ## Questions & Clarity
 
 If you have a question that isn't clearly answered in this knowledge base, please email jp@casadecopas.com with your question. This helps us improve clarity and ensure the knowledge base serves everyone better.
