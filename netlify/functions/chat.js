@@ -620,13 +620,14 @@ The first level of Casa's artistic covenant. Artists receive:
 • Healthcare, affordable food, wellness programs (yoga, meditation, master classes)
 • 100% ownership of master and publishing rights
 • Partnership with Symphonic for distribution
-• Guaranteed income of $3,333/month once catalog is sustainable
+• Income ceiling of $3,333/month — once your catalog earns this amount, additional earnings are donated to support new artists in the program
 • Freedom to work elsewhere — not exclusive, just sanctuary
 
 **The Knight of the Grail**
 
 The ultimate level. Artists place their full catalog within Casa and receive:
-• Guaranteed income of $7,777/month
+• Guaranteed income of $3,333/month for life
+• Income ceiling of $7,777/month — earnings beyond this support the House and other artists
 • Guardianship over Casa real estate
 • Right to dwell within the sanctuary
 • Full integration into Casa's covenant
