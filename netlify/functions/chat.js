@@ -607,6 +607,64 @@ You're welcome at events — but over time, Casa's public experiences will only 
 
 It might look unusual from the outside — but Casa is built on choice, consent, and reciprocity, not dogma or control. If it doesn't vibe with you, there are many other spaces in the city. No hard feelings.
 
+## The Grail Codex: Core Principles
+
+**Casa's Foundation**
+
+Casa de Copas was founded by artists who walked the length of the music industry and saw its exploitation. The industry values artists only as profit generators, treating them as replaceable parts. Casa offers a better way: a sanctuary that provides food, healthcare, shelter, and kinship so artists can focus on creating art with dignity.
+
+**The Knight of Cups**
+
+The first level of Casa's artistic covenant. Artists receive:
+• Free studio access when space allows
+• Healthcare, affordable food, wellness programs (yoga, meditation, master classes)
+• 100% ownership of master and publishing rights
+• Partnership with Symphonic for distribution
+• Guaranteed income of $3,333/month once catalog is sustainable
+• Freedom to work elsewhere — not exclusive, just sanctuary
+
+**The Knight of the Grail**
+
+The ultimate level. Artists place their full catalog within Casa and receive:
+• Guaranteed income of $7,777/month
+• Guardianship over Casa real estate
+• Right to dwell within the sanctuary
+• Full integration into Casa's covenant
+
+**The Dove Cove Protocol**
+
+Casa's conflict resolution framework based on restoration, not retribution:
+• Every voice matters and is heard fully
+• Seek restoration, not punishment
+• Love tokens may be adjusted to reflect accountability
+• Community wellbeing takes precedence over individual ego
+• Mediation by Knights and Virgil for escalated conflicts
+
+**Governance & The Infinite Game**
+
+Casa is governed by covenant, not hierarchy:
+• Virgil maintains the Codex and provides systemic clarity
+• Knights (starting with JP) serve as guardians, not rulers
+• JP holds a tie-breaking vote (used rarely, ideally never)
+• Any participant who reaches Era of Cups can participate in governance
+• Casa is an infinite game — not a project with an endpoint, but a covenant for generations
+
+**Who is JP?**
+
+John Paul Hitch Roney III, founder and first Knight of Casa de Copas. He studied opera, invested over a million dollars of his own resources into Casa, and walked through both success and exploitation in the music industry. JP holds the tie-breaking vote only to avoid stalemates. His belief: art is the reward and the path. Casa exists to protect artists so they can create purely, sustainably, and with dignity.
+
+**The Book of the Grail**
+
+The living memory of Casa, tracked through the Casa App. It records all contributions, devotion, and community participation. It may never exist physically, but its purpose is sacred: to remember those who built and sustained the House.
+
+**Additional Codex Q&A**
+
+• Yoga instructors, therapists, horticulturists: Contact jp@casadecopas.com to propose wellness programs
+• TV/media partnerships: Develop organically — email proposals to jp@casadecopas.com
+• Tiny Desk-style series: No — Casa paves new paths rather than replicating what exists
+• Equipment/property donations: Yes — receive tax receipts for full value, items go to guardians of appropriate rank
+• Exiting the program: Always possible — you keep your IP but forfeit standing and benefits; can re-enter but start from beginning
+
 ## Questions & Clarity
 
 If you have a question that isn't clearly answered in this knowledge base, please email jp@casadecopas.com with your question. This helps us improve clarity and ensure the knowledge base serves everyone better.
