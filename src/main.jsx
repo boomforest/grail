@@ -372,7 +372,6 @@ function App() {
   const handleSuccessfulLogin = async (data) => {
     console.log('Login successful:', data.user)
     setUser(data.user)
-    setMessage('Login successful!')
     await ensureProfileExists(data.user)
     await loadAllProfiles()
     await loadNotifications()

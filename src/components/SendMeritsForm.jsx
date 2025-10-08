@@ -30,6 +30,57 @@ function SendMeritsForm({ onBack, message, supabase, user, allProfiles }) {
     setSearchResults([])
   }
 
+  const handleToggleGoldRing = async () => {
+    if (!supabase || !user) {
+      setLocalMessage('Please wait for connection...')
+      return
+    }
+
+    const recipient = meritData.recipient.trim().toUpperCase()
+
+    if (!recipient) {
+      setLocalMessage('Please select a user first')
+      return
+    }
+
+    try {
+      setIsAwarding(true)
+      setLocalMessage('Updating gold ring...')
+
+      // Find recipient
+      const { data: recipientProfile, error: findError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('username', recipient)
+        .single()
+
+      if (findError || !recipientProfile) {
+        setLocalMessage('Recipient not found')
+        return
+      }
+
+      // Toggle gold ring
+      const newGoldRingValue = !recipientProfile.gold_ring
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ gold_ring: newGoldRingValue })
+        .eq('id', recipientProfile.id)
+
+      if (updateError) {
+        setLocalMessage('Failed to update gold ring')
+        return
+      }
+
+      setLocalMessage(`Gold ring ${newGoldRingValue ? 'added to' : 'removed from'} ${recipient}!`)
+
+    } catch (err) {
+      setLocalMessage('Gold ring update failed: ' + err.message)
+    } finally {
+      setIsAwarding(false)
+    }
+  }
+
   const handleSendMerits = async () => {
     if (!supabase || !user) {
       setLocalMessage('Please wait for connection...')
@@ -343,10 +394,31 @@ function SendMeritsForm({ onBack, message, supabase, user, allProfiles }) {
               fontSize: '1.1rem',
               fontWeight: '600',
               cursor: isAwarding ? 'not-allowed' : 'pointer',
-              boxShadow: isAwarding ? 'none' : '0 4px 15px rgba(40, 167, 69, 0.3)'
+              boxShadow: isAwarding ? 'none' : '0 4px 15px rgba(40, 167, 69, 0.3)',
+              marginBottom: '1rem'
             }}
           >
             {isAwarding ? 'Awarding Merits...' : 'Award Merits'}
+          </button>
+
+          {/* Toggle Gold Ring Button */}
+          <button
+            onClick={handleToggleGoldRing}
+            disabled={isAwarding}
+            style={{
+              width: '100%',
+              padding: '1rem',
+              backgroundColor: isAwarding ? '#cccccc' : '#FFD700',
+              color: '#000',
+              border: 'none',
+              borderRadius: '15px',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              cursor: isAwarding ? 'not-allowed' : 'pointer',
+              boxShadow: isAwarding ? 'none' : '0 4px 15px rgba(255, 215, 0, 0.3)'
+            }}
+          >
+            👑 Toggle Gold Ring
           </button>
         </div>
 

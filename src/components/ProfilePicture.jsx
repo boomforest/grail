@@ -104,7 +104,7 @@ function ProfilePicture({
       // Update profile in database
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ 
+        .update({
           profile_picture_url: null,
           profile_picture_updated_at: new Date().toISOString()
         })
@@ -114,8 +114,8 @@ function ProfilePicture({
 
       // Notify parent component
       if (onProfileUpdate) {
-        onProfileUpdate({ 
-          ...profile, 
+        onProfileUpdate({
+          ...profile,
           profile_picture_url: null,
           profile_picture_updated_at: new Date().toISOString()
         })
@@ -125,6 +125,39 @@ function ProfilePicture({
     } catch (error) {
       console.error('Error removing profile picture:', error)
       alert('Failed to remove profile picture. Please try again.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleRemoveGoldRing = async () => {
+    if (!user || !supabase || !profile?.gold_ring) return
+
+    setIsUploading(true)
+
+    try {
+      // Update profile in database
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          gold_ring: false
+        })
+        .eq('id', user.id)
+
+      if (updateError) throw updateError
+
+      // Notify parent component
+      if (onProfileUpdate) {
+        onProfileUpdate({
+          ...profile,
+          gold_ring: false
+        })
+      }
+
+      setShowUploadModal(false)
+    } catch (error) {
+      console.error('Error removing gold ring:', error)
+      alert('Failed to remove gold ring. Please try again.')
     } finally {
       setIsUploading(false)
     }
@@ -153,8 +186,10 @@ function ProfilePicture({
             alignItems: 'center',
             justifyContent: 'center',
             cursor: showUpload ? 'pointer' : 'default',
-            border: '3px solid #d2691e',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            border: profile?.gold_ring ? '4px solid gold' : '3px solid #d2691e',
+            boxShadow: profile?.gold_ring
+              ? '0 0 15px rgba(255, 215, 0, 0.6), 0 2px 8px rgba(0,0,0,0.1)'
+              : '0 2px 8px rgba(0,0,0,0.1)',
             transition: 'transform 0.2s',
             overflow: 'hidden'
           }}
@@ -271,29 +306,54 @@ function ProfilePicture({
               />
             </div>
 
-            {profile?.profile_picture_url && (
-              <button
-                onClick={handleRemovePicture}
-                disabled={isUploading}
-                style={{
-                  padding: '0.8rem 1.2rem',
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '12px',
-                  cursor: isUploading ? 'not-allowed' : 'pointer',
-                  opacity: isUploading ? 0.5 : 1,
-                  fontSize: '16px'
-                }}
-              >
-                🗑️ Remove Photo
-              </button>
-            )}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem'
+            }}>
+              {profile?.profile_picture_url && (
+                <button
+                  onClick={handleRemovePicture}
+                  disabled={isUploading}
+                  style={{
+                    padding: '0.8rem 1.2rem',
+                    backgroundColor: '#dc3545',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    cursor: isUploading ? 'not-allowed' : 'pointer',
+                    opacity: isUploading ? 0.5 : 1,
+                    fontSize: '16px'
+                  }}
+                >
+                  🗑️ Remove Photo
+                </button>
+              )}
 
-            <p style={{ 
-              fontSize: '0.8rem', 
-              color: '#666', 
-              margin: '1rem 0 0 0' 
+              {profile?.gold_ring && (
+                <button
+                  onClick={handleRemoveGoldRing}
+                  disabled={isUploading}
+                  style={{
+                    padding: '0.8rem 1.2rem',
+                    backgroundColor: '#8b4513',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    cursor: isUploading ? 'not-allowed' : 'pointer',
+                    opacity: isUploading ? 0.5 : 1,
+                    fontSize: '16px'
+                  }}
+                >
+                  👑 Remove Gold Ring
+                </button>
+              )}
+            </div>
+
+            <p style={{
+              fontSize: '0.8rem',
+              color: '#666',
+              margin: '1rem 0 0 0'
             }}>
               Max file size: 5MB. Supported formats: JPG, PNG, GIF
             </p>
