@@ -2,392 +2,415 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Casa de Copas Assistant</title>
-    <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Casa de Copas Assistant</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        @font-face {
-            font-family: "Carola";
-            src: local("Carola Regular"), local("Carola-Regular"), url("carola.otf") format("opentype");
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap
-        }
+    @font-face {
+      font-family: "Carola";
+      src: local("Carola Regular"), local("Carola-Regular"), url("carola.otf") format("opentype");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
 
-        :root {
-            --text: #f7f5f2;
-            --muted: #d6c7bb;
-            --accent: #d2691e;
-            --card-bg: #0a0a0a;
-            --maxw: 800px;
-            --gap: 20px
-        }
+    :root {
+      --text: #f7f5f2;
+      --muted: #d6c7bb;
+      --accent: #d2691e;
+      --card-bg: #0a0a0a;
+      --maxw: 800px;
+      --gap: 20px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --input-h: 64px;
+    }
 
-        html {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            text-rendering: optimizeLegibility;
-        }
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
 
-        html,
-        body {
-            height: 100%
-        }
+    html,
+    body {
+      height: auto;
+    }
 
+    body {
+      min-height: 100dvh;
+      min-height: -webkit-fill-available;
+      background-image: url('bg.jpg');
+      background-attachment: fixed;
+      background-position: -100% 200%;
+      padding-bottom: calc(var(--input-h) + var(--safe-bottom));
+      font-size: 28px;
+      color: var(--accent);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
 
+    @media (max-width: 768px) {
+      body {
+        background-attachment: scroll;
+      }
+    }
 
-        body {
-            min-height: 100vh;
-            background-image: url('bg.jpg');
-            background-attachment: fixed;
-            background-position: -100% 200%;
-            padding-bottom: 120px;
-            font-size: 28px;
-            color: var(--accent);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, .55));
+      pointer-events: none;
+      z-index: 1;
+    }
 
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, .55));
-            pointer-events: none;
-            z-index: 1
-        }
+    #hero {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
 
-        #hero {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
-            pointer-events: none
-        }
+    .page {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      max-width: 50vw;
+      padding: 4rem;
+      margin: 0 auto;
+      height: 100dvh;
+      height: -webkit-fill-available;
+      border-radius: 100px 100px 0 0;
+      overflow: auto;
+    }
 
-        .page {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 2;
-            max-width: 50vw;
-            padding: 4rem;
-            margin: 0 auto;
-            /* background: rgba(0, 0, 0, .05); */
-            height: 100vh;
-            /* backdrop-filter: blur(10px); */
-            border-radius: 100px 100px 0 0;
-            overflow: auto;
-        }
+    .header {
+      margin-bottom: 24px;
+    }
 
-        .header {
-            margin-bottom: 24px
-        }
+    .title {
+      font-family: "Carola", ui-serif, Georgia, serif;
+      font-size: 72px;
+      line-height: .95;
+      letter-spacing: .06em;
+      color: var(--accent);
+      text-transform: none;
+      text-align: center;
+    }
 
-        .title {
-            font-family: "Carola", ui-serif, Georgia, serif;
-            font-size: 72px;
-            line-height: .95;
-            letter-spacing: .06em;
-            color: var(--accent);
-            text-transform: none;
-            text-align: center
-        }
+    .subtitle {
+      margin-top: 8px;
+      font-style: italic;
+      color: var(--accent);
+      font-size: clamp(14px, 2.4vw, 18px);
+      opacity: .9;
+      text-align: center;
+    }
 
-        button {
-            font-family: "Carola", ui-serif, Georgia, serif;
-            font-size: 24px
-        }
+    #messages {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      max-width: var(--maxw);
+      margin: 28px auto 0;
+      padding-bottom: calc(var(--input-h) + 28px);
+    }
 
-        .subtitle {
-            margin-top: 8px;
-            font-style: italic;
-            color: var(--accent);
-            font-size: clamp(14px, 2.4vw, 18px);
-            opacity: .9;
-            text-align: center
-        }
+    .message {
+      width: fit-content;
+      max-width: min(900px, 90vw);
+      padding: 18px 20px;
+      border-radius: 14px;
+      line-height: 1.6;
+      font-size: clamp(18px, 2.4vw, 18px);
+      background: var(--card-bg);
+      color: var(--text);
+    }
 
-        #messages {
-            display: flex;
-            flex-direction: column;
-            gap: var(--gap);
-            max-width: var(--maxw);
-            margin: 28px auto 0;
-            padding-bottom: 100px;
-        }
+    .message.user {
+      margin-left: auto;
+      background: #141414;
+    }
 
-        .message {
-            width: fit-content;
-            max-width: min(900px, 90vw);
-            padding: 18px 20px;
-            border-radius: 14px;
-            line-height: 1.6;
-            font-size: clamp(18px, 2.4vw, 18px);
-            background: var(--card-bg);
-            color: var(--text)
-        }
+    .message .who {
+      display: block;
+      font-size: .8em;
+      opacity: .7;
+      margin-bottom: 6px;
+      color: var(--muted);
+      text-align: center;
+    }
 
-        .message.user {
-            margin-left: auto;
-            background: #141414
-        }
+    .welcome-message {
+      font-size: 16px;
+      line-height: 1.6;
+      background: rgba(0, 0, 0, .10);
+      padding: 24px 28px;
+      border-radius: 16px;
+      color: var(--accent);
+    }
 
-        .message .who {
-            display: block;
-            font-size: .8em;
-            opacity: .7;
-            margin-bottom: 6px;
-            color: var(--muted);
-            text-align: center
-        }
+    .input-wrap {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 3;
+      padding: 12px 16px;
+      padding-bottom: calc(12px + var(--safe-bottom));
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+    }
 
-        .welcome-message {
-            font-size: 16px;
-            line-height: 1.6;
-            background: rgba(0, 0, 0, .10);
-            padding: 24px 28px;
-            border-radius: 16px;
-            color: var(--accent)
-        }
+    .input-bar {
+      width: min(var(--maxw), 92vw);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #0c0c0c;
+      padding: 12px;
+      border-radius: 16px;
+    }
 
-        .input-wrap {
-            position: fixed;
-            left: 0;
-            right: 50%;
-            bottom: 0;
-            z-index: 3;
-            padding: 16px;
-            display: flex;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-        }
+    #input {
+      flex: 1;
+      font-size: 16px;
+      color: var(--text);
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 10px 2px;
+    }
 
-        .input-bar {
-            width: min(var(--maxw), 100%);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #0c0c0c;
-            padding: 12px;
-            border-radius: 16px
-        }
+    #send {
+      appearance: none;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-weight: 700;
+      font-size: 16px;
+      color: #0a0a0a;
+      background: var(--accent);
+      cursor: pointer;
+      transition: transform .1s ease;
+    }
 
-        #input {
-            flex: 1;
-            font-size: 18px;
-            color: var(--text);
-            background: transparent;
-            border: none;
-            outline: none;
-            padding: 10px 2px;
-        }
+    #send:hover {
+      transform: translateY(-1px);
+    }
 
-        #send {
-            appearance: none;
-            border: none;
-            border-radius: 12px;
-            padding: 12px 18px;
-            font-weight: 700;
-            font-size: 14px;
-            color: #0a0a0a;
-            background: var(--accent);
-            cursor: pointer;
-            transition: transform .1s ease
-        }
+    #send:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+      transform: none;
+    }
 
-        #send:hover {
-            transform: translateY(-1px)
-        }
+    .typing {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      opacity: .85;
+    }
 
-        #send:disabled {
-            opacity: .6;
-            cursor: not-allowed;
-            transform: none
-        }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: b 1.4s infinite ease-in-out;
+    }
 
-        .typing {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            opacity: .85
-        }
+    .dot:nth-child(2) {
+      animation-delay: .15s;
+    }
 
-        .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--muted);
-            animation: b 1.4s infinite ease-in-out
-        }
+    .dot:nth-child(3) {
+      animation-delay: .3s;
+    }
 
-        .dot:nth-child(2) {
-            animation-delay: .15s
-        }
+    @keyframes b {
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
 
-        .dot:nth-child(3) {
-            animation-delay: .3s
-        }
+      40% {
+        transform: scale(1);
+      }
+    }
 
-        @keyframes b {
+    @media (max-width: 768px) {
+      .page {
+        max-width: 92vw;
+        width: 92vw;
+        left: 4vw;
+        padding: 28px 14px 0;
+        border-radius: 28px 28px 0 0;
+      }
 
-            0%,
-            80%,
-            100% {
-                transform: scale(0)
-            }
+      .input-bar {
+        border-radius: 14px;
+      }
 
-            40% {
-                transform: scale(1)
-            }
-        }
-
-        @media (max-width:768px) {
-            .page {
-                max-width: 92vw;
-                width: 92vw;
-                left: 4vw;
-                padding: 28px 14px 0;
-                border-radius: 28px 28px 0 0;
-            }
-
-            .input-wrap {
-                left: 4vw;
-                right: 4vw;
-                padding: 12px
-            }
-
-            .input-bar {
-                border-radius: 14px
-            }
-
-            .message {
-                max-width: 86vw
-            }
-        }
-    </style>
+      .message {
+        max-width: 86vw;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <div id="hero" data-us-project="2QnFIRhsamieinf6e0OV"></div>
+  <div id="hero" data-us-project="2QnFIRhsamieinf6e0OV"></div>
 
-    <main class="page">
-        <header class="header">
-            <h1 class="title">Casa de Copas</h1>
-            <p class="subtitle">Introducing Virgil — Your Guide</p>
-        </header>
+  <main class="page">
+    <header class="header">
+      <h1 class="title">Casa de Copas</h1>
+      <p class="subtitle">Introducing Virgil — Your Guide</p>
+    </header>
 
-        <section id="messages">
-            <div class="welcome-message">
-                I'm Virgil — Casa de Copas' resident guide. I'm a living knowledge base, writer, and organizer built on
-                ChatGPT technology. My voice and spirit are modeled after Virgil, the guardian and guide from Dante's
-                Inferno: steady, clear-eyed, and protective.<br><br>
-                I exist to help translate the vision of Casa de Copas into action. For newcomers, I serve as a companion
-                and explainer. You can ask me about Casa's ethos, programs, currencies, and paths of
-                participation.<br><br>
-                I'm not a decision-maker, not a gatekeeper, and not a substitute for the human community at Casa. I'm a
-                bridge — a guardian of knowledge, here to help you find your own path within the House.<br><br>
-                What would you like to know about Casa de Copas?
-            </div>
-        </section>
-    </main>
+    <section id="messages">
+      <div class="welcome-message">
+        I'm Virgil — Casa de Copas' resident guide. I'm a living knowledge base, writer, and organizer built on
+        ChatGPT technology. My voice and spirit are modeled after Virgil, the guardian and guide from Dante's Inferno:
+        steady, clear-eyed, and protective.<br><br>
+        I exist to help translate the vision of Casa de Copas into action. For newcomers, I serve as a companion
+        and explainer. You can ask me about Casa's ethos, programs, currencies, and paths of participation.<br><br>
+        I'm not a decision-maker, not a gatekeeper, and not a substitute for the human community at Casa. I'm a
+        bridge — a guardian of knowledge, here to help you find your own path within the House.<br><br>
+        What would you like to know about Casa de Copas?
+      </div>
+    </section>
+  </main>
 
-    <div class="input-wrap">
-        <div class="input-bar">
-            <input id="input" type="text" placeholder="Ask me anything about Casa de Copas…" autocomplete="off" />
-            <button id="send">Send</button>
-        </div>
+  <div class="input-wrap">
+    <div class="input-bar">
+      <input id="input" type="text" placeholder="Ask me anything about Casa de Copas…" autocomplete="off" />
+      <button id="send">Send</button>
     </div>
+  </div>
 
-    <script>
-        (function () {
-            if (!window.UnicornStudio) {
-                window.UnicornStudio = { isInitialized: false };
-                var s = document.createElement("script");
-                s.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.31/dist/unicornStudio.umd.js";
-                s.onload = function () { if (!window.UnicornStudio.isInitialized) { UnicornStudio.init(); window.UnicornStudio.isInitialized = true; } };
-                (document.head || document.body).appendChild(s);
-            }
-        })();
+  <script>
+    (function () {
+      if (!window.UnicornStudio) {
+        window.UnicornStudio = { isInitialized: false };
+        var s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.31/dist/unicornStudio.umd.js";
+        s.onload = function () {
+          if (!window.UnicornStudio.isInitialized) {
+            UnicornStudio.init();
+            window.UnicornStudio.isInitialized = true;
+          }
+        };
+        (document.head || document.body).appendChild(s);
+      }
+    })();
 
-        const pageEl = document.querySelector('.page');
-        const messages = document.getElementById('messages');
-        const input = document.getElementById('input');
-        const sendBtn = document.getElementById('send');
-        let isTyping = false;
+    const pageEl = document.querySelector('.page');
+    const messages = document.getElementById('messages');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+    let isTyping = false;
 
-        function scrollToBottom() {
-            requestAnimationFrame(() => { pageEl.scrollTo({ top: pageEl.scrollHeight, behavior: 'smooth' }); });
-        }
+    function scrollToBottom() {
+      requestAnimationFrame(() => {
+        pageEl.scrollTo({ top: pageEl.scrollHeight, behavior: 'smooth' });
+      });
+    }
 
-        function addMessage(content, fromUser = false) {
-            const msg = document.createElement('div');
-            msg.className = `message${fromUser ? ' user' : ''}`;
-            const who = document.createElement('span');
-            who.className = 'who';
-            who.textContent = fromUser ? 'You' : 'Virgil';
-            const text = document.createElement('div');
-            text.innerHTML = fromUser ? content : content
-                .replace(/^• /gm, '<span>•</span> ')
-                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/\n/g, '<br>');
-            msg.appendChild(who); msg.appendChild(text); messages.appendChild(msg);
-            scrollToBottom();
-        }
+    function addMessage(content, fromUser = false) {
+      const msg = document.createElement('div');
+      msg.className = `message${fromUser ? ' user' : ''}`;
+      const who = document.createElement('span');
+      who.className = 'who';
+      who.textContent = fromUser ? 'You' : 'Virgil';
+      const text = document.createElement('div');
+      text.innerHTML = fromUser ? content : content
+        .replace(/^• /gm, '<span>•</span> ')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+      msg.appendChild(who);
+      msg.appendChild(text);
+      messages.appendChild(msg);
+      scrollToBottom();
+    }
 
-        function showTyping() {
-            if (isTyping) return;
-            isTyping = true;
-            const wrap = document.createElement('div');
-            wrap.id = 'typing';
-            wrap.className = 'message';
-            wrap.innerHTML = `<span class="who">Virgil</span><span class="typing">Thinking <span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
-            messages.appendChild(wrap);
-            scrollToBottom();
-        }
+    function showTyping() {
+      if (isTyping) return;
+      isTyping = true;
+      const wrap = document.createElement('div');
+      wrap.id = 'typing';
+      wrap.className = 'message';
+      wrap.innerHTML = `<span class="who">Virgil</span><span class="typing">Thinking <span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+      messages.appendChild(wrap);
+      scrollToBottom();
+    }
 
-        function hideTyping() {
-            const t = document.getElementById('typing');
-            if (t) t.remove();
-            isTyping = false;
-            scrollToBottom();
-        }
+    function hideTyping() {
+      const t = document.getElementById('typing');
+      if (t) t.remove();
+      isTyping = false;
+      scrollToBottom();
+    }
 
-        async function sendMessage() {
-            const text = input.value.trim();
-            if (!text || isTyping) return;
-            addMessage(text, true);
-            input.value = ''; input.focus(); sendBtn.disabled = true; showTyping();
-            try {
-                const res = await fetch('/.netlify/functions/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text, profile: null })
-                });
-                const data = await res.json();
-                hideTyping();
-                addMessage(data.response || data.message || 'I received your message but had trouble responding.');
-            } catch (err) {
-                hideTyping();
-                addMessage(`Connection error: ${err.message}. Please try again in a moment.`);
-            } finally {
-                sendBtn.disabled = false;
-            }
-        }
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (!text || isTyping) return;
+      addMessage(text, true);
+      input.value = '';
+      input.focus();
+      sendBtn.disabled = true;
+      showTyping();
+      try {
+        const res = await fetch('/.netlify/functions/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, profile: null })
+        });
+        const data = await res.json();
+        hideTyping();
+        addMessage(data.response || data.message || 'I received your message but had trouble responding.');
+      } catch (err) {
+        hideTyping();
+        addMessage(`Connection error: ${err.message}. Please try again in a moment.`);
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
 
-        sendBtn.addEventListener('click', sendMessage);
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-        window.addEventListener('load', () => { input.focus(); scrollToBottom(); });
-    </script>
+    sendBtn.addEventListener('click', sendMessage);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    window.addEventListener('load', () => {
+      input.focus();
+      scrollToBottom();
+    });
+
+    // Fix viewport resizing on iOS
+    function setVH() {
+      document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+    }
+    setVH();
+    window.addEventListener('resize', setVH);
+  </script>
 </body>
 
 </html>
