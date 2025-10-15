@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { saveConversationToNotion, generateConversationId } from '../services/notionService';
 
 const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   console.log('GPTChatWindow rendered with:', { isOpen, profile: profile?.username });
@@ -15,6 +16,7 @@ const GPTChatWindow = ({ isOpen, onToggle, profile }) => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const conversationIdRef = useRef(generateConversationId()); // Unique ID for this conversation session
 
   // Use environment variable for API key (secure approach)
   const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
@@ -142,6 +144,16 @@ NEVER provide financial, legal, or medical advice.`
       };
 
       setMessages(prev => [...prev, botMessage]);
+
+      // Save conversation to Notion (non-blocking)
+      saveConversationToNotion({
+        userMessage: currentInput,
+        virgilResponse: botMessage.text,
+        profile,
+        conversationId: conversationIdRef.current
+      }).catch(err => {
+        console.error('Failed to save to Notion (non-critical):', err);
+      });
     } catch (error) {
       console.error('Full error details:', error);
       
@@ -167,7 +179,7 @@ NEVER provide financial, legal, or medical advice.`
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
@@ -310,7 +322,7 @@ NEVER provide financial, legal, or medical advice.`
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             placeholder="Type message..."
             className="flex-1 border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             disabled={isLoading}

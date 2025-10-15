@@ -20,7 +20,7 @@ function AdminTicketManager({ profile, supabase, onBack }) {
     partner_username: '',
     partner_palomas_per_ticket: '',
     image_file: null,
-  })
+turn   })
 
   // Check if user is admin (allow all users on localhost for development)
   const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
