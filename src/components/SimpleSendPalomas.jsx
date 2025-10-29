@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function SimpleSendPalomas({ profile, supabase, onClose }) {
   const [recipient, setRecipient] = useState('CDC333') // Default to Casa
@@ -8,6 +8,32 @@ function SimpleSendPalomas({ profile, supabase, onClose }) {
   const [showCustomRecipient, setShowCustomRecipient] = useState(false) // Toggle for custom recipient
   const [showReceipt, setShowReceipt] = useState(false) // Show receipt after send
   const [receiptData, setReceiptData] = useState(null) // Store receipt info
+
+  // Get background image URL based on screen size
+  const getBackgroundImage = () => {
+    if (!supabase) return null
+
+    const isMobile = window.innerWidth <= 768
+    const filename = isMobile ? 'backgroundmobile.png' : 'backgrounddesktop.png'
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('tarot-cards')
+      .getPublicUrl(filename)
+
+    return publicUrl
+  }
+
+  const [backgroundUrl, setBackgroundUrl] = useState(getBackgroundImage())
+
+  // Update background on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setBackgroundUrl(getBackgroundImage())
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [supabase])
 
   const handleSend = async (e) => {
     e.preventDefault()
@@ -314,7 +340,7 @@ function SimpleSendPalomas({ profile, supabase, onClose }) {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -322,14 +348,17 @@ function SimpleSendPalomas({ profile, supabase, onClose }) {
       padding: '1rem'
     }}>
       <div style={{
-        background: 'linear-gradient(135deg, #fff8dc, #f5deb3)',
-        borderRadius: '25px',
+        backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : 'linear-gradient(135deg, #fef7ed, #fed7aa)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        borderRadius: '30px',
         padding: '2rem',
-        maxWidth: '400px',
+        maxWidth: '450px',
         width: '100%',
-        boxShadow: '0 20px 60px rgba(210, 105, 30, 0.3)',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
         border: '3px solid #d2691e',
-        position: 'relative'
+        position: 'relative',
+        textAlign: 'center'
       }}>
         {/* Close button */}
         <button
@@ -344,7 +373,13 @@ function SimpleSendPalomas({ profile, supabase, onClose }) {
             cursor: 'pointer',
             color: '#d2691e',
             opacity: 0.7,
-            transition: 'opacity 0.2s'
+            transition: 'opacity 0.2s',
+            width: '30px',
+            height: '30px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 2
           }}
           onMouseOver={(e) => e.target.style.opacity = '1'}
           onMouseOut={(e) => e.target.style.opacity = '0.7'}
@@ -352,103 +387,191 @@ function SimpleSendPalomas({ profile, supabase, onClose }) {
           ×
         </button>
 
-        {/* Balance and Recipient */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        {/* Big Paloma with Input Overlay */}
+        <div style={{
+          position: 'relative',
+          display: 'inline-block',
+          marginBottom: '1.5rem',
+          width: '100%',
+          maxWidth: '300px'
+        }}>
+          <img
+            src={supabase.storage.from('tarot-cards').getPublicUrl('DOV.png').data.publicUrl}
+            alt="Palomas"
+            style={{
+              width: '100%',
+              height: 'auto',
+              objectFit: 'contain',
+              display: 'block'
+            }}
+            onError={(e) => {
+              e.target.style.display = 'none'
+            }}
+          />
+
+          {/* Number Input Overlaid on Dove */}
           <div style={{
-            fontSize: '3rem',
-            fontWeight: '600',
-            color: '#d2691e'
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '60%'
           }}>
-            {profile?.total_palomas_collected || 0}
+            <input
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0"
+              min="1"
+              max={profile?.total_palomas_collected || 0}
+              disabled={sending}
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                border: 'none',
+                borderRadius: '15px',
+                fontSize: '3rem',
+                fontWeight: '900',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                textAlign: 'center',
+                outline: 'none',
+                color: '#d2691e',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+                transition: 'all 0.2s'
+              }}
+              onFocus={(e) => {
+                e.target.style.backgroundColor = 'rgba(255, 255, 255, 1)'
+                e.target.style.boxShadow = '0 6px 20px rgba(210, 105, 30, 0.4)'
+              }}
+              onBlur={(e) => {
+                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.95)'
+                e.target.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'
+              }}
+            />
           </div>
+
+          {/* Available Balance Display */}
           <div style={{
+            position: 'absolute',
+            bottom: '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
             fontSize: '0.9rem',
             color: '#8b4513',
-            marginTop: '0.5rem',
-            opacity: 0.8
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            padding: '0.25rem 0.75rem',
+            borderRadius: '20px',
+            fontWeight: '600',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
           }}>
-            {showCustomRecipient ? `Sending to: ${recipient}` : 'Sending to Casa de Copas'}
+            {profile?.total_palomas_collected || 0} available
           </div>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSend}>
-          {/* Amount input and Dove send button row */}
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'stretch' }}>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Amount"
-              min="1"
-              max={profile?.total_palomas_collected || 0}
-              disabled={sending}
-              style={{
-                flex: 1,
-                padding: '0.75rem',
-                border: '2px solid #deb887',
-                borderRadius: '12px',
-                fontSize: '1rem',
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                transition: 'border-color 0.2s',
-                outline: 'none',
-                textAlign: 'center'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#d2691e'}
-              onBlur={(e) => e.target.style.borderColor = '#deb887'}
-            />
-
-            {/* Dove emoji send button */}
+          {/* Send to Casa Button */}
+          {!showCustomRecipient && (
             <button
               type="submit"
               disabled={sending || !amount || parseInt(amount) <= 0}
               style={{
-                padding: '0.75rem 1.5rem',
+                width: '100%',
+                padding: '1rem 2rem',
                 border: 'none',
-                borderRadius: '12px',
+                borderRadius: '15px',
                 background: sending || !amount || parseInt(amount) <= 0
-                  ? 'linear-gradient(45deg, #bdbdbd, #9e9e9e)'
-                  : 'linear-gradient(45deg, #d2691e, #cd853f)',
-                fontSize: '2rem',
+                  ? 'linear-gradient(135deg, #bdbdbd, #9e9e9e)'
+                  : 'linear-gradient(135deg, #FFD700, #FFA500, #FF8C00)',
+                color: 'white',
+                fontSize: '1.2rem',
+                fontWeight: '700',
                 cursor: sending || !amount || parseInt(amount) <= 0 ? 'not-allowed' : 'pointer',
                 boxShadow: sending || !amount || parseInt(amount) <= 0
                   ? 'none'
-                  : '0 4px 15px rgba(210, 105, 30, 0.3)',
+                  : '0 4px 20px rgba(255, 215, 0, 0.5)',
                 transition: 'all 0.3s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
+                marginBottom: '1rem',
+                textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+              }}
+              onMouseOver={(e) => {
+                if (!sending && amount && parseInt(amount) > 0) {
+                  e.target.style.transform = 'translateY(-2px)'
+                  e.target.style.boxShadow = '0 6px 30px rgba(255, 215, 0, 0.7)'
+                }
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'translateY(0)'
+                e.target.style.boxShadow = '0 4px 20px rgba(255, 215, 0, 0.5)'
               }}
             >
-              {sending ? '⏳' : '🕊️'}
+              {sending ? 'Sending...' : 'Send to Casa'}
             </button>
-          </div>
+          )}
 
           {/* Custom recipient input (only show if toggled) */}
           {showCustomRecipient && (
-            <div style={{ marginBottom: '1.5rem' }}>
-              <input
-                type="text"
-                value={recipient}
-                onChange={(e) => setRecipient(e.target.value.toUpperCase())}
-                placeholder="Recipient Username"
-                disabled={sending}
+            <>
+              <div style={{ marginBottom: '1rem' }}>
+                <input
+                  type="text"
+                  value={recipient}
+                  onChange={(e) => setRecipient(e.target.value.toUpperCase())}
+                  placeholder="USERNAME"
+                  disabled={sending}
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    border: '2px solid #deb887',
+                    borderRadius: '15px',
+                    fontSize: '1.1rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    transition: 'border-color 0.2s',
+                    outline: 'none',
+                    textAlign: 'center',
+                    textTransform: 'uppercase',
+                    fontWeight: '600',
+                    color: '#d2691e'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#d2691e'}
+                  onBlur={(e) => e.target.style.borderColor = '#deb887'}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={sending || !amount || parseInt(amount) <= 0 || !recipient.trim()}
                 style={{
                   width: '100%',
-                  padding: '0.75rem',
-                  border: '2px solid #deb887',
-                  borderRadius: '12px',
-                  fontSize: '1rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  transition: 'border-color 0.2s',
-                  outline: 'none',
-                  textAlign: 'center',
-                  textTransform: 'uppercase'
+                  padding: '1rem 2rem',
+                  border: 'none',
+                  borderRadius: '15px',
+                  background: sending || !amount || parseInt(amount) <= 0 || !recipient.trim()
+                    ? 'linear-gradient(135deg, #bdbdbd, #9e9e9e)'
+                    : 'linear-gradient(135deg, #d2691e, #cd853f)',
+                  color: 'white',
+                  fontSize: '1.2rem',
+                  fontWeight: '700',
+                  cursor: sending || !amount || parseInt(amount) <= 0 || !recipient.trim() ? 'not-allowed' : 'pointer',
+                  boxShadow: sending || !amount || parseInt(amount) <= 0 || !recipient.trim()
+                    ? 'none'
+                    : '0 4px 20px rgba(210, 105, 30, 0.4)',
+                  transition: 'all 0.3s',
+                  marginBottom: '1rem'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#d2691e'}
-                onBlur={(e) => e.target.style.borderColor = '#deb887'}
-              />
-            </div>
+                onMouseOver={(e) => {
+                  if (!sending && amount && parseInt(amount) > 0 && recipient.trim()) {
+                    e.target.style.transform = 'translateY(-2px)'
+                    e.target.style.boxShadow = '0 6px 25px rgba(210, 105, 30, 0.5)'
+                  }
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)'
+                  e.target.style.boxShadow = '0 4px 20px rgba(210, 105, 30, 0.4)'
+                }}
+              >
+                {sending ? 'Sending...' : 'Send Palomas'}
+              </button>
+            </>
           )}
 
           {/* Toggle button for custom recipient */}
@@ -465,25 +588,30 @@ function SimpleSendPalomas({ profile, supabase, onClose }) {
             }}
             disabled={sending}
             style={{
-              marginBottom: '1rem',
-              padding: '0.5rem 1rem',
-              border: '1px solid #d2691e',
-              borderRadius: '8px',
-              background: 'rgba(210, 105, 30, 0.1)',
+              width: '100%',
+              padding: '0.75rem 1rem',
+              border: '2px solid #d2691e',
+              borderRadius: '15px',
+              background: 'linear-gradient(135deg, #FFFAF0, #FFF8DC)',
               color: '#d2691e',
-              fontSize: '0.85rem',
+              fontSize: '1rem',
+              fontWeight: '600',
               cursor: sending ? 'not-allowed' : 'pointer',
               opacity: sending ? 0.5 : 1,
-              transition: 'all 0.2s',
-              width: '100%'
+              transition: 'all 0.3s',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
             }}
             onMouseOver={(e) => {
               if (!sending) {
-                e.target.style.background = 'rgba(210, 105, 30, 0.2)';
+                e.target.style.background = 'linear-gradient(135deg, #FFF8DC, #FAEBD7)'
+                e.target.style.transform = 'translateY(-1px)'
+                e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)'
               }
             }}
             onMouseOut={(e) => {
-              e.target.style.background = 'rgba(210, 105, 30, 0.1)';
+              e.target.style.background = 'linear-gradient(135deg, #FFFAF0, #FFF8DC)'
+              e.target.style.transform = 'translateY(0)'
+              e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
             }}
           >
             {showCustomRecipient ? 'Send to Casa de Copas' : 'Send to another user'}
@@ -494,12 +622,13 @@ function SimpleSendPalomas({ profile, supabase, onClose }) {
             <div style={{
               background: '#ffebee',
               border: '1px solid #ffcdd2',
-              borderRadius: '10px',
+              borderRadius: '12px',
               padding: '0.75rem',
-              marginBottom: '1rem',
+              marginTop: '1rem',
               color: '#c62828',
               fontSize: '0.9rem',
-              textAlign: 'center'
+              textAlign: 'center',
+              fontWeight: '600'
             }}>
               {error}
             </div>
