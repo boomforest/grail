@@ -4,6 +4,7 @@ import WalletInput from './WalletInput'
 import ProfilePicture from './ProfilePicture'
 import SendPalomas from './SendPalomas'
 import RequestCashout from './RequestCashout'
+import PalomasHistory from './PalomasHistory'
 import { useLanguage } from '../contexts/LanguageContext'
 
 const formatNumber = (num) => {
@@ -1324,6 +1325,7 @@ function Dashboard({
 }) {
   const [showProductManager, setShowProductManager] = useState(false);
   const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
+  const [showPalomasHistory, setShowPalomasHistory] = useState(false);
   const [showSendPalomas, setShowSendPalomas] = useState(false);
   const [showRequestCashout, setShowRequestCashout] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -1359,7 +1361,7 @@ function Dashboard({
   // If showing love history, render that instead
   if (showPurchaseHistory) {
     return (
-      <LoveHistory 
+      <LoveHistory
         user={user}
         profile={profile}
         supabase={supabase}
@@ -1368,10 +1370,21 @@ function Dashboard({
     );
   }
 
+  // If showing Palomas history, render that instead
+  if (showPalomasHistory) {
+    return (
+      <PalomasHistory
+        profile={profile}
+        supabase={supabase}
+        onClose={() => setShowPalomasHistory(false)}
+      />
+    );
+  }
+
   // If showing product manager, render that instead
   if (showProductManager) {
     return (
-      <AdminProductManager 
+      <AdminProductManager
         profile={profile}
         supabase={supabase}
         onBack={() => setShowProductManager(false)}
@@ -1680,7 +1693,7 @@ function Dashboard({
                 {t('dashboard.requestCashout')}
               </button>
 
-              {/* Transaction History Button */}
+              {/* Transaction History Button (Love Tokens) */}
               <button
                 onClick={() => {
                   setShowSettings(false);
@@ -1689,17 +1702,39 @@ function Dashboard({
                 style={{
                   width: '100%',
                   padding: '0.75rem 1rem',
-                  background: 'linear-gradient(135deg, #d2691e, #cd853f)',
+                  background: 'linear-gradient(135deg, #e91e63, #f06292)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '10px',
                   cursor: 'pointer',
                   fontWeight: '500',
                   marginBottom: '0.5rem',
-                  boxShadow: '0 2px 8px rgba(210, 105, 30, 0.3)'
+                  boxShadow: '0 2px 8px rgba(233, 30, 99, 0.3)'
                 }}
               >
-                {t('dashboard.transactionHistory')}
+                Love History
+              </button>
+
+              {/* Palomas History Button */}
+              <button
+                onClick={() => {
+                  setShowSettings(false);
+                  setShowPalomasHistory(true);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem',
+                  background: 'linear-gradient(135deg, #8b4513, #a0522d)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  marginBottom: '0.5rem',
+                  boxShadow: '0 2px 8px rgba(139, 69, 19, 0.3)'
+                }}
+              >
+                Palomas History
               </button>
 
               {/* Admin Product Management Button */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import SimpleSendPalomas from './SimpleSendPalomas'
 import { useLanguage } from '../contexts/LanguageContext'
 
@@ -13,13 +13,8 @@ function PalomasMenu({
   onClose,
   supabase
 }) {
-  const [showSendPalomas, setShowSendPalomas] = useState(false) // Explicitly false
-  const [successMessage, setSuccessMessage] = useState('')
+  const [showSendPalomas, setShowSendPalomas] = useState(false)
   const { t } = useLanguage()
-  
-  const formatNumber = (num) => {
-    return new Intl.NumberFormat().format(num || 0)
-  }
 
   return (
     <div style={{
@@ -187,13 +182,6 @@ function PalomasMenu({
             onClose() // Also close the PalomasMenu to return to home
           }}
           onShowCupGame={onShowCupGame}
-          onSuccess={(msg) => {
-            setSuccessMessage(msg)
-            setTimeout(() => {
-              setSuccessMessage('')
-              onClose()
-            }, 2000)
-          }}
         />
       )}
     </div>

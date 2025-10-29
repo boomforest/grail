@@ -109,6 +109,40 @@ function SimpleSendPalomas({ profile, supabase, onClose }) {
         return
       }
 
+      // Create transaction record for sender
+      const { error: senderTransactionError } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: profile.id,
+          username: profile.username,
+          transaction_type: 'sent',
+          paloma_amount: palomasToSend,
+          recipient_id: recipientProfile.id,
+          recipient_username: recipientProfile.username,
+          description: `Sent ${palomasToSend} Palomas to ${recipientProfile.username}`
+        })
+
+      if (senderTransactionError) {
+        console.error('Error creating sender transaction:', senderTransactionError)
+      }
+
+      // Create transaction record for recipient
+      const { error: recipientTransactionError } = await supabase
+        .from('transactions')
+        .insert({
+          user_id: recipientProfile.id,
+          username: recipientProfile.username,
+          transaction_type: 'received',
+          paloma_amount: palomasToSend,
+          recipient_id: profile.id,
+          recipient_username: profile.username,
+          description: `Received ${palomasToSend} Palomas from ${profile.username}`
+        })
+
+      if (recipientTransactionError) {
+        console.error('Error creating recipient transaction:', recipientTransactionError)
+      }
+
       // If sending to CDC333, give 77% love token bonus
       let loveBonus = 0
       if (recipientProfile.username === 'CDC333') {
@@ -124,6 +158,21 @@ function SimpleSendPalomas({ profile, supabase, onClose }) {
 
           if (lovUpdateError) {
             console.error('Error updating Love balance:', lovUpdateError)
+          } else {
+            // Create love bonus transaction record
+            const { error: loveBonusTransactionError } = await supabase
+              .from('transactions')
+              .insert({
+                user_id: profile.id,
+                username: profile.username,
+                transaction_type: 'love_bonus',
+                love_amount: loveBonus,
+                description: `Love bonus for donating to Casa de Copas`
+              })
+
+            if (loveBonusTransactionError) {
+              console.error('Error creating love bonus transaction:', loveBonusTransactionError)
+            }
           }
         }
       }
