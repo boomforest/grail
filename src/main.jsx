@@ -696,6 +696,7 @@ function App() {
             onShowReleaseForm={setShowReleaseForm}
             onPayPalClick={handlePayPalClick}
             onShowSendLove={() => setShowSendLove(true)}
+            onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
           />
@@ -823,6 +824,7 @@ function App() {
             onShowReleaseForm={setShowReleaseForm}
             onPayPalClick={handlePayPalClick}
             onShowSendLove={() => setShowSendLove(true)}
+            onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
           />
@@ -1028,6 +1030,7 @@ function App() {
             onShowReleaseForm={setShowReleaseForm}
             onPayPalClick={handlePayPalClick}
             onShowSendLove={() => setShowSendLove(true)}
+            onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
           />
@@ -1109,6 +1112,7 @@ function App() {
             onShowReleaseForm={setShowReleaseForm}
             onPayPalClick={handlePayPalClick}
             onShowSendLove={() => setShowSendLove(true)}
+            onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
           />

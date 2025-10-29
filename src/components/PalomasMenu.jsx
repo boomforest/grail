@@ -2,13 +2,14 @@ import React, { useState } from 'react'
 import SimpleSendPalomas from './SimpleSendPalomas'
 import { useLanguage } from '../contexts/LanguageContext'
 
-function PalomasMenu({ 
+function PalomasMenu({
   profile,
   isAdmin,
   onShowSendForm,
   onShowReleaseForm,
   onPayPalClick,
   onShowSendLove,
+  onShowCupGame,
   onClose,
   supabase
 }) {
@@ -181,7 +182,11 @@ function PalomasMenu({
         <SimpleSendPalomas
           profile={profile}
           supabase={supabase}
-          onClose={() => setShowSendPalomas(false)}
+          onClose={() => {
+            setShowSendPalomas(false)
+            onClose() // Also close the PalomasMenu to return to home
+          }}
+          onShowCupGame={onShowCupGame}
           onSuccess={(msg) => {
             setSuccessMessage(msg)
             setTimeout(() => {
