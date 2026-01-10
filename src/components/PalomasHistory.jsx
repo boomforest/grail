@@ -15,18 +15,42 @@ function PalomasHistory({ profile, supabase, onClose }) {
   const loadTransactions = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('transactions')
+      // Load Doves transactions (paloma_transactions)
+      const { data: dovesData, error: dovesError } = await supabase
+        .from('paloma_transactions')
         .select('*')
-        .or(`user_id.eq.${profile.id},recipient_id.eq.${profile.id}`)
+        .eq('user_id', profile.id)
         .order('created_at', { ascending: false })
         .limit(50)
 
-      if (error) {
-        console.error('Error loading transactions:', error)
-      } else {
-        setTransactions(data || [])
+      if (dovesError) {
+        console.error('Error loading paloma transactions:', dovesError)
       }
+
+      // Load completed Eggs transactions
+      const { data: eggsData, error: eggsError } = await supabase
+        .from('eggs_transactions')
+        .select(`
+          *,
+          sender:profiles!eggs_transactions_sender_id_fkey(username),
+          recipient:profiles!eggs_transactions_recipient_id_fkey(username)
+        `)
+        .or(`sender_id.eq.${profile.id},recipient_id.eq.${profile.id}`)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+      if (eggsError) {
+        console.error('Error loading eggs transactions:', eggsError)
+      }
+
+      // Combine and sort all transactions
+      const allTransactions = [
+        ...(dovesData || []).map(t => ({ ...t, type: 'doves' })),
+        ...(eggsData || []).map(t => ({ ...t, type: 'eggs' }))
+      ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+
+      setTransactions(allTransactions)
     } catch (err) {
       console.error('Error:', err)
     } finally {
@@ -113,54 +137,48 @@ function PalomasHistory({ profile, supabase, onClose }) {
   }
 
   const getTransactionDisplay = (transaction) => {
-    const isSender = transaction.user_id === profile.id
-    const isReceiver = transaction.recipient_id === profile.id
+    // Handle Doves transactions (paloma_transactions)
+    if (transaction.type === 'doves') {
+      const source = transaction.source || ''
+      const isReceived = source.includes('transfer_from_') || source.includes('eggs_approved_from_')
 
-    if (transaction.transaction_type === 'sent' && isSender) {
-      return {
-        type: 'Sent',
-        amount: `-${transaction.paloma_amount}`,
-        otherParty: transaction.recipient_username || 'Unknown',
-        color: '#dc3545',
-        icon: '↑'
+      if (isReceived) {
+        const senderUsername = source.replace('transfer_from_', '').replace('eggs_approved_from_', '')
+        return {
+          type: source.includes('eggs_approved') ? 'Eggs Released' : 'Received Doves',
+          amount: `+${transaction.amount}`,
+          otherParty: `@${senderUsername}`,
+          color: '#28a745',
+          icon: source.includes('eggs_approved') ? '🐣' : '🕊️'
+        }
       }
-    } else if (transaction.transaction_type === 'received' || (transaction.transaction_type === 'sent' && isReceiver)) {
+
       return {
         type: 'Received',
-        amount: `+${transaction.paloma_amount}`,
-        otherParty: transaction.username,
+        amount: `+${transaction.amount}`,
+        otherParty: source || 'Casa de Copas',
         color: '#28a745',
-        icon: '↓'
+        icon: '📥'
       }
-    } else if (transaction.transaction_type === 'purchased') {
+    }
+
+    // Handle Eggs transactions (eggs_transactions)
+    if (transaction.type === 'eggs') {
+      const isSender = transaction.sender_id === profile.id
+      const otherParty = isSender ? transaction.recipient?.username : transaction.sender?.username
+
       return {
-        type: 'Purchased',
-        amount: `+${transaction.paloma_amount}`,
-        otherParty: 'Casa de Copas',
-        color: '#28a745',
-        icon: '💳'
-      }
-    } else if (transaction.transaction_type === 'love_bonus') {
-      return {
-        type: 'Love Bonus',
-        amount: `+${transaction.love_amount} ❤️`,
-        otherParty: 'Casa de Copas',
-        color: '#e91e63',
-        icon: '✨'
-      }
-    } else if (transaction.transaction_type === 'cashed_out') {
-      return {
-        type: 'Cashed Out',
-        amount: `-${transaction.paloma_amount}`,
-        otherParty: 'Withdrawal',
-        color: '#dc3545',
-        icon: '💰'
+        type: isSender ? 'Sent Eggs' : 'Received Eggs',
+        amount: isSender ? `-${transaction.total_amount}` : `+${transaction.hatched_amount}`,
+        otherParty: `@${otherParty}`,
+        color: isSender ? '#dc3545' : '#28a745',
+        icon: '🥚'
       }
     }
 
     return {
-      type: transaction.transaction_type,
-      amount: transaction.paloma_amount,
+      type: 'Transaction',
+      amount: transaction.amount || 0,
       otherParty: 'Unknown',
       color: '#6c757d',
       icon: '•'
