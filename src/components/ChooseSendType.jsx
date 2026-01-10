@@ -16,120 +16,108 @@ function ChooseSendType({ onBack, onSelectDoves, onSelectEggs }) {
       padding: '1rem'
     }}>
       <div style={{
-        background: 'white',
-        borderRadius: '20px',
+        background: 'linear-gradient(135deg, #fef7ed, #fed7aa)',
+        borderRadius: '25px',
         padding: '2rem',
         maxWidth: '400px',
         width: '100%',
-        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+        boxShadow: '0 20px 60px rgba(210, 105, 30, 0.3)',
+        border: '3px solid #d2691e',
+        position: 'relative'
       }}>
-        {/* Back button */}
+        {/* Close button */}
         <button
           onClick={onBack}
           style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
             background: 'none',
             border: 'none',
-            fontSize: '0.9rem',
-            color: '#666',
+            fontSize: '1.5rem',
             cursor: 'pointer',
-            marginBottom: '1rem',
-            padding: '0.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.25rem'
+            color: '#8b4513',
+            opacity: 0.7,
+            transition: 'opacity 0.2s'
           }}
+          onMouseOver={(e) => e.target.style.opacity = '1'}
+          onMouseOut={(e) => e.target.style.opacity = '0.7'}
         >
-          ← Back
+          ×
         </button>
 
-        {/* Title */}
-        <h2 style={{
-          fontSize: '1.5rem',
-          fontWeight: '700',
-          color: '#2c3e50',
-          marginBottom: '0.5rem',
-          textAlign: 'center'
+        {/* Action buttons */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem'
         }}>
-          Choose transfer type
-        </h2>
-
-        <p style={{
-          fontSize: '0.9rem',
-          color: '#666',
-          textAlign: 'center',
-          marginBottom: '2rem'
-        }}>
-          How would you like to send?
-        </p>
-
-        {/* Doves Button */}
-        <button
-          onClick={onSelectDoves}
-          style={{
-            width: '100%',
-            background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
-            border: '2px solid #2196f3',
-            borderRadius: '15px',
-            padding: '1.5rem',
-            marginBottom: '1rem',
-            cursor: 'pointer',
-            transition: 'transform 0.2s',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          <div style={{
-            fontSize: '2.5rem'
-          }}>
-            🕊️
-          </div>
-          <div style={{
-            fontSize: '1.1rem',
-            fontWeight: '600',
-            color: '#1976d2'
-          }}>
+          {/* Instant Button (Doves) */}
+          <button
+            onClick={onSelectDoves}
+            style={{
+              background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+              color: '#1976d2',
+              border: 'none',
+              borderRadius: '15px',
+              padding: '1rem 1.5rem',
+              fontSize: '1.2rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(33, 150, 243, 0.3)',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              width: '100%'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)'
+              e.target.style.boxShadow = '0 6px 20px rgba(33, 150, 243, 0.4)'
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)'
+              e.target.style.boxShadow = '0 4px 15px rgba(33, 150, 243, 0.3)'
+            }}
+          >
+            <span style={{ fontSize: '1.5rem' }}>🕊️</span>
             Instant
-          </div>
-        </button>
+          </button>
 
-        {/* Eggs Button */}
-        <button
-          onClick={onSelectEggs}
-          style={{
-            width: '100%',
-            background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
-            border: '2px solid #ff9800',
-            borderRadius: '15px',
-            padding: '1.5rem',
-            cursor: 'pointer',
-            transition: 'transform 0.2s',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          <div style={{
-            fontSize: '2.5rem'
-          }}>
-            🐣
-          </div>
-          <div style={{
-            fontSize: '1.1rem',
-            fontWeight: '600',
-            color: '#f57c00'
-          }}>
+          {/* Half Now Half Later Button (Eggs) */}
+          <button
+            onClick={onSelectEggs}
+            style={{
+              background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
+              color: '#f57c00',
+              border: 'none',
+              borderRadius: '15px',
+              padding: '1rem 1.5rem',
+              fontSize: '1.2rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(255, 152, 0, 0.3)',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              width: '100%'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)'
+              e.target.style.boxShadow = '0 6px 20px rgba(255, 152, 0, 0.4)'
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)'
+              e.target.style.boxShadow = '0 4px 15px rgba(255, 152, 0, 0.3)'
+            }}
+          >
+            <span style={{ fontSize: '1.5rem' }}>🐣</span>
             Half now, half later
-          </div>
-        </button>
+          </button>
+        </div>
       </div>
     </div>
   )
