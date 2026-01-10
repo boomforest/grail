@@ -65,10 +65,7 @@ function AdminPowerUps({ profile, supabase, onBack }) {
         return
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image must be smaller than 5MB')
-        return
-      }
+      // No file size limit - removed for Netlify compatibility
 
       setFormData(prev => ({
         ...prev,
