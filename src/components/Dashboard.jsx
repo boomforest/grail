@@ -1526,7 +1526,8 @@ function Dashboard({
               border: 'none',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
+              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
+              fontSize: '3rem'
             }}
             onMouseOver={(e) => {
               e.target.style.transform = 'scale(1.1)'
@@ -1538,58 +1539,11 @@ function Dashboard({
             }}
             title="Cup Game"
           >
-            <img 
-              src={supabase ? 
-                supabase.storage.from('tarot-cards').getPublicUrl('LOV.png').data.publicUrl 
-                : '/placeholder-trophy.png'
-              }
-              alt="Cup Game"
-              style={{
-                width: '3rem',
-                height: '3rem',
-                objectFit: 'contain'
-              }}
-              onError={(e) => {
-                e.target.outerHTML = '🏆'
-              }}
-            />
+            🏆
           </button>
 
-          {/* Right - Tickets */}
-          <button
-            onClick={() => onShowTickets(false)} // Always go to user tickets page
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.transform = 'scale(1.1)'
-              e.target.style.filter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
-            }}
-            onMouseOut={(e) => {
-              e.target.style.transform = 'scale(1)'
-              e.target.style.filter = 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
-            }}
-          >
-            <img 
-              src={supabase ? 
-                supabase.storage.from('tarot-cards').getPublicUrl('TIX.png').data.publicUrl 
-                : '/placeholder-ticket.png'
-              }
-              alt="Tickets"
-              style={{
-                width: '3rem',
-                height: '3rem',
-                objectFit: 'contain'
-              }}
-              onError={(e) => {
-                e.target.outerHTML = '🎫'
-              }}
-            />
-          </button>
+          {/* Right - Spacer for balance */}
+          <div style={{ width: '70px' }} />
 
           {/* Settings Panel */}
           {showSettings && (
@@ -1648,72 +1602,6 @@ function Dashboard({
                   {language === 'en' ? '🇲🇽' : '🇺🇸'}
                 </span>
                 {language === 'en' ? 'Cambiar a Español' : 'Switch to English'}
-              </button>
-
-              {/* Send Palomas Button */}
-              <button
-                onClick={() => {
-                  setShowSettings(false);
-                  setShowSendPalomas(true);
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  background: 'linear-gradient(135deg, #d2691e, #cd853f)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '10px',
-                  cursor: 'pointer',
-                  fontWeight: '500',
-                  marginBottom: '0.5rem',
-                  boxShadow: '0 2px 8px rgba(210, 105, 30, 0.3)'
-                }}
-              >
-                {t('dashboard.sendPalomas')}
-              </button>
-
-              {/* Request Cashout Button */}
-              <button
-                onClick={() => {
-                  setShowSettings(false);
-                  setShowRequestCashout(true);
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  background: 'linear-gradient(135deg, #4682b4, #5f9ea0)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '10px',
-                  cursor: 'pointer',
-                  fontWeight: '500',
-                  marginBottom: '0.5rem',
-                  boxShadow: '0 2px 8px rgba(70, 130, 180, 0.3)'
-                }}
-              >
-                {t('dashboard.requestCashout')}
-              </button>
-
-              {/* Transaction History Button (Love Tokens) */}
-              <button
-                onClick={() => {
-                  setShowSettings(false);
-                  setShowPurchaseHistory(true);
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  background: 'linear-gradient(135deg, #e91e63, #f06292)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '10px',
-                  cursor: 'pointer',
-                  fontWeight: '500',
-                  marginBottom: '0.5rem',
-                  boxShadow: '0 2px 8px rgba(233, 30, 99, 0.3)'
-                }}
-              >
-                Love History
               </button>
 
               {/* Palomas History Button */}
