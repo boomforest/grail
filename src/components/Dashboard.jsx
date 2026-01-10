@@ -1530,21 +1530,37 @@ function Dashboard({
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              fontSize: '2rem',
+              padding: 0,
               filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
               transition: 'all 0.3s ease'
             }}
             onMouseOver={(e) => {
-              e.target.style.transform = 'scale(1.1)'
-              e.target.style.filter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
+              e.currentTarget.style.transform = 'scale(1.1)'
+              e.currentTarget.style.filter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
             }}
             onMouseOut={(e) => {
-              e.target.style.transform = 'scale(1)'
-              e.target.style.filter = 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
+              e.currentTarget.style.transform = 'scale(1)'
+              e.currentTarget.style.filter = 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
             }}
             title="Power-Ups Store"
           >
-            ✨
+            <img
+              src={supabase ? supabase.storage.from('tarot-cards').getPublicUrl('powerups-logo.png').data.publicUrl : ''}
+              alt="Power-Ups"
+              style={{
+                width: '50px',
+                height: '50px',
+                objectFit: 'contain'
+              }}
+              onError={(e) => {
+                // Fallback to emoji if logo fails to load
+                e.target.style.display = 'none'
+                const fallback = document.createElement('span')
+                fallback.textContent = '✨'
+                fallback.style.fontSize = '2rem'
+                e.target.parentElement.appendChild(fallback)
+              }}
+            />
           </button>
 
           {/* Settings Panel */}
