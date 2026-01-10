@@ -1,30 +1,41 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
+// Cache-bust: v2.0 - Fixed increment_balance issue
 function PalomasHistory({ profile, supabase, onClose }) {
   const [transactions, setTransactions] = useState([])
   const [eggsInFlight, setEggsInFlight] = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (profile && supabase) {
-      loadTransactions()
-      loadEggsInFlight()
-    }
-  }, [profile, supabase])
+  const loadTransactions = useCallback(async () => {
+    if (!profile?.id || !supabase) return
 
-  const loadTransactions = async () => {
     setLoading(true)
     try {
-      // Load Doves transactions (paloma_transactions)
-      const { data: dovesData, error: dovesError } = await supabase
+      // Load Doves received (paloma_transactions where user is recipient)
+      const { data: dovesReceivedData, error: dovesReceivedError } = await supabase
         .from('paloma_transactions')
         .select('*')
         .eq('user_id', profile.id)
         .order('created_at', { ascending: false })
         .limit(50)
 
-      if (dovesError) {
-        console.error('Error loading paloma transactions:', dovesError)
+      if (dovesReceivedError) {
+        console.error('Error loading received paloma transactions:', dovesReceivedError)
+      }
+
+      // Load Doves sent (paloma_transactions where source contains current username)
+      const { data: dovesSentData, error: dovesSentError } = await supabase
+        .from('paloma_transactions')
+        .select(`
+          *,
+          recipient:profiles!paloma_transactions_user_id_fkey(username)
+        `)
+        .like('source', `%_from_${profile.username}`)
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+      if (dovesSentError) {
+        console.error('Error loading sent paloma transactions:', dovesSentError)
       }
 
       // Load completed Eggs transactions
@@ -46,7 +57,8 @@ function PalomasHistory({ profile, supabase, onClose }) {
 
       // Combine and sort all transactions
       const allTransactions = [
-        ...(dovesData || []).map(t => ({ ...t, type: 'doves' })),
+        ...(dovesReceivedData || []).map(t => ({ ...t, type: 'doves', direction: 'received' })),
+        ...(dovesSentData || []).map(t => ({ ...t, type: 'doves', direction: 'sent' })),
         ...(eggsData || []).map(t => ({ ...t, type: 'eggs' }))
       ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 
@@ -56,9 +68,11 @@ function PalomasHistory({ profile, supabase, onClose }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [profile?.id, profile?.username, supabase])
 
-  const loadEggsInFlight = async () => {
+  const loadEggsInFlight = useCallback(async () => {
+    if (!profile?.id || !supabase) return
+
     try {
       const { data, error } = await supabase
         .from('eggs_transactions')
@@ -79,43 +93,51 @@ function PalomasHistory({ profile, supabase, onClose }) {
     } catch (err) {
       console.error('Error:', err)
     }
-  }
+  }, [profile?.id, supabase])
+
+  useEffect(() => {
+    loadTransactions()
+    loadEggsInFlight()
+  }, [loadTransactions, loadEggsInFlight])
 
   const handleMarkDone = async (eggId, recipientId, pendingAmount) => {
     try {
-      // Update eggs_transaction status to approved
-      const { error: updateError } = await supabase
-        .from('eggs_transactions')
+      // Use the database function to release the payment with SECURITY DEFINER privileges
+      const { error } = await supabase
+        .rpc('release_eggs_payment', { p_egg_id: eggId })
+
+      if (error) {
+        console.error('Error releasing eggs payment (checking if succeeded anyway):', error)
+        // Check if egg was actually updated by verifying its status
+        const { data: eggCheck } = await supabase
+          .from('eggs_transactions')
+          .select('status')
+          .eq('id', eggId)
+          .single()
+
+        // If status is approved, the transaction succeeded despite the error - don't throw
+        if (eggCheck?.status === 'approved') {
+          console.log('Transaction succeeded despite RPC error')
+        } else {
+          throw error
+        }
+      }
+
+      // Update sender's pending count (reduce eggs_pending_sent)
+      const { error: senderError } = await supabase
+        .from('profiles')
         .update({
-          status: 'approved',
-          reviewed_at: new Date().toISOString(),
-          resolved_at: new Date().toISOString()
+          eggs_pending_sent: Math.max(0, (profile.eggs_pending_sent || 0) - pendingAmount),
+          last_status_update: new Date().toISOString()
         })
-        .eq('id', eggId)
+        .eq('id', profile.id)
 
-      if (updateError) throw updateError
+      if (senderError) {
+        console.error('Error updating sender pending:', senderError)
+        // Don't throw - this is just a counter update
+      }
 
-      // Create paloma_transaction for the pending amount
-      const { error: transactionError } = await supabase
-        .from('paloma_transactions')
-        .insert({
-          user_id: recipientId,
-          amount: pendingAmount,
-          source: `eggs_approved_from_${profile.username}`,
-          expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 year from now
-        })
-
-      if (transactionError) throw transactionError
-
-      // Update recipient balance
-      const { error: balanceError } = await supabase.rpc('increment_balance', {
-        user_id: recipientId,
-        amount: pendingAmount
-      })
-
-      if (balanceError) throw balanceError
-
-      // Reload eggs in flight
+      // Success! Reload eggs in flight and transactions
       loadEggsInFlight()
       loadTransactions()
     } catch (err) {
@@ -140,21 +162,44 @@ function PalomasHistory({ profile, supabase, onClose }) {
     // Handle Doves transactions (paloma_transactions)
     if (transaction.type === 'doves') {
       const source = transaction.source || ''
-      const isReceived = source.includes('transfer_from_') || source.includes('eggs_approved_from_')
+
+      // Handle sent Doves
+      if (transaction.direction === 'sent') {
+        const recipientUsername = transaction.recipient?.username || 'Unknown'
+        const isFromEggs = source.includes('eggs_approved')
+        const date = formatDate(transaction.created_at)
+
+        return {
+          type: `Sent ${transaction.amount} Dov${transaction.amount !== 1 ? 's' : ''}`,
+          amount: `-${transaction.amount}`,
+          otherParty: isFromEggs ? `@${recipientUsername} (from Eggs sent ${date})` : `@${recipientUsername}`,
+          color: '#dc3545',
+          icon: '🕊️'
+        }
+      }
+
+      // Handle received Doves
+      const isReceived = source.includes('transfer_from_') || source.includes('eggs_approved_from_') || source.includes('eggs_hatched_from_')
 
       if (isReceived) {
-        const senderUsername = source.replace('transfer_from_', '').replace('eggs_approved_from_', '')
+        const senderUsername = source
+          .replace('transfer_from_', '')
+          .replace('eggs_approved_from_', '')
+          .replace('eggs_hatched_from_', '')
+        const isFromEggs = source.includes('eggs_approved') || source.includes('eggs_hatched')
+        const date = formatDate(transaction.created_at)
+
         return {
-          type: source.includes('eggs_approved') ? 'Eggs Released' : 'Received Doves',
+          type: `Received ${transaction.amount} Dov${transaction.amount !== 1 ? 's' : ''}`,
           amount: `+${transaction.amount}`,
-          otherParty: `@${senderUsername}`,
+          otherParty: isFromEggs ? `@${senderUsername} (from Eggs ${date})` : `@${senderUsername}`,
           color: '#28a745',
-          icon: source.includes('eggs_approved') ? '🐣' : '🕊️'
+          icon: '🕊️'
         }
       }
 
       return {
-        type: 'Received',
+        type: `Received ${transaction.amount} Dov${transaction.amount !== 1 ? 's' : ''}`,
         amount: `+${transaction.amount}`,
         otherParty: source || 'Casa de Copas',
         color: '#28a745',
@@ -162,17 +207,19 @@ function PalomasHistory({ profile, supabase, onClose }) {
       }
     }
 
-    // Handle Eggs transactions (eggs_transactions)
+    // Handle Eggs transactions (eggs_transactions) - only show hatched amount
     if (transaction.type === 'eggs') {
       const isSender = transaction.sender_id === profile.id
       const otherParty = isSender ? transaction.recipient?.username : transaction.sender?.username
+      const amount = isSender ? transaction.hatched_amount : transaction.hatched_amount
+      const date = formatDate(transaction.created_at)
 
       return {
-        type: isSender ? 'Sent Eggs' : 'Received Eggs',
-        amount: isSender ? `-${transaction.total_amount}` : `+${transaction.hatched_amount}`,
-        otherParty: `@${otherParty}`,
+        type: isSender ? `Sent ${amount} Dov${amount !== 1 ? 's' : ''}` : `Received ${amount} Dov${amount !== 1 ? 's' : ''}`,
+        amount: isSender ? `-${amount}` : `+${amount}`,
+        otherParty: `@${otherParty} (from Eggs sent ${date})`,
         color: isSender ? '#dc3545' : '#28a745',
-        icon: '🥚'
+        icon: '🕊️'
       }
     }
 

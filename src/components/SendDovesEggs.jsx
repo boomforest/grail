@@ -117,7 +117,7 @@ function SendDovesEggs({ profile, supabase, onClose, onSuccess, transferType }) 
           user_id: recipientProfile.id,
           amount: sendAmount,
           transaction_type: 'received',
-          source: `doves_from_${profile.username}`,
+          source: `transfer_from_${profile.username}`,
           received_at: new Date().toISOString(),
           expires_at: expirationDate.toISOString(),
           metadata: {
