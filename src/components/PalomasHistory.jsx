@@ -319,111 +319,56 @@ function PalomasHistory({ profile, supabase, onClose }) {
             <>
               {/* Hatching Eggs Section */}
               {eggsInFlight.length > 0 && (
-                <div style={{ marginBottom: '2rem' }}>
+                <div style={{ marginBottom: '1.5rem' }}>
                   <h3 style={{
-                    fontSize: '1.1rem',
-                    fontWeight: '700',
+                    fontSize: '1rem',
+                    fontWeight: '600',
                     color: '#ff9800',
-                    marginBottom: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
+                    marginBottom: '0.75rem',
+                    borderBottom: '1px solid #ddd',
+                    paddingBottom: '0.5rem'
                   }}>
-                    🥚 Hatching Eggs
+                    Hatching Eggs
                   </h3>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.75rem'
-                  }}>
-                    {eggsInFlight.map((egg) => {
-                      const isSender = egg.sender_id === profile.id
-                      const otherParty = isSender ? egg.recipient?.username : egg.sender?.username
+                  {eggsInFlight.map((egg) => {
+                    const isSender = egg.sender_id === profile.id
+                    const otherParty = isSender ? egg.recipient?.username : egg.sender?.username
 
-                      return (
-                        <div
-                          key={egg.id}
-                          style={{
-                            background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
-                            borderRadius: '12px',
-                            padding: '1rem',
-                            border: '2px solid #ff9800',
-                            boxShadow: '0 2px 8px rgba(255, 152, 0, 0.2)',
-                            transition: 'transform 0.2s, box-shadow 0.2s'
-                          }}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)'
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 152, 0, 0.3)'
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)'
-                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 152, 0, 0.2)'
-                          }}
-                        >
-                          <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '0.75rem'
-                          }}>
-                            <div>
-                              <div style={{
-                                fontWeight: '600',
-                                color: '#333',
-                                fontSize: '1rem',
-                                marginBottom: '0.25rem'
-                              }}>
-                                {isSender ? 'Sent to' : 'Received from'} @{otherParty}
-                              </div>
-                              <div style={{
-                                fontSize: '0.85rem',
-                                color: '#666'
-                              }}>
-                                Pending: {egg.pending_amount} Palomas
-                              </div>
-                            </div>
-                            {isSender && (
-                              <button
-                                onClick={() => handleMarkDone(egg.id, egg.recipient_id, egg.pending_amount)}
-                                style={{
-                                  background: 'linear-gradient(135deg, #4caf50, #66bb6a)',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '8px',
-                                  padding: '0.5rem 1rem',
-                                  fontSize: '0.9rem',
-                                  fontWeight: '600',
-                                  cursor: 'pointer',
-                                  boxShadow: '0 2px 8px rgba(76, 175, 80, 0.3)',
-                                  transition: 'all 0.2s'
-                                }}
-                                onMouseOver={(e) => {
-                                  e.target.style.transform = 'scale(1.05)'
-                                  e.target.style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.4)'
-                                }}
-                                onMouseOut={(e) => {
-                                  e.target.style.transform = 'scale(1)'
-                                  e.target.style.boxShadow = '0 2px 8px rgba(76, 175, 80, 0.3)'
-                                }}
-                              >
-                                Done
-                              </button>
-                            )}
-                          </div>
-                          {egg.work_description && (
-                            <div style={{
-                              fontSize: '0.85rem',
-                              color: '#666',
-                              fontStyle: 'italic',
-                              marginTop: '0.5rem'
-                            }}>
-                              "{egg.work_description}"
-                            </div>
-                          )}
+                    return (
+                      <div
+                        key={egg.id}
+                        style={{
+                          padding: '0.75rem 0',
+                          borderBottom: '1px solid #eee',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <div style={{ fontSize: '0.9rem' }}>
+                          <span style={{ color: '#666' }}>
+                            {isSender ? 'To' : 'From'} @{otherParty} - {egg.pending_amount} Dovs pending
+                          </span>
                         </div>
-                      )
-                    })}
-                  </div>
+                        {isSender && (
+                          <button
+                            onClick={() => handleMarkDone(egg.id, egg.recipient_id, egg.pending_amount)}
+                            style={{
+                              background: '#4caf50',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '0.4rem 0.8rem',
+                              fontSize: '0.85rem',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Done
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
 
@@ -432,106 +377,54 @@ function PalomasHistory({ profile, supabase, onClose }) {
                 <div style={{
                   textAlign: 'center',
                   padding: '2rem',
-                  color: '#8b4513'
+                  color: '#999'
                 }}>
                   No transactions yet
                 </div>
               ) : transactions.length > 0 && (
                 <div>
                   <h3 style={{
-                    fontSize: '1.1rem',
-                    fontWeight: '700',
+                    fontSize: '1rem',
+                    fontWeight: '600',
                     color: '#8b4513',
-                    marginBottom: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
+                    marginBottom: '0.75rem',
+                    borderBottom: '1px solid #ddd',
+                    paddingBottom: '0.5rem'
                   }}>
-                    📜 Completed Transactions
+                    Completed Transactions
                   </h3>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '0.75rem'
-                  }}>
-                    {transactions.map((transaction) => {
-                      const display = getTransactionDisplay(transaction)
-                      return (
-                        <div
-                          key={transaction.id}
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.9)',
-                            borderRadius: '12px',
-                            padding: '1rem',
-                            border: `2px solid ${display.color}20`,
-                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                            transition: 'transform 0.2s, box-shadow 0.2s'
-                          }}
-                          onMouseOver={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)'
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)'
-                          }}
-                          onMouseOut={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)'
-                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)'
-                          }}
-                        >
-                          <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: '0.5rem'
-                          }}>
-                            <div style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '0.5rem'
-                            }}>
-                              <span style={{
-                                fontSize: '1.2rem'
-                              }}>
-                                {display.icon}
-                              </span>
-                              <span style={{
-                                fontWeight: '600',
-                                color: '#333',
-                                fontSize: '1rem'
-                              }}>
-                                {display.type}
-                              </span>
-                            </div>
-                            <span style={{
-                              fontWeight: '700',
-                              color: display.color,
-                              fontSize: '1.1rem'
-                            }}>
-                              {display.amount}
-                            </span>
-                          </div>
-                          <div style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            fontSize: '0.85rem',
-                            color: '#666'
-                          }}>
-                            <span>{display.otherParty}</span>
-                            <span>{formatDate(transaction.created_at)}</span>
-                          </div>
-                          {transaction.description && (
-                            <div style={{
-                              marginTop: '0.5rem',
-                              fontSize: '0.85rem',
-                              color: '#666',
-                              fontStyle: 'italic'
-                            }}>
-                              {transaction.description}
-                            </div>
-                          )}
+                  {transactions.map((transaction) => {
+                    const display = getTransactionDisplay(transaction)
+                    return (
+                      <div
+                        key={transaction.id}
+                        style={{
+                          padding: '0.75rem 0',
+                          borderBottom: '1px solid #eee',
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: '0.25rem'
+                        }}>
+                          <span style={{ color: display.color, fontWeight: '500' }}>
+                            {display.type}
+                          </span>
+                          <span style={{ color: display.color, fontWeight: '500' }}>
+                            {display.amount}
+                          </span>
                         </div>
-                      )
-                    })}
-                  </div>
+                        <div style={{
+                          fontSize: '0.85rem',
+                          color: '#666'
+                        }}>
+                          {display.otherParty} • {formatDate(transaction.created_at)}
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </>

@@ -46,6 +46,50 @@ export const translations = {
       loveBonus: '33% Love bonus for sending',
       receivedBonus: 'You received {amount} Love tokens as bonus!'
     },
+
+    // Doves & Eggs
+    dovesEggs: {
+      titleDoves: 'Send Doves',
+      titleEggs: 'Send Eggs',
+      chooseType: 'Choose Send Type',
+      doves: 'Doves',
+      eggs: 'Eggs',
+      dovesDesc: 'Direct payment - full amount delivered immediately',
+      eggsDesc: 'Escrow payment - 1 Dov now, remainder when done',
+      recipientPlaceholder: 'Recipient Username',
+      amountPlaceholder: 'Amount',
+      workDescription: 'Work Description',
+      workDescriptionPlaceholder: 'What is this payment for?',
+      yourBalance: 'Your balance',
+      send: 'Send',
+      sending: 'Sending...',
+      back: 'Back',
+      hatchingInfo: '1 Dov hatches immediately, {pending} pending until you mark done',
+      errors: {
+        recipientRequired: 'Please enter a recipient username',
+        amountRequired: 'Please enter a valid amount',
+        insufficientBalance: 'Insufficient balance',
+        recipientNotFound: 'Recipient not found',
+        cannotSendToSelf: 'Cannot send to yourself',
+        minimumAmount: 'Minimum amount is 1',
+        failedToSend: 'Failed to send',
+        failedToRelease: 'Failed to release payment'
+      },
+      successDoves: 'Sent {amount} Dovs to @{recipient}',
+      successEggs: 'Sent {amount} Eggs to @{recipient}. 1 Dov delivered, {pending} pending.',
+      hatchingEggs: 'Hatching Eggs',
+      completedTransactions: 'Completed Transactions',
+      to: 'To',
+      from: 'From',
+      dovsPending: 'Dovs pending',
+      done: 'Done',
+      sent: 'Sent {amount} Dov',
+      sentPlural: 'Sent {amount} Dovs',
+      received: 'Received {amount} Dov',
+      receivedPlural: 'Received {amount} Dovs',
+      loadingTransactions: 'Loading transactions...',
+      noTransactionsYet: 'No transactions yet'
+    },
     
     // Request Cashout
     requestCashout: {
@@ -291,6 +335,50 @@ export const translations = {
       supportCasa: '¡Envía a CUP333 (Casa de Copas) y gana 33% de bonificación en Love!',
       loveBonus: '33% de bonificación Love por enviar',
       receivedBonus: '¡Recibiste {amount} tokens de Love como bonificación!'
+    },
+
+    // Doves & Eggs
+    dovesEggs: {
+      titleDoves: 'Enviar Palomas',
+      titleEggs: 'Enviar Huevos',
+      chooseType: 'Elige Tipo de Envío',
+      doves: 'Palomas',
+      eggs: 'Huevos',
+      dovesDesc: 'Pago directo - cantidad completa entregada inmediatamente',
+      eggsDesc: 'Pago en depósito - 1 Paloma ahora, resto cuando termines',
+      recipientPlaceholder: 'Usuario Destinatario',
+      amountPlaceholder: 'Cantidad',
+      workDescription: 'Descripción del Trabajo',
+      workDescriptionPlaceholder: '¿Para qué es este pago?',
+      yourBalance: 'Tu saldo',
+      send: 'Enviar',
+      sending: 'Enviando...',
+      back: 'Atrás',
+      hatchingInfo: '1 Paloma sale inmediatamente, {pending} pendientes hasta que marques completado',
+      errors: {
+        recipientRequired: 'Por favor ingresa un nombre de usuario',
+        amountRequired: 'Por favor ingresa una cantidad válida',
+        insufficientBalance: 'Saldo insuficiente',
+        recipientNotFound: 'Destinatario no encontrado',
+        cannotSendToSelf: 'No puedes enviarte a ti mismo',
+        minimumAmount: 'La cantidad mínima es 1',
+        failedToSend: 'Error al enviar',
+        failedToRelease: 'Error al liberar pago'
+      },
+      successDoves: 'Enviaste {amount} Palomas a @{recipient}',
+      successEggs: 'Enviaste {amount} Huevos a @{recipient}. 1 Paloma entregada, {pending} pendientes.',
+      hatchingEggs: 'Huevos Eclosionando',
+      completedTransactions: 'Transacciones Completadas',
+      to: 'Para',
+      from: 'De',
+      dovsPending: 'Palomas pendientes',
+      done: 'Listo',
+      sent: 'Enviaste {amount} Paloma',
+      sentPlural: 'Enviaste {amount} Palomas',
+      received: 'Recibiste {amount} Paloma',
+      receivedPlural: 'Recibiste {amount} Palomas',
+      loadingTransactions: 'Cargando transacciones...',
+      noTransactionsYet: 'No hay transacciones aún'
     },
     
     // Request Cashout
