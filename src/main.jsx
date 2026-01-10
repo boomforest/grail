@@ -19,6 +19,7 @@ import PayPalButton from './components/PayPalButton'
 import PalomasMenu from './components/PalomasMenu'
 import TicketsPage from './components/TicketsPage'
 import AdminTicketManager from './components/AdminTicketManager'
+import AdminPowerUps from './components/AdminPowerUps'
 import SendLove from './components/SendLove'
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
   const [showPalomasMenu, setShowPalomasMenu] = useState(false) // Palomas management menu
   const [showTickets, setShowTickets] = useState(false) // Tickets page
   const [showAdminTickets, setShowAdminTickets] = useState(false) // Admin ticket management
+  const [showAdminPowerUps, setShowAdminPowerUps] = useState(false) // Admin power-ups management
   const [showSendLove, setShowSendLove] = useState(false) // Send love feature
   const [showSendDovesEggs, setShowSendDovesEggs] = useState(null) // New dual-send interface - stores 'DOVES' or 'EGGS'
   const [showEggsInFlight, setShowEggsInFlight] = useState(false) // Eggs management
@@ -837,6 +839,7 @@ function App() {
               setShowTickets(true)
             }
           }}
+          onShowAdminPowerUps={() => setShowAdminPowerUps(true)}
         />
         {showPalomasMenu && (
           <PalomasMenu
@@ -967,6 +970,7 @@ function App() {
               setShowTickets(true)
             }
           }}
+          onShowAdminPowerUps={() => setShowAdminPowerUps(true)}
         />
         {showPalomasMenu && (
           <PalomasMenu
@@ -1081,11 +1085,26 @@ function App() {
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
-        <GPTChatWindow 
-          isOpen={showGPTChat} 
-          onToggle={toggleGPTChat} 
-          profile={profile} 
+        <GPTChatWindow
+          isOpen={showGPTChat}
+          onToggle={toggleGPTChat}
+          profile={profile}
         /> */}
+      </>
+    )
+  }
+
+  // Admin power-ups management view
+  if (user && showAdminPowerUps && isAdmin) {
+    return (
+      <>
+        <AdminPowerUps
+          profile={profile}
+          supabase={supabase}
+          onBack={() => setShowAdminPowerUps(false)}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
       </>
     )
   }
@@ -1296,6 +1315,7 @@ function App() {
               setShowTickets(true)
             }
           }}
+          onShowAdminPowerUps={() => setShowAdminPowerUps(true)}
         />
         {showPalomasMenu && (
           <PalomasMenu

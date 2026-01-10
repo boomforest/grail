@@ -1322,7 +1322,8 @@ function Dashboard({
   onProfileUpdate,
   message,
   onShowPalomasMenu,
-  onShowTickets
+  onShowTickets,
+  onShowAdminPowerUps
 }) {
   const [showProductManager, setShowProductManager] = useState(false);
   const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
@@ -1670,6 +1671,32 @@ function Dashboard({
                     }}
                   >
                     Manage Tickets
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowSettings(false);
+                      onShowAdminPowerUps();
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem 1rem',
+                      background: 'linear-gradient(135deg, #9370db, #ba55d3)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      fontWeight: '500',
+                      marginBottom: '0.5rem',
+                      boxShadow: '0 2px 8px rgba(147, 112, 219, 0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <span>✨</span>
+                    Manage Power-Ups
                   </button>
                 </>
               )}
