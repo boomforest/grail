@@ -1,34 +1,13 @@
-import { useState } from 'react'
-import ChooseSendType from './ChooseSendType'
 import { useLanguage } from '../contexts/LanguageContext'
 
 function PalomasMenu({
-  profile,
   isAdmin,
-  onShowSendForm,
-  onShowReleaseForm,
   onPayPalClick,
   onShowSendLove,
-  onShowCupGame,
   onClose,
-  supabase,
-  onShowSendDovesEggs,
-  onShowEggsInFlight
+  onShowSendDovesEggs
 }) {
-  const [showChooseSendType, setShowChooseSendType] = useState(false)
   const { t } = useLanguage()
-
-  const handleSelectDoves = () => {
-    setShowChooseSendType(false)
-    onShowSendDovesEggs('DOVES')
-    onClose()
-  }
-
-  const handleSelectEggs = () => {
-    setShowChooseSendType(false)
-    onShowSendDovesEggs('EGGS')
-    onClose()
-  }
 
   return (
     <div style={{
@@ -75,11 +54,11 @@ function PalomasMenu({
           ×
         </button>
 
-        {/* Action buttons - Clean Get/Send stacked */}
-        <div style={{ 
-          display: 'flex', 
+        {/* Action buttons */}
+        <div style={{
+          display: 'flex',
           flexDirection: 'column',
-          gap: '1rem' 
+          gap: '1rem'
         }}>
           {/* Get Button */}
           <button
@@ -115,38 +94,76 @@ function PalomasMenu({
             {t('palomasMenu.get')}
           </button>
 
-          {/* Send Button */}
+          {/* Instant Send Button (Doves) */}
           <button
             onClick={() => {
-              console.log('Send button clicked, opening ChooseSendType modal')
-              setShowChooseSendType(true)
+              onShowSendDovesEggs('DOVES')
+              onClose()
             }}
             style={{
-              background: 'linear-gradient(135deg, #d2691e, #cd853f)',
-              color: 'white',
-              border: 'none',
+              background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+              color: '#1976d2',
+              border: '2px solid #2196f3',
               borderRadius: '15px',
               padding: '1rem 1.5rem',
               fontSize: '1.2rem',
               fontWeight: '600',
               cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(210, 105, 30, 0.3)',
+              boxShadow: '0 4px 15px rgba(33, 150, 243, 0.3)',
               transition: 'all 0.3s ease',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: '0.5rem',
               width: '100%'
             }}
             onMouseOver={(e) => {
               e.target.style.transform = 'translateY(-2px)'
-              e.target.style.boxShadow = '0 6px 20px rgba(210, 105, 30, 0.4)'
+              e.target.style.boxShadow = '0 6px 20px rgba(33, 150, 243, 0.4)'
             }}
             onMouseOut={(e) => {
               e.target.style.transform = 'translateY(0)'
-              e.target.style.boxShadow = '0 4px 15px rgba(210, 105, 30, 0.3)'
+              e.target.style.boxShadow = '0 4px 15px rgba(33, 150, 243, 0.3)'
             }}
           >
-            {t('palomasMenu.send')}
+            <span style={{ fontSize: '1.5rem' }}>🕊️</span>
+            Instant
+          </button>
+
+          {/* Half Now Half Later Button (Eggs) */}
+          <button
+            onClick={() => {
+              onShowSendDovesEggs('EGGS')
+              onClose()
+            }}
+            style={{
+              background: 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)',
+              color: '#f57c00',
+              border: '2px solid #ff9800',
+              borderRadius: '15px',
+              padding: '1rem 1.5rem',
+              fontSize: '1.2rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(255, 152, 0, 0.3)',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              width: '100%'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)'
+              e.target.style.boxShadow = '0 6px 20px rgba(255, 152, 0, 0.4)'
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)'
+              e.target.style.boxShadow = '0 4px 15px rgba(255, 152, 0, 0.3)'
+            }}
+          >
+            <span style={{ fontSize: '1.5rem' }}>🐣</span>
+            Half now, half later
           </button>
 
           {/* Send Love Button - Admin Only */}
@@ -186,18 +203,6 @@ function PalomasMenu({
           )}
         </div>
       </div>
-
-      {/* ChooseSendType Modal */}
-      {showChooseSendType && (
-        <>
-          {console.log('Rendering ChooseSendType modal')}
-          <ChooseSendType
-            onBack={() => setShowChooseSendType(false)}
-            onSelectDoves={handleSelectDoves}
-            onSelectEggs={handleSelectEggs}
-          />
-        </>
-      )}
     </div>
   )
 }
