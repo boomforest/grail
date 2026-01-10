@@ -163,7 +163,7 @@ function UsernameInput({ username, onUsernameChange }) {
 }
 
 function LoginForm({ supabase, onLogin, onRegister }) {
-  const { t, translations } = useLanguage()
+  const { t, translations, language, setLanguage } = useLanguage()
   
   // Helper function to display Spanish first with English in italics
   const dualText = (translationKey) => {
@@ -604,10 +604,72 @@ function LoginForm({ supabase, onLogin, onRegister }) {
             />
 
             {/* Username Component */}
-            <UsernameInput 
+            <UsernameInput
               username={formData.username || ''}
               onUsernameChange={(newUsername) => setFormData({ ...formData, username: newUsername })}
             />
+
+            {/* Language Selection */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                color: '#8b4513',
+                marginBottom: '0.5rem',
+                textAlign: 'left'
+              }}>
+                Preferred Language / Idioma Preferido:
+              </label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setLanguage('en')}
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    background: language === 'en' ? 'rgba(210, 105, 30, 0.8)' : 'rgba(255, 255, 255, 0.2)',
+                    color: language === 'en' ? 'white' : 'rgba(139, 69, 19, 0.8)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                    fontSize: '0.9rem',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>🇺🇸</span>
+                  English
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLanguage('es')}
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    background: language === 'es' ? 'rgba(210, 105, 30, 0.8)' : 'rgba(255, 255, 255, 0.2)',
+                    color: language === 'es' ? 'white' : 'rgba(139, 69, 19, 0.8)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                    fontSize: '0.9rem',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>🇲🇽</span>
+                  Español
+                </button>
+              </div>
+            </div>
 
             <button 
               onClick={handleRegister}

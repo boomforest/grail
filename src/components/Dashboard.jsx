@@ -1645,9 +1645,9 @@ function Dashboard({
                 }}
               >
                 <span style={{ fontSize: '1.2rem' }}>
-                  {language === 'en' ? '🇺🇸' : '🇲🇽'}
+                  {language === 'en' ? '🇲🇽' : '🇺🇸'}
                 </span>
-                {language === 'en' ? 'Switch to Spanish' : 'Cambiar a Inglés'}
+                {language === 'en' ? 'Cambiar a Español' : 'Switch to English'}
               </button>
 
               {/* Send Palomas Button */}
