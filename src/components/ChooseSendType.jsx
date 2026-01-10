@@ -74,31 +74,26 @@ function ChooseSendType({ onBack, onSelectDoves, onSelectEggs }) {
             marginBottom: '1rem',
             cursor: 'pointer',
             transition: 'transform 0.2s',
-            textAlign: 'left'
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.5rem'
           }}
           onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
           <div style={{
-            fontSize: '1.8rem',
-            marginBottom: '0.5rem'
+            fontSize: '2.5rem'
           }}>
             🕊️
           </div>
           <div style={{
-            fontSize: '1.25rem',
-            fontWeight: '700',
-            color: '#1976d2',
-            marginBottom: '0.5rem'
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: '#1976d2'
           }}>
-            Doves
-          </div>
-          <div style={{
-            fontSize: '0.85rem',
-            color: '#555',
-            lineHeight: '1.4'
-          }}>
-            Instant transfer. Use for immediate things like food, merch, bookings, studio time, etc.
+            Instant
           </div>
         </button>
 
@@ -113,31 +108,26 @@ function ChooseSendType({ onBack, onSelectDoves, onSelectEggs }) {
             padding: '1.5rem',
             cursor: 'pointer',
             transition: 'transform 0.2s',
-            textAlign: 'left'
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.5rem'
           }}
           onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
           <div style={{
-            fontSize: '1.8rem',
-            marginBottom: '0.5rem'
+            fontSize: '2.5rem'
           }}>
-            🥚
+            🐣
           </div>
           <div style={{
-            fontSize: '1.25rem',
-            fontWeight: '700',
-            color: '#f57c00',
-            marginBottom: '0.5rem'
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: '#f57c00'
           }}>
-            Eggs
-          </div>
-          <div style={{
-            fontSize: '0.85rem',
-            color: '#555',
-            lineHeight: '1.4'
-          }}>
-            Work-in-progress. 50% transfers now, 50% releases when you approve delivery.
+            Half now, half later
           </div>
         </button>
       </div>
