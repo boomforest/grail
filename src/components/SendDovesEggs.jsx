@@ -276,12 +276,7 @@ function SendDovesEggs({ profile, supabase, onClose, onSuccess, transferType }) 
           status: 'pending',
           work_description: workDescription,
           delivery_window_days: deliveryDays,
-          expected_delivery_date: expectedDelivery.toISOString(),
-          source_transaction_ids: usedTransactionIds,
-          metadata: {
-            sender_username: profile.username,
-            recipient_username: recipientProfile.username
-          }
+          expected_delivery_date: expectedDelivery.toISOString()
         }])
 
       // Update sender's balance (full amount deducted)
