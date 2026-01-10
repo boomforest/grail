@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { X, HelpCircle } from 'lucide-react'
 
 function SendDovesEggs({ profile, supabase, onClose, onSuccess, transferType }) {
@@ -589,7 +589,7 @@ function SendDovesEggs({ profile, supabase, onClose, onSuccess, transferType }) 
             <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1976d2' }}>
               🕊️ Send Doves
             </h2>
-            <button onClick={() => setSendType(null)} style={{
+            <button onClick={onClose} style={{
               background: 'none',
               border: 'none',
               cursor: 'pointer',
@@ -754,7 +754,7 @@ function SendDovesEggs({ profile, supabase, onClose, onSuccess, transferType }) 
             <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f57c00' }}>
               🥚 Send Eggs
             </h2>
-            <button onClick={() => setSendType(null)} style={{
+            <button onClick={onClose} style={{
               background: 'none',
               border: 'none',
               cursor: 'pointer',
