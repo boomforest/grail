@@ -550,8 +550,41 @@ function SendDovesEggs({ profile, supabase, onClose, onSuccess, transferType }) 
           padding: '2rem',
           maxWidth: '450px',
           width: '100%',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+          position: 'relative'
         }}>
+          {/* Info button - bottom left */}
+          <button
+            onClick={() => setShowExplainer('doves')}
+            style={{
+              position: 'absolute',
+              bottom: '1rem',
+              left: '1rem',
+              background: 'rgba(33, 150, 243, 0.1)',
+              border: '1px solid #2196f3',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: '#2196f3',
+              fontSize: '1.2rem',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(33, 150, 243, 0.2)'
+              e.currentTarget.style.transform = 'scale(1.1)'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(33, 150, 243, 0.1)'
+              e.currentTarget.style.transform = 'scale(1)'
+            }}
+          >
+            ℹ️
+          </button>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1976d2' }}>
               🕊️ Send Doves
@@ -681,8 +714,42 @@ function SendDovesEggs({ profile, supabase, onClose, onSuccess, transferType }) 
           width: '100%',
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
           maxHeight: '90vh',
-          overflowY: 'auto'
+          overflowY: 'auto',
+          position: 'relative'
         }}>
+          {/* Info button - bottom left */}
+          <button
+            onClick={() => setShowExplainer('eggs')}
+            style={{
+              position: 'absolute',
+              bottom: '1rem',
+              left: '1rem',
+              background: 'rgba(255, 152, 0, 0.1)',
+              border: '1px solid #ff9800',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: '#ff9800',
+              fontSize: '1.2rem',
+              transition: 'all 0.2s',
+              zIndex: 10
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 152, 0, 0.2)'
+              e.currentTarget.style.transform = 'scale(1.1)'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 152, 0, 0.1)'
+              e.currentTarget.style.transform = 'scale(1)'
+            }}
+          >
+            ℹ️
+          </button>
+
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f57c00' }}>
               🥚 Send Eggs
