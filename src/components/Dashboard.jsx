@@ -6,6 +6,7 @@ import SendPalomas from './SendPalomas'
 import RequestCashout from './RequestCashout'
 import PalomasHistory from './PalomasHistory'
 import ExpirationWarning from './ExpirationWarning'
+import StorePage from './StorePage'
 import { useLanguage } from '../contexts/LanguageContext'
 
 const formatNumber = (num) => {
@@ -1328,6 +1329,7 @@ function Dashboard({
   const [showPalomasHistory, setShowPalomasHistory] = useState(false);
   const [showSendPalomas, setShowSendPalomas] = useState(false);
   const [showRequestCashout, setShowRequestCashout] = useState(false);
+  const [showStore, setShowStore] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   
   const { language, toggleLanguage, t } = useLanguage();
@@ -1520,8 +1522,29 @@ function Dashboard({
           {/* Center - Spacer (Cup Game hidden for now) */}
           <div style={{ width: '70px' }} />
 
-          {/* Right - Spacer for balance */}
-          <div style={{ width: '70px' }} />
+          {/* Right - Store/Power-Ups button */}
+          <button
+            onClick={() => setShowStore(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '2rem',
+              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'scale(1.1)'
+              e.target.style.filter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'scale(1)'
+              e.target.style.filter = 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
+            }}
+            title="Power-Ups Store"
+          >
+            ✨
+          </button>
 
           {/* Settings Panel */}
           {showSettings && (
@@ -1788,6 +1811,14 @@ function Dashboard({
           supabase={supabase}
           onClose={() => setShowRequestCashout(false)}
           onSuccess={handleSuccess}
+        />
+      )}
+
+      {/* Store/Power-Ups Modal */}
+      {showStore && (
+        <StorePage
+          supabase={supabase}
+          onClose={() => setShowStore(false)}
         />
       )}
     </div>
