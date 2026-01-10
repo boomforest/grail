@@ -12,10 +12,13 @@ function PalomasHistory({ profile, supabase, onClose }) {
     setLoading(true)
     try {
       // Load Doves received (paloma_transactions where user is recipient)
+      // Exclude transactions where source contains "_from_" followed by current username
+      // (those are history records for sent transactions, not received)
       const { data: dovesReceivedData, error: dovesReceivedError } = await supabase
         .from('paloma_transactions')
         .select('*')
         .eq('user_id', profile.id)
+        .not('source', 'like', `%_from_${profile.username}`)
         .order('created_at', { ascending: false })
         .limit(50)
 
