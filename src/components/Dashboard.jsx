@@ -1307,7 +1307,7 @@ const AdminProductManager = ({ profile, supabase, onBack }) => {
 };
 
 // Main Dashboard Component
-function Dashboard({ 
+function Dashboard({
   profile,
   user,
   supabase,
@@ -1315,7 +1315,6 @@ function Dashboard({
   showSettings,
   setShowSettings,
   onShowNotifications,
-  onShowCupGame,
   onShowSendMeritsForm,
   onWalletSave,
   onLogout,
@@ -1518,29 +1517,8 @@ function Dashboard({
             )}
           </div>
 
-          {/* Center - Cup Game */}
-          <button
-            onClick={onShowCupGame}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
-              fontSize: '3rem'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.transform = 'scale(1.1)'
-              e.target.style.filter = 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
-            }}
-            onMouseOut={(e) => {
-              e.target.style.transform = 'scale(1)'
-              e.target.style.filter = 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))'
-            }}
-            title="Cup Game"
-          >
-            🏆
-          </button>
+          {/* Center - Spacer (Cup Game hidden for now) */}
+          <div style={{ width: '70px' }} />
 
           {/* Right - Spacer for balance */}
           <div style={{ width: '70px' }} />
