@@ -849,7 +849,7 @@ function App() {
             onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
-            onShowSendDovesEggs={() => setShowSendDovesEggs(true)}
+            onShowSendDovesEggs={setShowSendDovesEggs}
             onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
@@ -979,7 +979,7 @@ function App() {
             onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
-            onShowSendDovesEggs={() => setShowSendDovesEggs(true)}
+            onShowSendDovesEggs={setShowSendDovesEggs}
             onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
@@ -1187,7 +1187,7 @@ function App() {
             onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
-            onShowSendDovesEggs={() => setShowSendDovesEggs(true)}
+            onShowSendDovesEggs={setShowSendDovesEggs}
             onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
@@ -1308,7 +1308,7 @@ function App() {
             onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
-            onShowSendDovesEggs={() => setShowSendDovesEggs(true)}
+            onShowSendDovesEggs={setShowSendDovesEggs}
             onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
