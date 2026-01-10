@@ -1,6 +1,25 @@
 [build]
   functions = "netlify/functions"
 
+# Scheduled function: Daily Paloma expiration check at midnight UTC
+[functions."expire-palomas"]
+  schedule = "0 0 * * *"
+
+# Prevent caching of HTML files
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+
+# Prevent caching of main JS files
+[[headers]]
+  for = "/assets/*.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+# Security headers for all files
 [[headers]]
   for = "/*"
   [headers.values]

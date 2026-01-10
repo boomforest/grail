@@ -5,6 +5,8 @@ import LoginForm from './components/LoginForm'
 import ResetPassword from './components/ResetPassword'
 import Dashboard from './components/Dashboard'
 import SendForm from './components/SendForm'
+import SendDovesEggs from './components/SendDovesEggs'
+import EggsInFlight from './components/EggsInFlight'
 import ReleaseForm from './components/ReleaseForm'
 import SendMeritsForm from './components/SendMeritsForm'
 import NotificationsFeed from './components/NotificationsFeed'
@@ -44,7 +46,9 @@ function App() {
   const [showTickets, setShowTickets] = useState(false) // Tickets page
   const [showAdminTickets, setShowAdminTickets] = useState(false) // Admin ticket management
   const [showSendLove, setShowSendLove] = useState(false) // Send love feature
-  
+  const [showSendDovesEggs, setShowSendDovesEggs] = useState(null) // New dual-send interface - stores 'DOVES' or 'EGGS'
+  const [showEggsInFlight, setShowEggsInFlight] = useState(false) // Eggs management
+
   // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
     recipient: '',
@@ -146,27 +150,43 @@ function App() {
   useEffect(() => {
     const initSupabase = async () => {
       try {
+        console.log('🚀 Initializing Supabase...')
+
         // Check if this is a password reset URL first
         const urlParams = new URLSearchParams(window.location.search)
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const type = urlParams.get('type') || hashParams.get('type')
-        
+
         if (type === 'recovery') {
+          console.log('🔐 Password recovery mode detected')
           setShowResetPassword(true)
         }
+
+        console.log('📦 Creating Supabase client...')
+        console.log('URL:', import.meta.env.VITE_SUPABASE_URL)
+        console.log('Has ANON key:', !!import.meta.env.VITE_SUPABASE_ANON_KEY)
 
         const { createClient } = await import('@supabase/supabase-js')
         const client = createClient(
           import.meta.env.VITE_SUPABASE_URL,
           import.meta.env.VITE_SUPABASE_ANON_KEY
         )
+
+        console.log('✅ Supabase client created')
         setSupabase(client)
         setMessage('')
 
         // Only auto-login if NOT on a reset password page
         if (type !== 'recovery') {
-          const { data: { session } } = await client.auth.getSession()
+          console.log('🔑 Checking for existing session...')
+          const { data: { session }, error: sessionError } = await client.auth.getSession()
+
+          if (sessionError) {
+            console.error('❌ Session error:', sessionError)
+          }
+
           if (session?.user) {
+            console.log('👤 User session found:', session.user.email)
             setUser(session.user)
             await ensureProfileExists(session.user, client)
             await loadAllProfiles(client)
@@ -206,16 +226,55 @@ function App() {
   }, [])
 
   const ensureProfileExists = async (authUser, client = supabase) => {
+    console.log('🔍 ensureProfileExists called for user:', authUser?.id, authUser?.email)
+
     try {
-      const { data: existingProfile } = await client
+      console.log('📡 Fetching profile from database...')
+      const { data: existingProfile, error: fetchError } = await client
         .from('profiles')
         .select('*')
         .eq('id', authUser.id)
         .single()
 
+      if (fetchError) {
+        console.error('❌ Error fetching profile:', fetchError)
+        throw fetchError
+      }
+
+      console.log('✅ Profile fetched:', {
+        username: existingProfile?.username,
+        email: existingProfile?.email,
+        dov_balance: existingProfile?.dov_balance,
+        total_palomas_collected: existingProfile?.total_palomas_collected,
+        profile_picture_url: existingProfile?.profile_picture_url ? 'Has picture' : 'No picture'
+      })
+
       if (existingProfile) {
+        // One-time migration: sync dov_balance with total_palomas_collected if needed
+        if ((existingProfile.dov_balance === 0 || existingProfile.dov_balance === null) &&
+            existingProfile.total_palomas_collected > 0) {
+          console.log('🔄 Migrating balance: setting dov_balance to match total_palomas_collected')
+          const { error: migrationError } = await client
+            .from('profiles')
+            .update({
+              dov_balance: existingProfile.total_palomas_collected,
+              last_status_update: new Date().toISOString()
+            })
+            .eq('id', authUser.id)
+
+          if (migrationError) {
+            console.error('❌ Migration error:', migrationError)
+          } else {
+            console.log('✅ Balance migrated successfully')
+            existingProfile.dov_balance = existingProfile.total_palomas_collected
+          }
+        }
+
+        console.log('📦 Setting profile state...')
         setProfile(existingProfile)
+
         // Sync cups when user logs in
+        console.log('🏆 Syncing cups from Palomas...')
         await syncCupsFromPalomas(authUser.id)
         return existingProfile
       }
@@ -403,34 +462,57 @@ function App() {
   }
 
   const handleLogout = async () => {
-    if (supabase?.notificationSubscription) {
-      supabase.notificationSubscription.unsubscribe()
+    console.log('🚪 Logout initiated...')
+
+    try {
+      if (supabase?.notificationSubscription) {
+        console.log('📡 Unsubscribing from notifications...')
+        await supabase.notificationSubscription.unsubscribe()
+      }
+
+      if (supabase) {
+        console.log('🔐 Signing out from Supabase...')
+        const { error } = await supabase.auth.signOut()
+        if (error) {
+          console.error('❌ Logout error:', error)
+          throw error
+        }
+        console.log('✅ Signed out successfully')
+      }
+
+      // Reset all state
+      console.log('🧹 Clearing app state...')
+      setUser(null)
+      setProfile(null)
+      setAllProfiles([])
+      setNotifications([])
+      setShowSettings(false)
+      setShowSendForm(null)
+      setShowReleaseForm(null)
+      setShowSendMeritsForm(false)
+      setShowNotifications(false)
+      setShowManifesto(false)
+      setShowCupGame(false)
+      setShowGPTChat(false)
+      setShowPayPal(false)
+      setShowWelcome(false)
+      setHasSeenWelcome(false)
+      setShowPalomasMenu(false)
+      setShowTickets(false)
+      setShowAdminTickets(false)
+      setShowSendLove(false)
+      setMessage('Logged out successfully')
+      setTransferData({ recipient: '', amount: '' })
+      setReleaseData({ amount: '', reason: '' })
+
+      console.log('✅ Logout complete!')
+    } catch (error) {
+      console.error('❌ Error during logout:', error)
+      setMessage('Logout error - please refresh the page')
     }
-    
-    if (supabase) {
-      await supabase.auth.signOut()
-    }
-    setUser(null)
-    setProfile(null)
-    setAllProfiles([])
-    setNotifications([])
-    setShowSettings(false)
-    setShowSendForm(null)
-    setShowReleaseForm(null)
-    setShowSendMeritsForm(false)
-    setShowNotifications(false)
-    setShowManifesto(false)
-    setShowCupGame(false)
-    setShowGPTChat(false)
-    setShowPayPal(false) // Reset PayPal modal
-    setShowWelcome(false) // Reset welcome modal
-    setHasSeenWelcome(false) // Reset welcome state
-    setMessage('')
-    setTransferData({ recipient: '', amount: '' })
-    setReleaseData({ amount: '', reason: '' })
   }
 
-  // NEW: Handle Palomas Transfer Function
+  // NEW: Handle Palomas Transfer Function with FIFO expiration tracking
   const handlePalomasTransfer = async () => {
     if (!supabase || !profile) {
       setMessage('Please wait for connection...')
@@ -465,25 +547,92 @@ function App() {
         return
       }
 
-      // Check sender has enough Palomas
-      if (profile.total_palomas_collected < amount) {
+      // Check sender has enough Palomas (using dov_balance)
+      if (profile.dov_balance < amount) {
         setMessage('Insufficient Palomas')
         return
       }
 
-      // Transfer Palomas
+      // FIFO: Get sender's active transactions ordered by received_at (oldest first)
+      const { data: senderTransactions, error: txError } = await supabase
+        .from('paloma_transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_expired', false)
+        .gte('expires_at', new Date().toISOString())
+        .order('received_at', { ascending: true })
+
+      if (txError) {
+        console.error('Error fetching sender transactions:', txError)
+        setMessage('Transfer failed: Could not fetch transactions')
+        return
+      }
+
+      // Calculate total available (should match dov_balance)
+      const totalAvailable = senderTransactions.reduce((sum, tx) => sum + tx.amount, 0)
+
+      if (totalAvailable < amount) {
+        setMessage('Insufficient active Palomas')
+        return
+      }
+
+      // Deduct from oldest transactions first (FIFO)
+      let remaining = amount
+      for (const tx of senderTransactions) {
+        if (remaining <= 0) break
+
+        const deductAmount = Math.min(remaining, tx.amount)
+
+        if (tx.amount === deductAmount) {
+          // Delete transaction entirely
+          await supabase
+            .from('paloma_transactions')
+            .delete()
+            .eq('id', tx.id)
+        } else {
+          // Reduce transaction amount
+          await supabase
+            .from('paloma_transactions')
+            .update({ amount: tx.amount - deductAmount })
+            .eq('id', tx.id)
+        }
+
+        remaining -= deductAmount
+      }
+
+      // Create new transaction for recipient with fresh 1-year expiration
+      const expirationDate = new Date()
+      expirationDate.setFullYear(expirationDate.getFullYear() + 1)
+
+      await supabase
+        .from('paloma_transactions')
+        .insert([{
+          user_id: recipientProfile.id,
+          amount: amount,
+          transaction_type: 'received',
+          source: `transfer_from_${profile.username}`,
+          received_at: new Date().toISOString(),
+          expires_at: expirationDate.toISOString(),
+          metadata: {
+            sender_username: profile.username,
+            sender_id: user.id
+          }
+        }])
+
+      // Update sender's dov_balance
       await supabase
         .from('profiles')
-        .update({ 
-          total_palomas_collected: profile.total_palomas_collected - amount,
+        .update({
+          dov_balance: profile.dov_balance - amount,
           last_status_update: new Date().toISOString()
         })
         .eq('id', user.id)
 
+      // Update recipient's dov_balance
       await supabase
         .from('profiles')
-        .update({ 
-          total_palomas_collected: recipientProfile.total_palomas_collected + amount,
+        .update({
+          dov_balance: recipientProfile.dov_balance + amount,
           last_status_update: new Date().toISOString()
         })
         .eq('id', recipientProfile.id)
@@ -491,10 +640,11 @@ function App() {
       setMessage(`Sent ${amount} Palomas to ${recipient}!`)
       setTransferData({ recipient: '', amount: '' })
       setShowSendForm(null)
-      
+
       await ensureProfileExists(user)
       await loadAllProfiles()
     } catch (err) {
+      console.error('Transfer error:', err)
       setMessage('Transfer failed: ' + err.message)
     } finally {
       setIsTransferring(false)
@@ -699,6 +849,8 @@ function App() {
             onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
+            onShowSendDovesEggs={() => setShowSendDovesEggs(true)}
+            onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
@@ -827,6 +979,8 @@ function App() {
             onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
+            onShowSendDovesEggs={() => setShowSendDovesEggs(true)}
+            onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
@@ -1033,6 +1187,8 @@ function App() {
             onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
+            onShowSendDovesEggs={() => setShowSendDovesEggs(true)}
+            onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
@@ -1070,6 +1226,43 @@ function App() {
           onToggle={toggleGPTChat} 
           profile={profile} 
         /> */}
+      </>
+    )
+  }
+
+  // Send Doves/Eggs view
+  if (user && showSendDovesEggs) {
+    return (
+      <>
+        <SendDovesEggs
+          profile={profile}
+          supabase={supabase}
+          transferType={showSendDovesEggs} // 'DOVES' or 'EGGS'
+          onClose={() => setShowSendDovesEggs(null)}
+          onSuccess={(msg) => {
+            setMessage(msg)
+            setTimeout(() => setMessage(''), 5000)
+            ensureProfileExists(user)
+          }}
+        />
+      </>
+    )
+  }
+
+  // Eggs in Flight view
+  if (user && showEggsInFlight) {
+    return (
+      <>
+        <EggsInFlight
+          profile={profile}
+          supabase={supabase}
+          onClose={() => setShowEggsInFlight(false)}
+          onSuccess={(msg) => {
+            setMessage(msg)
+            setTimeout(() => setMessage(''), 5000)
+            ensureProfileExists(user)
+          }}
+        />
       </>
     )
   }
@@ -1115,6 +1308,8 @@ function App() {
             onShowCupGame={() => setShowCupGame(true)}
             onClose={() => setShowPalomasMenu(false)}
             supabase={supabase}
+            onShowSendDovesEggs={() => setShowSendDovesEggs(true)}
+            onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />

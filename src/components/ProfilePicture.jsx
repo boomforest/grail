@@ -53,17 +53,18 @@ function ProfilePicture({
 
       if (uploadError) throw uploadError
 
-      // Get public URL
+      // Get public URL with cache busting
       const { data: urlData } = supabase.storage
         .from('profile-pictures')
         .getPublicUrl(fileName)
 
-      const publicUrl = urlData.publicUrl
+      // Add timestamp for cache busting
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`
 
       // Update profile in database
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ 
+        .update({
           profile_picture_url: publicUrl,
           profile_picture_updated_at: new Date().toISOString()
         })
@@ -179,7 +180,9 @@ function ProfilePicture({
             height: currentSize.height,
             borderRadius: '50%',
             backgroundColor: profile?.profile_picture_url ? 'transparent' : '#f0f0f0',
-            backgroundImage: profile?.profile_picture_url ? `url(${profile.profile_picture_url})` : 'none',
+            backgroundImage: profile?.profile_picture_url
+              ? `url(${profile.profile_picture_url.includes('?') ? profile.profile_picture_url : profile.profile_picture_url + '?t=' + Date.now()})`
+              : 'none',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             display: 'flex',

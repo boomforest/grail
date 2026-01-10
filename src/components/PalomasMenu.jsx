@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import SimpleSendPalomas from './SimpleSendPalomas'
+import ChooseSendType from './ChooseSendType'
 import { useLanguage } from '../contexts/LanguageContext'
 
 function PalomasMenu({
@@ -11,10 +11,24 @@ function PalomasMenu({
   onShowSendLove,
   onShowCupGame,
   onClose,
-  supabase
+  supabase,
+  onShowSendDovesEggs,
+  onShowEggsInFlight
 }) {
-  const [showSendPalomas, setShowSendPalomas] = useState(false)
+  const [showChooseSendType, setShowChooseSendType] = useState(false)
   const { t } = useLanguage()
+
+  const handleSelectDoves = () => {
+    setShowChooseSendType(false)
+    onShowSendDovesEggs('DOVES')
+    onClose()
+  }
+
+  const handleSelectEggs = () => {
+    setShowChooseSendType(false)
+    onShowSendDovesEggs('EGGS')
+    onClose()
+  }
 
   return (
     <div style={{
@@ -104,7 +118,8 @@ function PalomasMenu({
           {/* Send Button */}
           <button
             onClick={() => {
-              setShowSendPalomas(true)
+              console.log('Send button clicked, opening ChooseSendType modal')
+              setShowChooseSendType(true)
             }}
             style={{
               background: 'linear-gradient(135deg, #d2691e, #cd853f)',
@@ -171,18 +186,17 @@ function PalomasMenu({
           )}
         </div>
       </div>
-      
-      {/* SimpleSendPalomas Modal */}
-      {showSendPalomas && (
-        <SimpleSendPalomas
-          profile={profile}
-          supabase={supabase}
-          onClose={() => {
-            setShowSendPalomas(false)
-            onClose() // Also close the PalomasMenu to return to home
-          }}
-          onShowCupGame={onShowCupGame}
-        />
+
+      {/* ChooseSendType Modal */}
+      {showChooseSendType && (
+        <>
+          {console.log('Rendering ChooseSendType modal')}
+          <ChooseSendType
+            onBack={() => setShowChooseSendType(false)}
+            onSelectDoves={handleSelectDoves}
+            onSelectEggs={handleSelectEggs}
+          />
+        </>
       )}
     </div>
   )

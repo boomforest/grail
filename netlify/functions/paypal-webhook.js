@@ -221,6 +221,35 @@ exports.handler = async (event, context) => {
         }
       }
 
+      // Insert transaction record for expiration tracking
+      console.log('Creating paloma_transaction record for expiration tracking...')
+      const expirationDate = new Date()
+      expirationDate.setFullYear(expirationDate.getFullYear() + 1) // 1 year from now
+
+      const { error: transactionError } = await supabase
+        .from('paloma_transactions')
+        .insert([{
+          user_id: userId,
+          amount: palomasToAdd,
+          transaction_type: 'purchase',
+          source: 'paypal',
+          received_at: new Date().toISOString(),
+          expires_at: expirationDate.toISOString(),
+          metadata: {
+            payment_amount: paymentAmount,
+            paypal_transaction_id: resource.id || resource.transaction_id,
+            event_type: webhookData.event_type
+          }
+        }])
+
+      if (transactionError) {
+        console.error('Error creating transaction record:', transactionError)
+        // Don't fail the webhook - balance was updated successfully
+        // Just log the error for debugging
+      } else {
+        console.log(`✅ Transaction record created: ${palomasToAdd} Palomas expiring on ${expirationDate.toISOString()}`)
+      }
+
       // Verify the update worked by fetching again
       console.log('Verifying update by fetching user again...')
       const { data: verifyProfile, error: verifyError } = await supabase

@@ -6,19 +6,19 @@ function FloatingGrailButton({ onGrailClick }) {
       onClick={onGrailClick}
       style={{
         position: 'fixed',
-        bottom: '1rem',
-        left: '1rem',
+        bottom: '0.75rem',
+        left: '0.75rem',
         background: 'rgba(255, 255, 255, 0.9)',
         border: 'none',
-        borderRadius: '20px',
-        padding: '0.5rem 1rem',
-        fontSize: '0.9rem',
+        borderRadius: '15px',
+        padding: '0.35rem 0.75rem',
+        fontSize: '0.7rem',
         color: '#d2691e',
         cursor: 'pointer',
         fontFamily: 'system-ui, -apple-system, sans-serif',
         fontWeight: '500',
         zIndex: 1000,
-        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.08)'
       }}
     >
       antisocial media MMXXV

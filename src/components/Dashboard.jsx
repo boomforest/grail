@@ -5,6 +5,7 @@ import ProfilePicture from './ProfilePicture'
 import SendPalomas from './SendPalomas'
 import RequestCashout from './RequestCashout'
 import PalomasHistory from './PalomasHistory'
+import ExpirationWarning from './ExpirationWarning'
 import { useLanguage } from '../contexts/LanguageContext'
 
 const formatNumber = (num) => {
@@ -1895,11 +1896,14 @@ function Dashboard({
               lineHeight: '1',
               textShadow: '0 4px 20px rgba(0, 0, 0, 0.6)' // Stronger shadow for better contrast
             }}>
-              {formatNumber(profile?.total_palomas_collected || 0)}
+              {formatNumber(profile?.dov_balance || 0)}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Expiration Warning */}
+      <ExpirationWarning supabase={supabase} userId={user?.id} />
 
       {/* SendPalomas Modal */}
       {showSendPalomas && (
