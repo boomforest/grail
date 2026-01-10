@@ -72,6 +72,32 @@ function StorePage({ supabase, onClose }) {
           marginBottom: '1.5rem',
           textAlign: 'center'
         }}>
+          {/* Logo */}
+          {supabase && (
+            <img
+              src={supabase.storage.from('tarot-cards').getPublicUrl('powerups-logo.png').data.publicUrl}
+              alt="Power-Ups"
+              style={{
+                width: '80px',
+                height: '80px',
+                marginBottom: '0.75rem',
+                objectFit: 'contain'
+              }}
+              onError={(e) => {
+                // Fallback to emoji if logo not found
+                e.target.style.display = 'none'
+                e.target.nextSibling.style.display = 'block'
+              }}
+            />
+          )}
+          <div style={{
+            fontSize: '4rem',
+            marginBottom: '0.5rem',
+            display: supabase ? 'none' : 'block'
+          }}>
+            ✨
+          </div>
+
           <h2 style={{
             margin: 0,
             color: '#d2691e',
@@ -79,7 +105,7 @@ function StorePage({ supabase, onClose }) {
             fontWeight: '700',
             marginBottom: '0.5rem'
           }}>
-            ✨ Power-Ups Store
+            Power-Ups Store
           </h2>
           <p style={{
             margin: 0,
