@@ -211,13 +211,15 @@ function PalomasHistory({ profile, supabase, onClose }) {
     if (transaction.type === 'eggs') {
       const isSender = transaction.sender_id === profile.id
       const otherParty = isSender ? transaction.recipient?.username : transaction.sender?.username
-      const amount = isSender ? transaction.hatched_amount : transaction.hatched_amount
+      const amount = transaction.hatched_amount
       const date = formatDate(transaction.created_at)
 
       return {
         type: isSender ? `Sent ${amount} Dov${amount !== 1 ? 's' : ''}` : `Received ${amount} Dov${amount !== 1 ? 's' : ''}`,
         amount: isSender ? `-${amount}` : `+${amount}`,
-        otherParty: `@${otherParty} (from Eggs sent ${date})`,
+        otherParty: isSender
+          ? `@${otherParty} (Eggs payment released ${date})`
+          : `@${otherParty} (Eggs payment received ${date})`,
         color: isSender ? '#dc3545' : '#28a745',
         icon: '🕊️'
       }
