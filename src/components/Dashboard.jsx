@@ -1597,77 +1597,33 @@ function Dashboard({
                 Palomas History
               </button>
 
-              {/* Admin Product Management Button */}
+              {/* Admin Power-Ups Management Button */}
               {isAdmin && (
-                <>
-                  <button
-                    onClick={() => {
-                      setShowSettings(false);
-                      setShowProductManager(true);
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      background: 'linear-gradient(135deg, #b8860b, #daa520)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '10px',
-                      cursor: 'pointer',
-                      fontWeight: '500',
-                      marginBottom: '0.5rem',
-                      boxShadow: '0 2px 8px rgba(184, 134, 11, 0.3)'
-                    }}
-                  >
-                    Manage Products
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      setShowSettings(false);
-                      onShowTickets(true); // Pass true to indicate admin view
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      background: 'linear-gradient(135deg, #cd853f, #f4a460)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '10px',
-                      cursor: 'pointer',
-                      fontWeight: '500',
-                      marginBottom: '0.5rem',
-                      boxShadow: '0 2px 8px rgba(205, 133, 63, 0.3)'
-                    }}
-                  >
-                    Manage Tickets
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setShowSettings(false);
-                      onShowAdminPowerUps();
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem 1rem',
-                      background: 'linear-gradient(135deg, #9370db, #ba55d3)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '10px',
-                      cursor: 'pointer',
-                      fontWeight: '500',
-                      marginBottom: '0.5rem',
-                      boxShadow: '0 2px 8px rgba(147, 112, 219, 0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.5rem'
-                    }}
-                  >
-                    <span>✨</span>
-                    Manage Power-Ups
-                  </button>
-                </>
+                <button
+                  onClick={() => {
+                    setShowSettings(false);
+                    onShowAdminPowerUps();
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'linear-gradient(135deg, #9370db, #ba55d3)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                    marginBottom: '0.5rem',
+                    boxShadow: '0 2px 8px rgba(147, 112, 219, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <span>✨</span>
+                  Manage Power-Ups
+                </button>
               )}
               
               {/* Logout Button */}
