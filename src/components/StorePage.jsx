@@ -266,19 +266,34 @@ function PowerUpCard({ powerUp, supabase }) {
     }}
     >
       {/* Image */}
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={powerUp.title}
+          style={{
+            width: '100%',
+            height: '150px',
+            objectFit: 'cover'
+          }}
+          onLoad={() => {}}
+          onError={(e) => {
+            // Show gradient fallback
+            e.target.style.display = 'none'
+            e.target.nextSibling.style.display = 'flex'
+          }}
+        />
+      ) : null}
       <div style={{
         width: '100%',
         height: '150px',
-        background: imageUrl
-          ? `url(${imageUrl}) center/cover`
-          : 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #ffecd2 100%)',
-        display: 'flex',
+        background: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #ffecd2 100%)',
+        display: imageUrl ? 'none' : 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         color: 'white',
         fontSize: '3rem'
       }}>
-        {!imageUrl && '✨'}
+        ✨
       </div>
 
       {/* Content */}

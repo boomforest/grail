@@ -11,14 +11,12 @@ function PalomasHistory({ profile, supabase, onClose }) {
 
     setLoading(true)
     try {
-      // Load Doves received (paloma_transactions where user is recipient)
-      // Exclude transactions where source contains "_from_" followed by current username
-      // (those are history records for sent transactions, not received)
+      // Load Doves received (exclude 'sent' type transactions)
       const { data: dovesReceivedData, error: dovesReceivedError } = await supabase
         .from('paloma_transactions')
         .select('*')
         .eq('user_id', profile.id)
-        .not('source', 'like', `%_from_${profile.username}`)
+        .neq('transaction_type', 'sent')
         .order('created_at', { ascending: false })
         .limit(50)
 
@@ -26,14 +24,12 @@ function PalomasHistory({ profile, supabase, onClose }) {
         console.error('Error loading received paloma transactions:', dovesReceivedError)
       }
 
-      // Load Doves sent (paloma_transactions where source contains current username)
+      // Load Doves sent (paloma_transactions in sender's own account)
       const { data: dovesSentData, error: dovesSentError } = await supabase
         .from('paloma_transactions')
-        .select(`
-          *,
-          recipient:profiles!paloma_transactions_user_id_fkey(username)
-        `)
-        .like('source', `%_from_${profile.username}`)
+        .select('*')
+        .eq('user_id', profile.id)
+        .eq('transaction_type', 'sent')
         .order('created_at', { ascending: false })
         .limit(50)
 
@@ -167,15 +163,16 @@ function PalomasHistory({ profile, supabase, onClose }) {
       const source = transaction.source || ''
 
       // Handle sent Doves
-      if (transaction.direction === 'sent') {
-        const recipientUsername = transaction.recipient?.username || 'Unknown'
-        const isFromEggs = source.includes('eggs_approved')
-        const date = formatDate(transaction.created_at)
+      if (transaction.direction === 'sent' || transaction.transaction_type === 'sent') {
+        // Extract recipient username from source (transfer_to_USERNAME) or metadata
+        const recipientUsername = transaction.metadata?.recipient_username
+          || source.replace('transfer_to_', '')
+          || 'Unknown'
 
         return {
           type: `Sent ${transaction.amount} Dov${transaction.amount !== 1 ? 's' : ''}`,
           amount: `-${transaction.amount}`,
-          otherParty: isFromEggs ? `@${recipientUsername} (from Eggs sent ${date})` : `@${recipientUsername}`,
+          otherParty: `@${recipientUsername}`,
           color: '#dc3545',
           icon: '🕊️'
         }

@@ -1469,55 +1469,6 @@ function Dashboard({
                 ? (profile?.username || 'User').substring(0, 8) + '...'
                 : (profile?.username || 'User')}
             </div>
-            
-            {/* Admin indicators */}
-            {isAdmin && (
-              <div style={{
-                position: 'absolute',
-                top: '-8px',
-                right: '-8px',
-                display: 'flex',
-                gap: '2px'
-              }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onShowNotifications()
-                  }}
-                  style={{
-                    background: '#d2691e',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '20px',
-                    height: '20px',
-                    fontSize: '0.7rem',
-                    cursor: 'pointer',
-                    color: 'white'
-                  }}
-                >
-                  🔔
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onShowSendMeritsForm()
-                  }}
-                  style={{
-                    background: '#d2691e',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '20px',
-                    height: '20px',
-                    fontSize: '0.7rem',
-                    cursor: 'pointer',
-                    color: 'white'
-                  }}
-                  title="Send Merits"
-                >
-                  ⭐
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Center - Spacer (Cup Game hidden for now) */}
@@ -1548,16 +1499,18 @@ function Dashboard({
               src={supabase ? supabase.storage.from('tarot-cards').getPublicUrl('powerups-logo.png').data.publicUrl : ''}
               alt="Power-Ups"
               style={{
-                width: '50px',
-                height: '50px',
-                objectFit: 'contain'
+                width: '70px',
+                height: '70px',
+                objectFit: 'contain',
+                pointerEvents: 'none'
               }}
               onError={(e) => {
                 // Fallback to emoji if logo fails to load
                 e.target.style.display = 'none'
                 const fallback = document.createElement('span')
                 fallback.textContent = '✨'
-                fallback.style.fontSize = '2rem'
+                fallback.style.fontSize = '3rem'
+                fallback.style.pointerEvents = 'none'
                 e.target.parentElement.appendChild(fallback)
               }}
             />

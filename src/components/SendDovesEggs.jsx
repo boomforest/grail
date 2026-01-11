@@ -111,6 +111,7 @@ function SendDovesEggs({ profile, supabase, onClose, onSuccess, transferType }) 
       const expirationDate = new Date()
       expirationDate.setFullYear(expirationDate.getFullYear() + 1)
 
+      // Create transaction for recipient
       await supabase
         .from('paloma_transactions')
         .insert([{
@@ -126,6 +127,28 @@ function SendDovesEggs({ profile, supabase, onClose, onSuccess, transferType }) 
             send_type: 'doves'
           }
         }])
+
+      // Create corresponding transaction record for sender (for history tracking)
+      const { error: sentTxError } = await supabase
+        .from('paloma_transactions')
+        .insert([{
+          user_id: profile.id,
+          amount: sendAmount,
+          transaction_type: 'sent',
+          source: `transfer_to_${recipientUsername}`,
+          received_at: new Date().toISOString(),
+          expires_at: expirationDate.toISOString(),
+          metadata: {
+            recipient_username: recipientUsername,
+            recipient_id: recipientProfile.id,
+            send_type: 'doves'
+          }
+        }])
+        .select()
+
+      if (sentTxError) {
+        console.error('Error creating sent transaction:', sentTxError)
+      }
 
       // Update balances
       await supabase
