@@ -58,9 +58,9 @@ function PalomasHistory({ profile, supabase, onClose }) {
 
       // Combine and sort all transactions
       const allTransactions = [
-        ...(dovesReceivedData || []).map(t => ({ ...t, type: 'doves', direction: 'received' })),
-        ...(dovesSentData || []).map(t => ({ ...t, type: 'doves', direction: 'sent' })),
-        ...(eggsData || []).map(t => ({ ...t, type: 'eggs' }))
+        ...(dovesReceivedData || []).map(tx => ({ ...tx, type: 'doves', direction: 'received' })),
+        ...(dovesSentData || []).map(tx => ({ ...tx, type: 'doves', direction: 'sent' })),
+        ...(eggsData || []).map(tx => ({ ...tx, type: 'eggs' }))
       ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 
       setTransactions(allTransactions)
