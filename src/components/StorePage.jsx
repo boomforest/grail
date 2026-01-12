@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { listPowerUps, getPowerUpImageUrl } from '../utils/powerUpsUtils'
+import { useLanguage } from '../contexts/LanguageContext'
 
 /**
  * Store Page - Browse power-ups by category
  * Immersive tarot card-style design
  */
 function StorePage({ supabase, onClose }) {
+  const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState('studios')
   const [powerUps, setPowerUps] = useState([])
   const [loading, setLoading] = useState(true)
@@ -27,16 +29,16 @@ function StorePage({ supabase, onClose }) {
       setPowerUps(data)
     } catch (err) {
       console.error('Error loading power-ups:', err)
-      setError('Failed to load power-ups')
+      setError(t('store.error'))
     } finally {
       setLoading(false)
     }
   }
 
   const tabs = [
-    { id: 'studios', label: 'Studios', icon: '🎙️' },
-    { id: 'pros', label: 'Pros', icon: '🎵' },
-    { id: 'health', label: 'Health', icon: '🧘' }
+    { id: 'studios', label: t('store.studios'), icon: '🎙️' },
+    { id: 'pros', label: t('store.pros'), icon: '🎵' },
+    { id: 'health', label: t('store.health'), icon: '🧘' }
   ]
 
   return (
@@ -141,7 +143,7 @@ function StorePage({ supabase, onClose }) {
             color: 'rgba(255,255,255,0.5)',
             fontSize: '1.1rem'
           }}>
-            Loading...
+            {t('store.loading')}
           </div>
         ) : error ? (
           <div style={{
@@ -155,7 +157,7 @@ function StorePage({ supabase, onClose }) {
             color: 'rgba(255,255,255,0.4)',
             fontSize: '1.1rem'
           }}>
-            No offerings available yet
+            {t('store.noOfferings')}
           </div>
         ) : (
           <div style={{
@@ -184,16 +186,6 @@ function StorePage({ supabase, onClose }) {
         )}
       </div>
 
-      {/* Subtle footer hint */}
-      <div style={{
-        textAlign: 'center',
-        padding: '0.75rem',
-        color: 'rgba(255,255,255,0.3)',
-        fontSize: '0.8rem',
-        background: 'linear-gradient(0deg, rgba(0,0,0,0.5) 0%, transparent 100%)'
-      }}>
-        Coming soon: Redeem with Doves
-      </div>
     </div>
   )
 }
@@ -202,6 +194,7 @@ function StorePage({ supabase, onClose }) {
  * Tarot Card Component - Fighter/Game card style display
  */
 function TarotCard({ powerUp, supabase, isSelected, onClick, index, total }) {
+  const { t } = useLanguage()
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
 
@@ -440,7 +433,7 @@ function TarotCard({ powerUp, supabase, isSelected, onClick, index, total }) {
             fontFamily: 'monospace',
             textShadow: '2px 2px 0px rgba(0,0,0,0.8)'
           }}>
-            ✦ SELECTED ✦
+            ✦ {t('store.selected')} ✦
           </div>
         )}
       </div>

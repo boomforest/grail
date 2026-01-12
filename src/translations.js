@@ -150,6 +150,35 @@ export const translations = {
       status: 'Transaction completed successfully',
       thankYou: 'Thank you for supporting Casa de Copas!'
     },
+
+    // Palomas History
+    palomasHistory: {
+      title: 'Transaction History',
+      button: 'Palomas History',
+      loading: 'Loading transactions...',
+      noTransactions: 'No transactions yet',
+      hatchingEggs: 'Hatching Eggs',
+      completedTransactions: 'Completed Transactions',
+      to: 'To',
+      from: 'From',
+      dovsPending: 'Dovs pending',
+      done: 'Done',
+      sent: 'Sent',
+      received: 'Received',
+      dov: 'Dov',
+      dovs: 'Dovs'
+    },
+
+    // Store/Power-Ups
+    store: {
+      studios: 'Studios',
+      pros: 'Pros',
+      health: 'Health',
+      loading: 'Loading...',
+      error: 'Failed to load power-ups',
+      noOfferings: 'No offerings available yet',
+      selected: 'SELECTED'
+    },
     
     // Cup Game
     cupGame: {
@@ -440,7 +469,36 @@ export const translations = {
       status: 'Transacción completada exitosamente',
       thankYou: '¡Gracias por apoyar a Casa de Copas!'
     },
-    
+
+    // Palomas History
+    palomasHistory: {
+      title: 'Historial de Transacciones',
+      button: 'Historial de Palomas',
+      loading: 'Cargando transacciones...',
+      noTransactions: 'No hay transacciones aún',
+      hatchingEggs: 'Huevos Eclosionando',
+      completedTransactions: 'Transacciones Completadas',
+      to: 'Para',
+      from: 'De',
+      dovsPending: 'Palomas pendientes',
+      done: 'Listo',
+      sent: 'Enviado',
+      received: 'Recibido',
+      dov: 'Paloma',
+      dovs: 'Palomas'
+    },
+
+    // Store/Power-Ups
+    store: {
+      studios: 'Estudios',
+      pros: 'Profesionales',
+      health: 'Salud',
+      loading: 'Cargando...',
+      error: 'Error al cargar power-ups',
+      noOfferings: 'No hay ofertas disponibles aún',
+      selected: 'SELECCIONADO'
+    },
+
     // Cup Game
     cupGame: {
       title: 'Viaje de Copas del Tarot',

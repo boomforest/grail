@@ -1617,7 +1617,7 @@ function Dashboard({
                   boxShadow: '0 2px 8px rgba(139, 69, 19, 0.3)'
                 }}
               >
-                Palomas History
+                {t('palomasHistory.button')}
               </button>
 
               {/* Admin Power-Ups Management Button */}

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useLanguage } from '../contexts/LanguageContext'
 
 // Cache-bust: v2.0 - Fixed increment_balance issue
 function PalomasHistory({ profile, supabase, onClose }) {
+  const { t } = useLanguage()
   const [transactions, setTransactions] = useState([])
   const [eggsInFlight, setEggsInFlight] = useState([])
   const [loading, setLoading] = useState(true)
@@ -272,7 +274,7 @@ function PalomasHistory({ profile, supabase, onClose }) {
             fontSize: '1.5rem',
             fontWeight: '700'
           }}>
-            Transaction History
+            {t('palomasHistory.title')}
           </h2>
         </div>
 
@@ -315,7 +317,7 @@ function PalomasHistory({ profile, supabase, onClose }) {
               padding: '2rem',
               color: '#8b4513'
             }}>
-              Loading transactions...
+              {t('palomasHistory.loading')}
             </div>
           ) : (
             <>
@@ -330,7 +332,7 @@ function PalomasHistory({ profile, supabase, onClose }) {
                     borderBottom: '1px solid #ddd',
                     paddingBottom: '0.5rem'
                   }}>
-                    Hatching Eggs
+                    {t('palomasHistory.hatchingEggs')}
                   </h3>
                   {eggsInFlight.map((egg) => {
                     const isSender = egg.sender_id === profile.id
@@ -349,7 +351,7 @@ function PalomasHistory({ profile, supabase, onClose }) {
                       >
                         <div style={{ fontSize: '0.9rem' }}>
                           <span style={{ color: '#666' }}>
-                            {isSender ? 'To' : 'From'} @{otherParty} - {egg.pending_amount} Dovs pending
+                            {isSender ? t('palomasHistory.to') : t('palomasHistory.from')} @{otherParty} - {egg.pending_amount} {t('palomasHistory.dovsPending')}
                           </span>
                         </div>
                         {isSender && (
@@ -365,7 +367,7 @@ function PalomasHistory({ profile, supabase, onClose }) {
                               cursor: 'pointer'
                             }}
                           >
-                            Done
+                            {t('palomasHistory.done')}
                           </button>
                         )}
                       </div>
@@ -381,7 +383,7 @@ function PalomasHistory({ profile, supabase, onClose }) {
                   padding: '2rem',
                   color: '#999'
                 }}>
-                  No transactions yet
+                  {t('palomasHistory.noTransactions')}
                 </div>
               ) : transactions.length > 0 && (
                 <div>
@@ -393,7 +395,7 @@ function PalomasHistory({ profile, supabase, onClose }) {
                     borderBottom: '1px solid #ddd',
                     paddingBottom: '0.5rem'
                   }}>
-                    Completed Transactions
+                    {t('palomasHistory.completedTransactions')}
                   </h3>
                   {transactions.map((transaction) => {
                     const display = getTransactionDisplay(transaction)
