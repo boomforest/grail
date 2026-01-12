@@ -66,6 +66,14 @@ function App() {
   const [isTransferring, setIsTransferring] = useState(false)
   const [isReleasing, setIsReleasing] = useState(false)
 
+  // Auto-clearing message helper
+  const showMessage = (msg, duration = 3000) => {
+    setMessage(msg)
+    if (duration > 0) {
+      setTimeout(() => setMessage(''), duration)
+    }
+  }
+
   const toggleGPTChat = () => {
     setShowGPTChat(prev => !prev)
   }
@@ -214,7 +222,7 @@ function App() {
           }
         }
       } catch (error) {
-        setMessage('Connection failed')
+        showMessage('Connection failed')
         console.error('Supabase error:', error)
       }
     }
@@ -305,17 +313,17 @@ function App() {
         .single()
 
       if (createError) {
-        setMessage('Profile creation failed: ' + createError.message)
+        showMessage('Profile creation failed: ' + createError.message)
         return null
       }
 
       setProfile(createdProfile)
-      setMessage('Profile created successfully!')
+      showMessage('Profile created successfully!')
       // Sync cups for new profile
       await syncCupsFromPalomas(authUser.id)
       return createdProfile
     } catch (error) {
-      setMessage('Error creating profile: ' + error.message)
+      showMessage('Error creating profile: ' + error.message)
       return null
     }
   }
@@ -398,20 +406,20 @@ function App() {
 
       if (error) {
         console.error('Error saving wallet address:', error)
-        setMessage('Failed to save wallet address: ' + error.message)
+        showMessage('Failed to save wallet address: ' + error.message)
         return
       }
 
       await ensureProfileExists(user)
-      
+
       if (walletAddress) {
-        setMessage('Wallet address saved! 🎉')
+        showMessage('Wallet address saved!')
       } else {
-        setMessage('Wallet address removed')
+        showMessage('Wallet address removed')
       }
     } catch (error) {
       console.error('Error handling wallet save:', error)
-      setMessage('Error saving wallet: ' + error.message)
+      showMessage('Error saving wallet: ' + error.message)
     }
   }
 
@@ -441,7 +449,7 @@ function App() {
   const handleSuccessfulRegister = async (data) => {
     console.log('Registration successful:', data.user)
     setUser(data.user)
-    setMessage('Registration successful!')
+    showMessage('Registration successful!')
     await ensureProfileExists(data.user)
     await loadAllProfiles()
     await loadNotifications()
@@ -453,14 +461,14 @@ function App() {
     if (supabase) {
       await supabase.auth.signOut()
     }
-    
+
     setShowResetPassword(false)
     setUser(null)
     setProfile(null)
-    
+
     // Clear URL parameters
     window.history.replaceState({}, document.title, window.location.pathname)
-    setMessage('Password reset complete! Please log in with your new password.')
+    showMessage('Password reset complete! Please log in with your new password.')
   }
 
   const handleLogout = async () => {
@@ -503,21 +511,21 @@ function App() {
       setShowTickets(false)
       setShowAdminTickets(false)
       setShowSendLove(false)
-      setMessage('Logged out successfully')
+      showMessage('Logged out successfully', 2000)
       setTransferData({ recipient: '', amount: '' })
       setReleaseData({ amount: '', reason: '' })
 
       console.log('✅ Logout complete!')
     } catch (error) {
       console.error('❌ Error during logout:', error)
-      setMessage('Logout error - please refresh the page')
+      showMessage('Logout error - please refresh the page')
     }
   }
 
   // NEW: Handle Palomas Transfer Function with FIFO expiration tracking
   const handlePalomasTransfer = async () => {
     if (!supabase || !profile) {
-      setMessage('Please wait for connection...')
+      showMessage('Please wait for connection...')
       return
     }
 
@@ -525,7 +533,7 @@ function App() {
     const amount = parseFloat(transferData.amount)
 
     if (!recipient || !amount) {
-      setMessage('Please fill in recipient and amount')
+      showMessage('Please fill in recipient and amount')
       return
     }
 
@@ -540,18 +548,18 @@ function App() {
         .single()
 
       if (findError || !recipientProfile) {
-        setMessage('Recipient not found')
+        showMessage('Recipient not found')
         return
       }
 
       if (recipientProfile.id === user.id) {
-        setMessage('Cannot send to yourself')
+        showMessage('Cannot send to yourself')
         return
       }
 
       // Check sender has enough Palomas (using dov_balance)
       if (profile.dov_balance < amount) {
-        setMessage('Insufficient Palomas')
+        showMessage('Insufficient Palomas')
         return
       }
 
@@ -566,7 +574,7 @@ function App() {
 
       if (txError) {
         console.error('Error fetching sender transactions:', txError)
-        setMessage('Transfer failed: Could not fetch transactions')
+        showMessage('Transfer failed: Could not fetch transactions')
         return
       }
 
@@ -574,7 +582,7 @@ function App() {
       const totalAvailable = senderTransactions.reduce((sum, tx) => sum + tx.amount, 0)
 
       if (totalAvailable < amount) {
-        setMessage('Insufficient active Palomas')
+        showMessage('Insufficient active Palomas')
         return
       }
 
@@ -639,7 +647,7 @@ function App() {
         })
         .eq('id', recipientProfile.id)
 
-      setMessage(`Sent ${amount} Palomas to ${recipient}!`)
+      showMessage(`Sent ${amount} Palomas to ${recipient}!`)
       setTransferData({ recipient: '', amount: '' })
       setShowSendForm(null)
 
@@ -647,7 +655,7 @@ function App() {
       await loadAllProfiles()
     } catch (err) {
       console.error('Transfer error:', err)
-      setMessage('Transfer failed: ' + err.message)
+      showMessage('Transfer failed: ' + err.message)
     } finally {
       setIsTransferring(false)
     }
@@ -656,7 +664,7 @@ function App() {
   // EXISTING: Admin Transfer Function (for DOV/DJR tokens)
   const handleAdminTransfer = async (tokenType) => {
     if (!supabase || !profile) {
-      setMessage('Please wait for connection...')
+      showMessage('Please wait for connection...')
       return
     }
 
@@ -664,7 +672,7 @@ function App() {
     const amount = parseFloat(transferData.amount)
 
     if (!recipient || !amount) {
-      setMessage('Please fill in recipient and amount')
+      showMessage('Please fill in recipient and amount')
       return
     }
 
@@ -678,18 +686,18 @@ function App() {
         .single()
 
       if (findError || !recipientProfile) {
-        setMessage('Recipient not found')
+        showMessage('Recipient not found')
         return
       }
 
       if (recipientProfile.id === user.id) {
-        setMessage('Cannot send to yourself')
+        showMessage('Cannot send to yourself')
         return
       }
 
       const currentBalance = tokenType === 'DOV' ? profile.dov_balance : profile.djr_balance
       if (currentBalance < amount) {
-        setMessage('Insufficient tokens')
+        showMessage('Insufficient tokens')
         return
       }
 
@@ -715,14 +723,14 @@ function App() {
           .eq('id', recipientProfile.id)
       }
 
-      setMessage('Sent ' + amount + ' ' + tokenType + ' to ' + recipient + '!')
+      showMessage('Sent ' + amount + ' ' + tokenType + ' to ' + recipient + '!')
       setTransferData({ recipient: '', amount: '' })
       setShowSendForm(null)
-      
+
       await ensureProfileExists(user)
       await loadAllProfiles()
     } catch (err) {
-      setMessage('Transfer failed: ' + err.message)
+      showMessage('Transfer failed: ' + err.message)
     } finally {
       setIsTransferring(false)
     }
@@ -730,7 +738,7 @@ function App() {
 
   const handleRelease = async (tokenType) => {
     if (!supabase || !profile) {
-      setMessage('Please wait for connection...')
+      showMessage('Please wait for connection...')
       return
     }
 
@@ -738,14 +746,14 @@ function App() {
     const reason = releaseData.reason.trim() || 'Token release'
 
     if (!amount) {
-      setMessage('Please enter amount')
+      showMessage('Please enter amount')
       return
     }
 
     // For Palomas (DOV), check total_palomas_collected instead of dov_balance
     const currentBalance = tokenType === 'DOV' ? profile.total_palomas_collected : profile.djr_balance
     if (currentBalance < amount) {
-      setMessage('Insufficient tokens')
+      showMessage('Insufficient tokens')
       return
     }
 
@@ -756,7 +764,7 @@ function App() {
         // Release Palomas from total_palomas_collected
         await supabase
           .from('profiles')
-          .update({ 
+          .update({
             total_palomas_collected: profile.total_palomas_collected - amount,
             last_status_update: new Date().toISOString()
           })
@@ -764,7 +772,7 @@ function App() {
       } else {
         await supabase
           .from('profiles')
-          .update({ 
+          .update({
             djr_balance: profile.djr_balance - amount,
             last_status_update: new Date().toISOString()
           })
@@ -775,15 +783,15 @@ function App() {
       await createReleaseNotification(amount, reason, tokenType)
       console.log('Finished creating notification')
 
-      setMessage('Released ' + amount + ' ' + tokenType + '!')
+      showMessage('Released ' + amount + ' ' + tokenType + '!')
       setReleaseData({ amount: '', reason: '' })
       setShowReleaseForm(null)
-      
+
       await ensureProfileExists(user)
       await loadAllProfiles()
       await loadNotifications()
     } catch (err) {
-      setMessage('Release failed: ' + err.message)
+      showMessage('Release failed: ' + err.message)
     } finally {
       setIsReleasing(false)
     }
@@ -792,7 +800,7 @@ function App() {
   // PayPal handler - updated to close welcome modal
   const handlePayPalClick = () => {
     if (!user) {
-      setMessage('Please log in to purchase Palomas')
+      showMessage('Please log in to purchase Palomas')
       return
     }
     closeWelcome() // Close welcome modal when opening PayPal
@@ -930,7 +938,7 @@ function App() {
               syncCupsFromPalomas={syncCupsFromPalomas}
               onSuccess={(order) => {
                 console.log('Payment completed:', order)
-                setMessage(`Payment successful! Palomas will be credited shortly.`)
+                showMessage('Payment successful! Palomas will be credited shortly.')
                 // Refresh user data after a short delay
                 setTimeout(async () => {
                   await ensureProfileExists(user)
@@ -939,7 +947,7 @@ function App() {
               }}
               onError={(error) => {
                 console.error('Payment failed:', error)
-                setMessage('Payment failed. Please try again.')
+                showMessage('Payment failed. Please try again.')
               }}
             />
           </div>
@@ -1162,10 +1170,7 @@ function App() {
           profile={profile}
           supabase={supabase}
           onClose={() => setShowSendLove(false)}
-          onSuccess={(msg) => {
-            setMessage(msg)
-            setTimeout(() => setMessage(''), 3000)
-          }}
+          onSuccess={(msg) => showMessage(msg)}
         />
         <Dashboard
           profile={profile}
@@ -1259,8 +1264,7 @@ function App() {
           transferType={showSendDovesEggs} // 'DOVES' or 'EGGS'
           onClose={() => setShowSendDovesEggs(null)}
           onSuccess={(msg) => {
-            setMessage(msg)
-            setTimeout(() => setMessage(''), 5000)
+            showMessage(msg, 5000)
             ensureProfileExists(user)
           }}
         />
@@ -1277,8 +1281,7 @@ function App() {
           supabase={supabase}
           onClose={() => setShowEggsInFlight(false)}
           onSuccess={(msg) => {
-            setMessage(msg)
-            setTimeout(() => setMessage(''), 5000)
+            showMessage(msg, 5000)
             ensureProfileExists(user)
           }}
         />

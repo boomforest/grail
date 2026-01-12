@@ -97,20 +97,6 @@ function StorePage({ supabase, onClose }) {
           ))}
         </div>
 
-        {/* Title - subtle */}
-        <div style={{
-          position: 'absolute',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          color: 'rgba(255,255,255,0.4)',
-          fontSize: '0.85rem',
-          fontWeight: '500',
-          letterSpacing: '2px',
-          textTransform: 'uppercase'
-        }}>
-          Power-Ups
-        </div>
-
         {/* Close button */}
         <button
           onClick={onClose}
