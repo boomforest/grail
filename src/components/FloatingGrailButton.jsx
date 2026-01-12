@@ -2,27 +2,30 @@ import React from 'react'
 
 function FloatingGrailButton({ onGrailClick }) {
   return (
-    <button
+    <span
       onClick={onGrailClick}
       style={{
         position: 'fixed',
-        bottom: '0.75rem',
-        left: '0.75rem',
-        background: 'rgba(255, 255, 255, 0.9)',
+        bottom: '1rem',
+        right: '1rem',
+        background: 'transparent',
         border: 'none',
-        borderRadius: '15px',
-        padding: '0.35rem 0.75rem',
-        fontSize: '0.7rem',
-        color: '#d2691e',
-        cursor: 'pointer',
+        padding: '0.25rem',
+        fontSize: '0.55rem',
+        color: 'rgba(139, 69, 19, 0.25)',
+        cursor: 'default',
         fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontWeight: '500',
-        zIndex: 1000,
-        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.08)'
+        fontWeight: '400',
+        letterSpacing: '0.5px',
+        zIndex: 100,
+        userSelect: 'none',
+        transition: 'color 0.3s ease'
       }}
+      onMouseOver={(e) => e.target.style.color = 'rgba(139, 69, 19, 0.5)'}
+      onMouseOut={(e) => e.target.style.color = 'rgba(139, 69, 19, 0.25)'}
     >
       antisocial media MMXXV
-    </button>
+    </span>
   )
 }
 

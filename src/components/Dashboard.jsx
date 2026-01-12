@@ -1403,6 +1403,29 @@ function Dashboard({
   }
 
   return (
+    <>
+    {/* Renault logo - bottom left */}
+    <img
+      src={supabase ? supabase.storage.from('tarot-cards').getPublicUrl('23888e06-612f-47c0-bcb2-45f572efcd89/Renault_2021_Text.svg').data.publicUrl : ''}
+      alt="Renault"
+      style={{
+        position: 'fixed',
+        bottom: '1rem',
+        left: '1rem',
+        height: '72px',
+        width: 'auto',
+        objectFit: 'contain',
+        opacity: 0.5,
+        transition: 'opacity 0.3s ease',
+        zIndex: 9999
+      }}
+      onMouseOver={(e) => e.target.style.opacity = '0.8'}
+      onMouseOut={(e) => e.target.style.opacity = '0.5'}
+      onError={(e) => {
+        console.log('Renault logo failed to load')
+        e.target.style.display = 'none'
+      }}
+    />
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#f5f5dc',
@@ -1773,7 +1796,9 @@ function Dashboard({
           onClose={() => setShowStore(false)}
         />
       )}
+
     </div>
+    </>
   )
 }
 

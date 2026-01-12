@@ -536,7 +536,7 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               </button>
             </div>
 
-            <button 
+            <button
               onClick={handleLogin}
               disabled={loading || !supabase}
               style={{
@@ -557,6 +557,65 @@ function LoginForm({ supabase, onLogin, onRegister }) {
             >
               {loading ? dualText('login.loading') : dualText('login.signIn')}
             </button>
+
+            {/* Dev mode bypass - only on localhost */}
+            {window.location.hostname === 'localhost' && (
+              <button
+                onClick={async () => {
+                  setLoading(true)
+                  try {
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                      email: 'dev@test.com',
+                      password: 'devtest123'
+                    })
+                    if (error) {
+                      // If dev account doesn't exist, create it
+                      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                        email: 'dev@test.com',
+                        password: 'devtest123',
+                        options: {
+                          data: {
+                            display_name: 'Dev Tester',
+                            username: 'DEV001'
+                          }
+                        }
+                      })
+                      if (!signUpError && signUpData) {
+                        // Try login again
+                        const { data: retryData } = await supabase.auth.signInWithPassword({
+                          email: 'dev@test.com',
+                          password: 'devtest123'
+                        })
+                        if (retryData && onLogin) onLogin(retryData)
+                      }
+                    } else {
+                      if (onLogin) onLogin(data)
+                    }
+                  } catch (err) {
+                    console.error('Dev login error:', err)
+                  } finally {
+                    setLoading(false)
+                  }
+                }}
+                disabled={loading || !supabase}
+                style={{
+                  width: '100%',
+                  marginTop: '1rem',
+                  padding: '0.75rem 1.5rem',
+                  background: 'rgba(100, 100, 100, 0.6)',
+                  color: 'white',
+                  border: '1px dashed rgba(255, 255, 255, 0.4)',
+                  borderRadius: '25px',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  fontSize: '0.9rem',
+                  opacity: (loading || !supabase) ? 0.5 : 1,
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                🔧 Dev Login (Skip Auth)
+              </button>
+            )}
           </>
         )}
 
