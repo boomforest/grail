@@ -68,6 +68,8 @@ export async function createPowerUp(supabase, powerUpData) {
         category: powerUpData.category,
         title: powerUpData.title,
         description: powerUpData.description,
+        title_es: powerUpData.title_es || null,
+        description_es: powerUpData.description_es || null,
         price_doves: powerUpData.price_doves,
         image_path: powerUpData.image_path || null,
         is_active: powerUpData.is_active !== undefined ? powerUpData.is_active : true,

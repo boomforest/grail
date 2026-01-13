@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Edit, Trash2, Save, X, Upload } from 'lucide-react'
+import { Plus, Edit, Trash2, Save, X, Upload, Languages, Loader } from 'lucide-react'
 import {
   listAllPowerUps,
   createPowerUp,
@@ -21,11 +21,14 @@ function AdminPowerUps({ profile, supabase, onBack }) {
     category: 'studios',
     title: '',
     description: '',
+    title_es: '',
+    description_es: '',
     price_doves: '',
     sort_order: '0',
     is_active: true,
     image_file: null
   })
+  const [translating, setTranslating] = useState(false)
 
   // Check if user is admin
   const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -79,6 +82,8 @@ function AdminPowerUps({ profile, supabase, onBack }) {
       category: 'studios',
       title: '',
       description: '',
+      title_es: '',
+      description_es: '',
       price_doves: '',
       sort_order: '0',
       is_active: true,
@@ -86,6 +91,42 @@ function AdminPowerUps({ profile, supabase, onBack }) {
     })
     setEditingPowerUp(null)
     setShowAddForm(false)
+  }
+
+  const handleAutoTranslate = async () => {
+    if (!formData.title && !formData.description) {
+      alert('Please enter a title or description to translate')
+      return
+    }
+
+    setTranslating(true)
+    try {
+      const response = await fetch('/.netlify/functions/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Translation failed')
+      }
+
+      const translations = await response.json()
+
+      setFormData(prev => ({
+        ...prev,
+        title_es: translations.title_es || prev.title_es,
+        description_es: translations.description_es || prev.description_es
+      }))
+    } catch (error) {
+      console.error('Translation error:', error)
+      alert('Translation failed. Please try again or enter manually.')
+    } finally {
+      setTranslating(false)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -113,6 +154,8 @@ function AdminPowerUps({ profile, supabase, onBack }) {
           category: formData.category,
           title: formData.title,
           description: formData.description,
+          title_es: formData.title_es || null,
+          description_es: formData.description_es || null,
           price_doves: parseInt(formData.price_doves),
           sort_order: parseInt(formData.sort_order),
           is_active: formData.is_active,
@@ -126,6 +169,8 @@ function AdminPowerUps({ profile, supabase, onBack }) {
           category: formData.category,
           title: formData.title,
           description: formData.description,
+          title_es: formData.title_es || null,
+          description_es: formData.description_es || null,
           price_doves: parseInt(formData.price_doves),
           sort_order: parseInt(formData.sort_order),
           is_active: formData.is_active,
@@ -158,6 +203,8 @@ function AdminPowerUps({ profile, supabase, onBack }) {
       category: powerUp.category,
       title: powerUp.title,
       description: powerUp.description,
+      title_es: powerUp.title_es || '',
+      description_es: powerUp.description_es || '',
       price_doves: powerUp.price_doves.toString(),
       sort_order: powerUp.sort_order.toString(),
       is_active: powerUp.is_active,
@@ -357,6 +404,118 @@ function AdminPowerUps({ profile, supabase, onBack }) {
                   marginTop: '0.25rem'
                 }}>
                   {descriptionValidation.wordCount} / 250 words
+                </div>
+              </div>
+
+              {/* Spanish Translation Section */}
+              <div style={{
+                marginBottom: '1.5rem',
+                padding: '1rem',
+                background: '#f8f4f0',
+                borderRadius: '10px',
+                border: '2px solid #d2691e'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '1rem'
+                }}>
+                  <h3 style={{
+                    margin: 0,
+                    color: '#d2691e',
+                    fontSize: '1.1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <Languages size={20} />
+                    Spanish Translation
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={handleAutoTranslate}
+                    disabled={translating || (!formData.title && !formData.description)}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: translating ? '#ccc' : '#4a90e2',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: translating ? 'not-allowed' : 'pointer',
+                      fontWeight: '600',
+                      fontSize: '0.85rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    {translating ? (
+                      <>
+                        <Loader size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                        Translating...
+                      </>
+                    ) : (
+                      <>
+                        <Languages size={16} />
+                        Auto-Translate
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Spanish Title */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{
+                    display: 'block',
+                    fontWeight: '600',
+                    marginBottom: '0.5rem',
+                    color: '#333'
+                  }}>
+                    Título (Spanish Title)
+                  </label>
+                  <input
+                    type="text"
+                    name="title_es"
+                    value={formData.title_es}
+                    onChange={handleInputChange}
+                    placeholder="Spanish translation of title"
+                    maxLength={100}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '2px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                </div>
+
+                {/* Spanish Description */}
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontWeight: '600',
+                    marginBottom: '0.5rem',
+                    color: '#333'
+                  }}>
+                    Descripción (Spanish Description)
+                  </label>
+                  <textarea
+                    name="description_es"
+                    value={formData.description_es}
+                    onChange={handleInputChange}
+                    placeholder="Spanish translation of description"
+                    rows={4}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '2px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '1rem',
+                      fontFamily: 'inherit'
+                    }}
+                  />
                 </div>
               </div>
 

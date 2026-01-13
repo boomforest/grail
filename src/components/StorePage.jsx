@@ -194,7 +194,7 @@ function StorePage({ supabase, onClose }) {
  * Tarot Card Component - Fighter/Game card style display
  */
 function TarotCard({ powerUp, supabase, isSelected, onClick, index, total }) {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
 
@@ -207,9 +207,13 @@ function TarotCard({ powerUp, supabase, isSelected, onClick, index, total }) {
   const cardWidth = 'calc((100vh - 180px) * 0.6)'
   const maxWidth = total <= 2 ? '400px' : total <= 3 ? '320px' : '280px'
 
+  // Get localized title and description
+  const displayTitle = language === 'es' && powerUp.title_es ? powerUp.title_es : powerUp.title
+  const displayDescription = language === 'es' && powerUp.description_es ? powerUp.description_es : powerUp.description
+
   // Parse description into stat-like lines
-  const descriptionLines = powerUp.description
-    ? powerUp.description.split(/[,.\n]/).filter(line => line.trim()).slice(0, 5)
+  const descriptionLines = displayDescription
+    ? displayDescription.split(/[,.\n]/).filter(line => line.trim()).slice(0, 5)
     : []
 
   return (
@@ -337,7 +341,7 @@ function TarotCard({ powerUp, supabase, isSelected, onClick, index, total }) {
             textShadow: '2px 2px 0px rgba(0,0,0,0.8)',
             lineHeight: 1.2
           }}>
-            {powerUp.title}
+            {displayTitle}
           </h3>
         </div>
       </div>
