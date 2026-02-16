@@ -477,86 +477,88 @@ function LoginForm({ supabase, onLogin, onRegister }) {
         {/* Login Tab */}
         {activeTab === 'login' && (
           <>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder={dualTextPlain('login.email')}
-              style={{
-                width: '100%',
-                padding: '1rem',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '15px',
-                marginBottom: '1rem',
-                boxSizing: 'border-box',
-                fontSize: '1rem',
-                outline: 'none',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                transition: 'all 0.3s ease',
-                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
-              }}
-            />
-
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              placeholder={dualTextPlain('login.password')}
-              style={{
-                width: '100%',
-                padding: '1rem',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '15px',
-                marginBottom: '0.5rem',
-                boxSizing: 'border-box',
-                fontSize: '1rem',
-                outline: 'none',
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                transition: 'all 0.3s ease',
-                boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
-              }}
-            />
-
-            {/* Forgot Password Link */}
-            <div style={{ marginBottom: '1rem', textAlign: 'right' }}>
-              <button
-                type="button"
-                onClick={() => setActiveTab('forgot')}
+            <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder={dualTextPlain('login.email')}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#d2691e',
-                  fontSize: '0.9rem',
+                  width: '100%',
+                  padding: '1rem',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '15px',
+                  marginBottom: '1rem',
+                  boxSizing: 'border-box',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
+                }}
+              />
+
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder={dualTextPlain('login.password')}
+                style={{
+                  width: '100%',
+                  padding: '1rem',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: '15px',
+                  marginBottom: '0.5rem',
+                  boxSizing: 'border-box',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 15px rgba(210, 105, 30, 0.1)'
+                }}
+              />
+
+              {/* Forgot Password Link */}
+              <div style={{ marginBottom: '1rem', textAlign: 'right' }}>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('forgot')}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#d2691e',
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    padding: 0
+                  }}
+                >
+                  {dualText('login.forgotPassword')}
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || !supabase}
+                style={{
+                  width: '100%',
+                  padding: '1rem 2rem',
+                  background: 'rgba(210, 105, 30, 0.8)',
+                  color: 'white',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '25px',
                   cursor: 'pointer',
-                  textDecoration: 'underline',
-                  padding: 0
+                  fontWeight: '500',
+                  fontSize: '1rem',
+                  opacity: (loading || !supabase) ? 0.5 : 1,
+                  boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  transition: 'all 0.3s ease'
                 }}
               >
-                {dualText('login.forgotPassword')}
+                {loading ? dualText('login.loading') : dualText('login.signIn')}
               </button>
-            </div>
-
-            <button
-              onClick={handleLogin}
-              disabled={loading || !supabase}
-              style={{
-                width: '100%',
-                padding: '1rem 2rem',
-                background: 'rgba(210, 105, 30, 0.8)',
-                color: 'white',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '25px',
-                cursor: 'pointer',
-                fontWeight: '500',
-                fontSize: '1rem',
-                opacity: (loading || !supabase) ? 0.5 : 1,
-                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)',
-                backdropFilter: 'blur(10px)',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              {loading ? dualText('login.loading') : dualText('login.signIn')}
-            </button>
+            </form>
 
             {/* Dev mode bypass - only on localhost */}
             {window.location.hostname === 'localhost' && (

@@ -864,7 +864,7 @@ function App() {
             onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
@@ -884,7 +884,7 @@ function App() {
           supabase={supabase}
           onPasswordReset={handlePasswordResetComplete}
         />
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
       </>
     )
@@ -995,7 +995,7 @@ function App() {
             onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
@@ -1018,7 +1018,7 @@ function App() {
           user={user}
           allProfiles={allProfiles}
         />
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
@@ -1045,7 +1045,7 @@ function App() {
             syncCupsFromPalomas(user.id)
           }}
         />
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
@@ -1069,7 +1069,7 @@ function App() {
           isAdmin={isAdmin}
           onProfileUpdate={setProfile}
         />
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
@@ -1090,7 +1090,7 @@ function App() {
           supabase={supabase}
           onBack={() => setShowAdminTickets(false)}
         />
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow
@@ -1111,7 +1111,7 @@ function App() {
           supabase={supabase}
           onBack={() => setShowAdminPowerUps(false)}
         />
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
       </>
     )
@@ -1126,7 +1126,7 @@ function App() {
           notifications={notifications}
           onRefresh={() => loadNotifications()}
         />
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
@@ -1150,7 +1150,7 @@ function App() {
           isTransferring={isTransferring}
           onSend={showSendForm === 'DOV' ? handlePalomasTransfer : handleAdminTransfer} // FIXED: Use Palomas transfer for DOV
         />
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
@@ -1215,7 +1215,7 @@ function App() {
             onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
@@ -1242,7 +1242,7 @@ function App() {
           profile={profile}
           supabase={supabase}
         />
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
@@ -1335,7 +1335,7 @@ function App() {
             onShowEggsInFlight={() => setShowEggsInFlight(true)}
           />
         )}
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
         {/* GPTChatWindow disabled - moved to standalone page
         <GPTChatWindow 
@@ -1376,7 +1376,7 @@ function App() {
         onLogin={handleSuccessfulLogin}
         onRegister={handleSuccessfulRegister}
       />
-      <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+      <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
       {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
     </>
   )
