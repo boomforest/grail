@@ -77,7 +77,7 @@ const ViewRouter = ({
   // Common components that appear in multiple views
   const renderCommonComponents = () => (
     <>
-      <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
+      <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
       {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
       <GPTChatWindow 
         isOpen={showGPTChat} 
@@ -109,7 +109,7 @@ const ViewRouter = ({
           onLogin={onLogin}
           onRegister={onRegister}
         />
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} supabase={supabase} />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
       </>
     )
