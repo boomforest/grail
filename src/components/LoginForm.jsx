@@ -216,7 +216,8 @@ function LoginForm({ supabase, onLogin, onRegister }) {
     email: '',
     password: '',
     name: '',
-    username: ''
+    username: '',
+    isArtistApplicant: false
   });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -301,7 +302,9 @@ function LoginForm({ supabase, onLogin, onRegister }) {
         options: {
           data: {
             display_name: formData.name || null,
-            username: formData.username
+            username: formData.username,
+            is_artist_applicant: formData.isArtistApplicant,
+            primary_language: language
           }
         }
       });
@@ -571,14 +574,16 @@ function LoginForm({ supabase, onLogin, onRegister }) {
                       password: 'devtest123'
                     })
                     if (error) {
-                      // If dev account doesn't exist, create it
+                      // If dev account doesn't exist, create it as artist applicant
                       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
                         email: 'dev@test.com',
                         password: 'devtest123',
                         options: {
                           data: {
                             display_name: 'Dev Tester',
-                            username: 'DEV001'
+                            username: 'DEV001',
+                            is_artist_applicant: true,
+                            primary_language: 'en'
                           }
                         }
                       })
@@ -591,6 +596,13 @@ function LoginForm({ supabase, onLogin, onRegister }) {
                         if (retryData && onLogin) onLogin(retryData)
                       }
                     } else {
+                      // Set dev user as artist applicant for testing
+                      if (data?.user) {
+                        await supabase
+                          .from('profiles')
+                          .update({ is_artist_applicant: true })
+                          .eq('id', data.user.id)
+                      }
                       if (onLogin) onLogin(data)
                     }
                   } catch (err) {
@@ -732,7 +744,50 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               </div>
             </div>
 
-            <button 
+            {/* Artist Applicant Checkbox */}
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.75rem',
+                cursor: 'pointer',
+                padding: '0.75rem 1rem',
+                borderRadius: '12px',
+                backgroundColor: formData.isArtistApplicant
+                  ? 'rgba(210, 105, 30, 0.15)'
+                  : 'rgba(255, 255, 255, 0.1)',
+                border: formData.isArtistApplicant
+                  ? '2px solid rgba(210, 105, 30, 0.5)'
+                  : '1px solid rgba(255, 255, 255, 0.3)',
+                transition: 'all 0.3s ease'
+              }}>
+                <input
+                  type="checkbox"
+                  checked={formData.isArtistApplicant}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    isArtistApplicant: e.target.checked
+                  })}
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    accentColor: '#d2691e',
+                    marginTop: '2px',
+                    flexShrink: 0
+                  }}
+                />
+                <span style={{
+                  fontSize: '0.9rem',
+                  color: '#8b4513',
+                  fontWeight: '500',
+                  lineHeight: '1.4'
+                }}>
+                  {dualText('login.iAmArtist')}
+                </span>
+              </label>
+            </div>
+
+            <button
               onClick={handleRegister}
               disabled={loading || !supabase || (!formData.username || formData.username.length !== 6)}
               style={{

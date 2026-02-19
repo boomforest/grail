@@ -278,9 +278,66 @@ export const translations = {
         weakPassword: 'Password must be at least 6 characters',
         emailInUse: 'Email already in use',
         networkError: 'Network error. Please try again.'
+      },
+      iAmArtist: 'I am applying as an artist for the Casa de Copas accelerator program'
+    },
+
+    // Artist Intake
+    artist: {
+      applyTitle: 'Artist Application',
+      applySubtitle: 'Apply to join the Casa de Copas artist accelerator program',
+      artistName: 'Artist / Project Name',
+      artistNamePlaceholder: 'Your artist or project name',
+      country: 'Country of Origin',
+      selectCountry: 'Select your country',
+      otherCountry: 'Specify your country',
+      uploadTrack: 'Upload a Track',
+      uploadTrackDesc: 'Share a sample of your work (MP3, WAV, M4A - max 20MB)',
+      chooseFile: 'Choose Audio File',
+      uploading: 'Uploading...',
+      fileSelected: 'File selected',
+      readGuidelines: 'Read Program Guidelines & FAQ',
+      confirm18Plus: 'I confirm that I am 18 years of age or older.',
+      acceptTerms: 'I have read and agree to the Program Conditions. By submitting this track, I confirm I have the rights to share it and agree to the program rules.',
+      submit: 'Submit Application',
+      submitting: 'Submitting...',
+      pendingTitle: 'Application Received',
+      pendingMessage: 'Thank you for applying. Applications are reviewed on a rolling basis. We will notify you when a decision has been made.',
+      pendingPrepare: 'While you wait, prepare the following in case you are approved:',
+      pendingPrepareItems: [
+        'A short bio and artist statement',
+        'Links to your portfolio or social media',
+        'Additional tracks or demos'
+      ],
+      portalTitle: 'Artist Portal',
+      portalWelcome: 'Welcome to the Casa de Copas artist accelerator.',
+      portalComingSoon: 'The full Artist Portal is coming soon.',
+      submittedOn: 'Submitted',
+      settingsTitle: 'Artist Portal',
+      settingsStatus: 'Application Status',
+      statusPending: 'Pending Review',
+      statusApproved: 'Approved',
+      statusDraft: 'Draft',
+      statusRejected: 'Rejected',
+      changeSong: 'Change Song',
+      currentSong: 'Current Song',
+      noSong: 'No song uploaded',
+      uploadPhoto: 'Upload Artist Photo',
+      currentPhoto: 'Artist Photo',
+      noPhoto: 'No photo uploaded',
+      pageStatus: 'Artist Page Status',
+      pageComplete: 'Complete',
+      pagePending: 'Pending',
+      pageIncomplete: 'Incomplete — fill all fields to complete your profile',
+      errors: {
+        nameRequired: 'Please enter your artist or project name',
+        countryRequired: 'Please select your country of origin',
+        must18Plus: 'You must confirm you are 18 years or older',
+        mustAcceptTerms: 'You must accept the program conditions',
+        submitFailed: 'Submission failed'
       }
     },
-    
+
     // Tickets
     tickets: {
       title: 'Event Tickets',
@@ -597,9 +654,66 @@ export const translations = {
         weakPassword: 'La contraseña debe tener al menos 6 caracteres',
         emailInUse: 'Correo ya en uso',
         networkError: 'Error de red. Por favor intenta de nuevo.'
+      },
+      iAmArtist: 'Estoy aplicando como artista al programa acelerador de Casa de Copas'
+    },
+
+    // Artist Intake
+    artist: {
+      applyTitle: 'Solicitud de Artista',
+      applySubtitle: 'Aplica para unirte al programa acelerador de artistas de Casa de Copas',
+      artistName: 'Nombre del Artista / Proyecto',
+      artistNamePlaceholder: 'Tu nombre artístico o de proyecto',
+      country: 'País de Origen',
+      selectCountry: 'Selecciona tu país',
+      otherCountry: 'Especifica tu país',
+      uploadTrack: 'Sube una Pista',
+      uploadTrackDesc: 'Comparte una muestra de tu trabajo (MP3, WAV, M4A - máx 20MB)',
+      chooseFile: 'Elegir Archivo de Audio',
+      uploading: 'Subiendo...',
+      fileSelected: 'Archivo seleccionado',
+      readGuidelines: 'Leer Directrices del Programa y FAQ',
+      confirm18Plus: 'Confirmo que tengo 18 años o más.',
+      acceptTerms: 'He leído y acepto las Condiciones del Programa. Al enviar esta pista, confirmo que tengo los derechos para compartirla y acepto las reglas del programa.',
+      submit: 'Enviar Solicitud',
+      submitting: 'Enviando...',
+      pendingTitle: 'Solicitud Recibida',
+      pendingMessage: 'Gracias por aplicar. Las solicitudes se revisan de forma continua. Te notificaremos cuando se haya tomado una decisión.',
+      pendingPrepare: 'Mientras esperas, prepara lo siguiente en caso de ser aprobado:',
+      pendingPrepareItems: [
+        'Una breve biografía y declaración artística',
+        'Enlaces a tu portafolio o redes sociales',
+        'Pistas o demos adicionales'
+      ],
+      portalTitle: 'Portal del Artista',
+      portalWelcome: 'Bienvenido al programa acelerador de artistas de Casa de Copas.',
+      portalComingSoon: 'El Portal del Artista completo estará disponible pronto.',
+      submittedOn: 'Enviado',
+      settingsTitle: 'Portal del Artista',
+      settingsStatus: 'Estado de Solicitud',
+      statusPending: 'En Revisión',
+      statusApproved: 'Aprobado',
+      statusDraft: 'Borrador',
+      statusRejected: 'Rechazado',
+      changeSong: 'Cambiar Canción',
+      currentSong: 'Canción Actual',
+      noSong: 'Sin canción subida',
+      uploadPhoto: 'Subir Foto de Artista',
+      currentPhoto: 'Foto de Artista',
+      noPhoto: 'Sin foto subida',
+      pageStatus: 'Estado de Página de Artista',
+      pageComplete: 'Completo',
+      pagePending: 'Pendiente',
+      pageIncomplete: 'Incompleto — completa todos los campos para terminar tu perfil',
+      errors: {
+        nameRequired: 'Por favor ingresa tu nombre artístico o de proyecto',
+        countryRequired: 'Por favor selecciona tu país de origen',
+        must18Plus: 'Debes confirmar que tienes 18 años o más',
+        mustAcceptTerms: 'Debes aceptar las condiciones del programa',
+        submitFailed: 'La solicitud falló'
       }
     },
-    
+
     // Tickets
     tickets: {
       title: 'Boletos de Eventos',

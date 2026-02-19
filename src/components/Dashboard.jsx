@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Upload, Plus, Edit, Trash2, Save, X, Coffee, ArrowLeft, Receipt, Calendar, Package } from 'lucide-react'
+import { Upload, Plus, Edit, Trash2, Save, X, Coffee, ArrowLeft, Receipt, Calendar, Package, Music, Camera, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 import WalletInput from './WalletInput'
 import ProfilePicture from './ProfilePicture'
 import SendPalomas from './SendPalomas'
@@ -1323,7 +1323,9 @@ function Dashboard({
   message,
   onShowPalomasMenu,
   onShowTickets,
-  onShowAdminPowerUps
+  onShowAdminPowerUps,
+  artistApplication,
+  onArtistApplicationUpdate
 }) {
   const [showProductManager, setShowProductManager] = useState(false);
   const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
@@ -1332,6 +1334,8 @@ function Dashboard({
   const [showRequestCashout, setShowRequestCashout] = useState(false);
   const [showStore, setShowStore] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [isUploadingSong, setIsUploadingSong] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   
   const { language, toggleLanguage, t } = useLanguage();
 
@@ -1393,6 +1397,107 @@ function Dashboard({
         onBack={() => setShowProductManager(false)}
       />
     );
+  }
+
+  // Artist Portal: upload new song
+  const handleArtistSongChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file || !supabase || !user || !artistApplication) return
+
+    if (!file.type.startsWith('audio/')) {
+      alert('Please select an audio file (MP3, WAV, M4A)')
+      return
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      alert('File size must be less than 20MB')
+      return
+    }
+
+    setIsUploadingSong(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user.id}/track-${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('artist-tracks')
+        .upload(fileName, file, { upsert: true })
+      if (uploadError) throw uploadError
+
+      const { data: urlData } = supabase.storage
+        .from('artist-tracks')
+        .getPublicUrl(fileName)
+
+      const { error: updateError } = await supabase
+        .from('artist_applications')
+        .update({ track_url: urlData.publicUrl, updated_at: new Date().toISOString() })
+        .eq('id', artistApplication.id)
+      if (updateError) throw updateError
+
+      if (onArtistApplicationUpdate) {
+        onArtistApplicationUpdate({ ...artistApplication, track_url: urlData.publicUrl })
+      }
+    } catch (error) {
+      console.error('Error uploading song:', error)
+      alert('Failed to upload song. Please try again.')
+    } finally {
+      setIsUploadingSong(false)
+    }
+  }
+
+  // Artist Portal: upload artist photo
+  const handleArtistPhotoChange = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file || !supabase || !user || !artistApplication) return
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file (JPG, PNG)')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB')
+      return
+    }
+
+    setIsUploadingPhoto(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user.id}/artist-photo-${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('artist-photos')
+        .upload(fileName, file, { upsert: true })
+      if (uploadError) throw uploadError
+
+      const { data: urlData } = supabase.storage
+        .from('artist-photos')
+        .getPublicUrl(fileName)
+
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`
+
+      const { error: updateError } = await supabase
+        .from('artist_applications')
+        .update({ artist_photo_url: publicUrl, updated_at: new Date().toISOString() })
+        .eq('id', artistApplication.id)
+      if (updateError) throw updateError
+
+      if (onArtistApplicationUpdate) {
+        onArtistApplicationUpdate({ ...artistApplication, artist_photo_url: publicUrl })
+      }
+    } catch (error) {
+      console.error('Error uploading artist photo:', error)
+      alert('Failed to upload photo. Please try again.')
+    } finally {
+      setIsUploadingPhoto(false)
+    }
+  }
+
+  // Artist Portal: compute page completeness
+  const getArtistPageStatus = () => {
+    if (!artistApplication) return null
+    const allFieldsFilled = artistApplication.artist_name && artistApplication.country && artistApplication.track_url && artistApplication.artist_photo_url
+    if (artistApplication.status === 'approved' && allFieldsFilled) return 'complete'
+    if (artistApplication.status === 'submitted') return 'pending'
+    return 'incomplete'
   }
 
   // Handle success messages from modals
@@ -1575,6 +1680,205 @@ function Dashboard({
                 </span>
                 {language === 'en' ? 'Cambiar a Español' : 'Switch to English'}
               </button>
+
+              {/* Artist Portal Box */}
+              {profile?.is_artist_applicant && artistApplication && (
+                <div style={{
+                  border: '2px solid rgba(210, 105, 30, 0.3)',
+                  borderRadius: '12px',
+                  padding: '1rem',
+                  marginBottom: '0.5rem',
+                  backgroundColor: 'rgba(255, 248, 220, 0.5)'
+                }}>
+                  <h4 style={{
+                    margin: '0 0 0.75rem',
+                    color: '#8b4513',
+                    fontSize: '0.95rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <Music size={16} />
+                    {t('artist.settingsTitle')}
+                  </h4>
+
+                  {/* Application Status Badge */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: '0.75rem'
+                  }}>
+                    <span style={{ fontSize: '0.8rem', color: '#8b4513' }}>
+                      {t('artist.settingsStatus')}
+                    </span>
+                    <span style={{
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '20px',
+                      fontSize: '0.75rem',
+                      fontWeight: '600',
+                      backgroundColor: artistApplication.status === 'approved' ? 'rgba(16, 185, 129, 0.15)' :
+                        artistApplication.status === 'submitted' ? 'rgba(245, 158, 11, 0.15)' :
+                        artistApplication.status === 'rejected' ? 'rgba(239, 68, 68, 0.15)' :
+                        'rgba(107, 114, 128, 0.15)',
+                      color: artistApplication.status === 'approved' ? '#059669' :
+                        artistApplication.status === 'submitted' ? '#d97706' :
+                        artistApplication.status === 'rejected' ? '#dc2626' :
+                        '#6b7280'
+                    }}>
+                      {artistApplication.status === 'approved' ? t('artist.statusApproved') :
+                       artistApplication.status === 'submitted' ? t('artist.statusPending') :
+                       artistApplication.status === 'rejected' ? t('artist.statusRejected') :
+                       t('artist.statusDraft')}
+                    </span>
+                  </div>
+
+                  {/* Song Section */}
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '0.8rem',
+                      fontWeight: '500',
+                      color: '#8b4513',
+                      marginBottom: '0.35rem'
+                    }}>
+                      {t('artist.currentSong')}
+                    </label>
+                    {artistApplication.track_url ? (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.5rem',
+                        backgroundColor: 'rgba(210, 105, 30, 0.08)',
+                        borderRadius: '8px',
+                        marginBottom: '0.35rem'
+                      }}>
+                        <Music size={14} color="#d2691e" />
+                        <span style={{
+                          fontSize: '0.8rem',
+                          color: '#8b4513',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          flex: 1
+                        }}>
+                          {decodeURIComponent(artistApplication.track_url.split('/').pop().split('?')[0])}
+                        </span>
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '0.8rem', color: '#a0522d', margin: '0 0 0.35rem', fontStyle: 'italic' }}>
+                        {t('artist.noSong')}
+                      </p>
+                    )}
+                    <label style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      padding: '0.4rem 0.8rem',
+                      backgroundColor: '#d2691e',
+                      color: 'white',
+                      borderRadius: '8px',
+                      cursor: isUploadingSong ? 'not-allowed' : 'pointer',
+                      fontSize: '0.8rem',
+                      opacity: isUploadingSong ? 0.6 : 1
+                    }}>
+                      <input
+                        type="file"
+                        accept="audio/*"
+                        onChange={handleArtistSongChange}
+                        disabled={isUploadingSong}
+                        style={{ display: 'none' }}
+                      />
+                      <Upload size={14} />
+                      {isUploadingSong ? t('artist.uploading') : t('artist.changeSong')}
+                    </label>
+                  </div>
+
+                  {/* Photo Section */}
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '0.8rem',
+                      fontWeight: '500',
+                      color: '#8b4513',
+                      marginBottom: '0.35rem'
+                    }}>
+                      {t('artist.currentPhoto')}
+                    </label>
+                    {artistApplication.artist_photo_url ? (
+                      <div style={{
+                        width: '80px',
+                        height: '80px',
+                        borderRadius: '10px',
+                        backgroundImage: `url(${artistApplication.artist_photo_url})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        border: '2px solid rgba(210, 105, 30, 0.3)',
+                        marginBottom: '0.35rem'
+                      }} />
+                    ) : (
+                      <p style={{ fontSize: '0.8rem', color: '#a0522d', margin: '0 0 0.35rem', fontStyle: 'italic' }}>
+                        {t('artist.noPhoto')}
+                      </p>
+                    )}
+                    <label style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      padding: '0.4rem 0.8rem',
+                      backgroundColor: '#d2691e',
+                      color: 'white',
+                      borderRadius: '8px',
+                      cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+                      fontSize: '0.8rem',
+                      opacity: isUploadingPhoto ? 0.6 : 1
+                    }}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleArtistPhotoChange}
+                        disabled={isUploadingPhoto}
+                        style={{ display: 'none' }}
+                      />
+                      <Camera size={14} />
+                      {isUploadingPhoto ? t('artist.uploading') : t('artist.uploadPhoto')}
+                    </label>
+                  </div>
+
+                  {/* Artist Page Status */}
+                  {(() => {
+                    const status = getArtistPageStatus()
+                    return (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.5rem 0.75rem',
+                        borderRadius: '8px',
+                        backgroundColor: status === 'complete' ? 'rgba(16, 185, 129, 0.1)' :
+                          status === 'pending' ? 'rgba(245, 158, 11, 0.1)' :
+                          'rgba(107, 114, 128, 0.1)',
+                        borderTop: '1px solid rgba(210, 105, 30, 0.15)'
+                      }}>
+                        {status === 'complete' ? <CheckCircle size={16} color="#059669" /> :
+                         status === 'pending' ? <Clock size={16} color="#d97706" /> :
+                         <AlertCircle size={16} color="#6b7280" />}
+                        <span style={{
+                          fontSize: '0.8rem',
+                          fontWeight: '600',
+                          color: status === 'complete' ? '#059669' :
+                            status === 'pending' ? '#d97706' : '#6b7280'
+                        }}>
+                          {t('artist.pageStatus')}: {status === 'complete' ? t('artist.pageComplete') :
+                           status === 'pending' ? t('artist.pagePending') :
+                           t('artist.pageIncomplete')}
+                        </span>
+                      </div>
+                    )
+                  })()}
+                </div>
+              )}
 
               {/* Palomas History Button */}
               <button

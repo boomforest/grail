@@ -14,13 +14,15 @@ import ManifestoPopup from './components/ManifestoPopup'
 import FloatingGrailButton from './components/FloatingGrailButton'
 import TarotCupsPage from './components/cupgame'
 import GPTChatWindow from './components/GPTChatWindow'
-import WelcomeModal from './components/WelcomeModal'
 import PayPalButton from './components/PayPalButton'
 import PalomasMenu from './components/PalomasMenu'
 import TicketsPage from './components/TicketsPage'
 import AdminTicketManager from './components/AdminTicketManager'
 import AdminPowerUps from './components/AdminPowerUps'
 import SendLove from './components/SendLove'
+import ArtistApply from './components/ArtistApply'
+import ArtistPending from './components/ArtistPending'
+import ArtistPortal from './components/ArtistPortal'
 
 function App() {
   // Core state
@@ -41,8 +43,6 @@ function App() {
   const [showGPTChat, setShowGPTChat] = useState(false)
   const [showPayPal, setShowPayPal] = useState(false) // PayPal modal state
   const [showResetPassword, setShowResetPassword] = useState(false) // Reset password state
-  const [showWelcome, setShowWelcome] = useState(false) // Welcome modal state
-  const [hasSeenWelcome, setHasSeenWelcome] = useState(false) // Track if user has seen welcome
   const [showPalomasMenu, setShowPalomasMenu] = useState(false) // Palomas management menu
   const [showTickets, setShowTickets] = useState(false) // Tickets page
   const [showAdminTickets, setShowAdminTickets] = useState(false) // Admin ticket management
@@ -50,6 +50,10 @@ function App() {
   const [showSendLove, setShowSendLove] = useState(false) // Send love feature
   const [showSendDovesEggs, setShowSendDovesEggs] = useState(null) // New dual-send interface - stores 'DOVES' or 'EGGS'
   const [showEggsInFlight, setShowEggsInFlight] = useState(false) // Eggs management
+  const [showArtistApply, setShowArtistApply] = useState(false) // Artist application form
+  const [showArtistPending, setShowArtistPending] = useState(false) // Artist pending review
+  const [showArtistPortal, setShowArtistPortal] = useState(false) // Artist portal (approved)
+  const [artistApplication, setArtistApplication] = useState(null) // Artist application data
 
   // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
@@ -78,26 +82,6 @@ function App() {
     setShowGPTChat(prev => !prev)
   }
 
-  // Check if should show welcome modal
-  useEffect(() => {
-    if (user && profile && !hasSeenWelcome) {
-      const totalPalomas = profile.total_palomas_collected || 0
-      if (totalPalomas === 0) {
-        // Small delay to let the dashboard load first
-        const timer = setTimeout(() => {
-          setShowWelcome(true)
-        }, 1000)
-        
-        return () => clearTimeout(timer)
-      }
-    }
-  }, [user, profile, hasSeenWelcome])
-
-  // Close welcome modal
-  const closeWelcome = () => {
-    setShowWelcome(false)
-    setHasSeenWelcome(true)
-  }
 
   // Sync cups function
   const syncCupsFromPalomas = async (userId) => {
@@ -157,6 +141,47 @@ function App() {
     }
   }
 
+  // Fetch artist application for a user
+  const fetchArtistApplication = async (userId, client = supabase) => {
+    if (!client || !userId) return null
+    try {
+      const { data, error } = await client
+        .from('artist_applications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (error) {
+        console.error('Error fetching artist application:', error)
+        return null
+      }
+      setArtistApplication(data)
+      return data
+    } catch (error) {
+      console.error('Error in fetchArtistApplication:', error)
+      return null
+    }
+  }
+
+  // Route artist applicants to the correct view
+  const routeArtistView = (application) => {
+    setShowArtistApply(false)
+    setShowArtistPending(false)
+    setShowArtistPortal(false)
+
+    if (!application) {
+      setShowArtistApply(true)
+    } else if (application.status === 'approved') {
+      setShowArtistPortal(true)
+    } else if (application.status === 'submitted') {
+      setShowArtistPending(true)
+    } else if (application.status === 'draft' || application.status === 'rejected') {
+      setShowArtistApply(true)
+    }
+  }
+
   useEffect(() => {
     const initSupabase = async () => {
       try {
@@ -198,9 +223,15 @@ function App() {
           if (session?.user) {
             console.log('👤 User session found:', session.user.email)
             setUser(session.user)
-            await ensureProfileExists(session.user, client)
+            const restoredProfile = await ensureProfileExists(session.user, client)
             await loadAllProfiles(client)
             await loadNotifications(client)
+
+            // Route artist applicants to correct view
+            if (restoredProfile?.is_artist_applicant) {
+              const app = await fetchArtistApplication(session.user.id, client)
+              routeArtistView(app)
+            }
             
             // Set up real-time subscription for notifications
             try {
@@ -244,7 +275,7 @@ function App() {
         .from('profiles')
         .select('*')
         .eq('id', authUser.id)
-        .single()
+        .maybeSingle()
 
       if (fetchError) {
         console.error('❌ Error fetching profile:', fetchError)
@@ -303,7 +334,9 @@ function App() {
         cup_count: 0,
         tarot_level: 1,
         merit_count: 0,
-        total_palomas_collected: isAdmin ? 1000000 : 0
+        total_palomas_collected: isAdmin ? 1000000 : 0,
+        is_artist_applicant: authUser.user_metadata?.is_artist_applicant || false,
+        primary_language: authUser.user_metadata?.primary_language || localStorage.getItem('language') || 'en'
       }
 
       const { data: createdProfile, error: createError } = await client
@@ -441,18 +474,30 @@ function App() {
   const handleSuccessfulLogin = async (data) => {
     console.log('Login successful:', data.user)
     setUser(data.user)
-    await ensureProfileExists(data.user)
+    const loginProfile = await ensureProfileExists(data.user)
     await loadAllProfiles()
     await loadNotifications()
+
+    // Route artist applicants
+    if (loginProfile?.is_artist_applicant) {
+      const app = await fetchArtistApplication(data.user.id)
+      routeArtistView(app)
+    }
   }
 
   const handleSuccessfulRegister = async (data) => {
     console.log('Registration successful:', data.user)
     setUser(data.user)
     showMessage('Registration successful!')
-    await ensureProfileExists(data.user)
+    const regProfile = await ensureProfileExists(data.user)
     await loadAllProfiles()
     await loadNotifications()
+
+    // Route artist applicants
+    if (regProfile?.is_artist_applicant) {
+      const app = await fetchArtistApplication(data.user.id)
+      routeArtistView(app)
+    }
   }
 
   // Handle password reset completion
@@ -511,6 +556,10 @@ function App() {
       setShowTickets(false)
       setShowAdminTickets(false)
       setShowSendLove(false)
+      setShowArtistApply(false)
+      setShowArtistPending(false)
+      setShowArtistPortal(false)
+      setArtistApplication(null)
       showMessage('Logged out successfully', 2000)
       setTransferData({ recipient: '', amount: '' })
       setReleaseData({ amount: '', reason: '' })
@@ -811,71 +860,6 @@ function App() {
   const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   const isAdmin = isDevelopment ? true : (profile?.username === 'JPR333' || user?.email === 'jproney@gmail.com')
 
-  // Welcome Modal View - Show if user has 0 palomas and hasn't seen it
-  if (user && showWelcome) {
-    return (
-      <>
-        <WelcomeModal
-          onClose={closeWelcome}
-          onBuyPalomas={() => {
-            closeWelcome()
-            setShowPayPal(true)
-          }}
-        />
-        <Dashboard
-          profile={profile}
-          user={user}
-          supabase={supabase}
-          isAdmin={isAdmin}
-          showSettings={showSettings}
-          setShowSettings={setShowSettings}
-          onShowNotifications={() => setShowNotifications(true)}
-          onShowCupGame={() => {
-            setShowCupGame(true)
-            syncCupsFromPalomas(user.id)
-          }}
-          onWalletSave={handleWalletSave}
-          onLogout={handleLogout}
-          onProfileUpdate={setProfile}
-          message={message}
-          onShowSendMeritsForm={() => setShowSendMeritsForm(true)}
-          onShowPalomasMenu={() => setShowPalomasMenu(true)}
-          onShowTickets={(isAdmin) => {
-            if (isAdmin) {
-              setShowAdminTickets(true)
-            } else {
-              setShowTickets(true)
-            }
-          }}
-          onShowAdminPowerUps={() => setShowAdminPowerUps(true)}
-        />
-        {showPalomasMenu && (
-          <PalomasMenu
-            profile={profile}
-            isAdmin={isAdmin}
-            onShowSendForm={setShowSendForm}
-            onShowReleaseForm={setShowReleaseForm}
-            onPayPalClick={handlePayPalClick}
-            onShowSendLove={() => setShowSendLove(true)}
-            onShowCupGame={() => setShowCupGame(true)}
-            onClose={() => setShowPalomasMenu(false)}
-            supabase={supabase}
-            onShowSendDovesEggs={setShowSendDovesEggs}
-            onShowEggsInFlight={() => setShowEggsInFlight(true)}
-          />
-        )}
-        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
-        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
-        {/* GPTChatWindow disabled - moved to standalone page
-        <GPTChatWindow 
-          isOpen={showGPTChat} 
-          onToggle={toggleGPTChat} 
-          profile={profile} 
-        /> */}
-      </>
-    )
-  }
-
   // Reset Password View - Show this first if we're on a reset URL
   if (showResetPassword) {
     return (
@@ -979,6 +963,8 @@ function App() {
             }
           }}
           onShowAdminPowerUps={() => setShowAdminPowerUps(true)}
+          artistApplication={artistApplication}
+          onArtistApplicationUpdate={setArtistApplication}
         />
         {showPalomasMenu && (
           <PalomasMenu
@@ -1199,6 +1185,8 @@ function App() {
           message={message}
           onShowCupGame={() => setShowCupGame(true)}
           onPayPalClick={handlePayPalClick}
+          artistApplication={artistApplication}
+          onArtistApplicationUpdate={setArtistApplication}
         />
         {showPalomasMenu && (
           <PalomasMenu
@@ -1289,6 +1277,61 @@ function App() {
     )
   }
 
+  // Artist Apply view
+  if (user && showArtistApply) {
+    return (
+      <>
+        <ArtistApply
+          user={user}
+          profile={profile}
+          supabase={supabase}
+          existingApplication={artistApplication}
+          onSubmitted={async (application) => {
+            setArtistApplication(application)
+            setShowArtistApply(false)
+            setShowArtistPending(true)
+          }}
+          onBack={() => setShowArtistApply(false)}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+      </>
+    )
+  }
+
+  // Artist Pending view
+  if (user && showArtistPending) {
+    return (
+      <>
+        <ArtistPending
+          profile={profile}
+          application={artistApplication}
+          supabase={supabase}
+          onBack={() => setShowArtistPending(false)}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+      </>
+    )
+  }
+
+  // Artist Portal view
+  if (user && showArtistPortal) {
+    return (
+      <>
+        <ArtistPortal
+          user={user}
+          profile={profile}
+          supabase={supabase}
+          application={artistApplication}
+          onBack={() => setShowArtistPortal(false)}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+      </>
+    )
+  }
+
   if (user) {
     return (
       <>
@@ -1319,6 +1362,8 @@ function App() {
             }
           }}
           onShowAdminPowerUps={() => setShowAdminPowerUps(true)}
+          artistApplication={artistApplication}
+          onArtistApplicationUpdate={setArtistApplication}
         />
         {showPalomasMenu && (
           <PalomasMenu
