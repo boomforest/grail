@@ -329,6 +329,8 @@ export const translations = {
       pageComplete: 'Complete',
       pagePending: 'Pending',
       pageIncomplete: 'Incomplete — fill all fields to complete your profile',
+      settingsApplyPrompt: 'Join the Casa de Copas artist accelerator program. Apply to showcase your music and connect with the community.',
+      settingsApplyButton: 'Apply as Artist',
       errors: {
         nameRequired: 'Please enter your artist or project name',
         countryRequired: 'Please select your country of origin',
@@ -705,6 +707,8 @@ export const translations = {
       pageComplete: 'Completo',
       pagePending: 'Pendiente',
       pageIncomplete: 'Incompleto — completa todos los campos para terminar tu perfil',
+      settingsApplyPrompt: 'Únete al programa acelerador de artistas de Casa de Copas. Aplica para mostrar tu música y conectar con la comunidad.',
+      settingsApplyButton: 'Aplicar como Artista',
       errors: {
         nameRequired: 'Por favor ingresa tu nombre artístico o de proyecto',
         countryRequired: 'Por favor selecciona tu país de origen',

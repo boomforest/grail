@@ -23,6 +23,7 @@ import SendLove from './components/SendLove'
 import ArtistApply from './components/ArtistApply'
 import ArtistPending from './components/ArtistPending'
 import ArtistPortal from './components/ArtistPortal'
+import AdminArtistSubmissions from './components/AdminArtistSubmissions'
 
 function App() {
   // Core state
@@ -54,6 +55,7 @@ function App() {
   const [showArtistPending, setShowArtistPending] = useState(false) // Artist pending review
   const [showArtistPortal, setShowArtistPortal] = useState(false) // Artist portal (approved)
   const [artistApplication, setArtistApplication] = useState(null) // Artist application data
+  const [showAdminArtistSubmissions, setShowAdminArtistSubmissions] = useState(false) // Admin artist submissions
 
   // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
@@ -227,9 +229,10 @@ function App() {
             await loadAllProfiles(client)
             await loadNotifications(client)
 
-            // Route artist applicants to correct view
-            if (restoredProfile?.is_artist_applicant) {
-              const app = await fetchArtistApplication(session.user.id, client)
+            // Fetch artist application for all users (returns null if none)
+            const app = await fetchArtistApplication(session.user.id, client)
+            // Only auto-route to artist views for registered artist applicants
+            if (restoredProfile?.is_artist_applicant && app) {
               routeArtistView(app)
             }
             
@@ -478,9 +481,9 @@ function App() {
     await loadAllProfiles()
     await loadNotifications()
 
-    // Route artist applicants
-    if (loginProfile?.is_artist_applicant) {
-      const app = await fetchArtistApplication(data.user.id)
+    // Fetch artist application for all users
+    const app = await fetchArtistApplication(data.user.id)
+    if (loginProfile?.is_artist_applicant && app) {
       routeArtistView(app)
     }
   }
@@ -493,9 +496,9 @@ function App() {
     await loadAllProfiles()
     await loadNotifications()
 
-    // Route artist applicants
-    if (regProfile?.is_artist_applicant) {
-      const app = await fetchArtistApplication(data.user.id)
+    // Fetch artist application for all users
+    const app = await fetchArtistApplication(data.user.id)
+    if (regProfile?.is_artist_applicant && app) {
       routeArtistView(app)
     }
   }
@@ -560,6 +563,7 @@ function App() {
       setShowArtistPending(false)
       setShowArtistPortal(false)
       setArtistApplication(null)
+      setShowAdminArtistSubmissions(false)
       showMessage('Logged out successfully', 2000)
       setTransferData({ recipient: '', amount: '' })
       setReleaseData({ amount: '', reason: '' })
@@ -965,6 +969,8 @@ function App() {
           onShowAdminPowerUps={() => setShowAdminPowerUps(true)}
           artistApplication={artistApplication}
           onArtistApplicationUpdate={setArtistApplication}
+          onShowArtistApply={() => { setShowSettings(false); setShowArtistApply(true) }}
+          onShowAdminArtistSubmissions={() => setShowAdminArtistSubmissions(true)}
         />
         {showPalomasMenu && (
           <PalomasMenu
@@ -1103,6 +1109,21 @@ function App() {
     )
   }
 
+  // Admin artist submissions view
+  if (user && showAdminArtistSubmissions && isAdmin) {
+    return (
+      <>
+        <AdminArtistSubmissions
+          profile={profile}
+          supabase={supabase}
+          onBack={() => setShowAdminArtistSubmissions(false)}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
+      </>
+    )
+  }
+
   // Render based on current view
   if (user && showNotifications && isAdmin) {
     return (
@@ -1187,6 +1208,8 @@ function App() {
           onPayPalClick={handlePayPalClick}
           artistApplication={artistApplication}
           onArtistApplicationUpdate={setArtistApplication}
+          onShowArtistApply={() => { setShowSettings(false); setShowArtistApply(true) }}
+          onShowAdminArtistSubmissions={() => setShowAdminArtistSubmissions(true)}
         />
         {showPalomasMenu && (
           <PalomasMenu
@@ -1290,6 +1313,14 @@ function App() {
             setArtistApplication(application)
             setShowArtistApply(false)
             setShowArtistPending(true)
+            // Mark user as artist applicant if not already
+            if (!profile?.is_artist_applicant) {
+              await supabase
+                .from('profiles')
+                .update({ is_artist_applicant: true })
+                .eq('id', user.id)
+              setProfile(prev => ({ ...prev, is_artist_applicant: true }))
+            }
           }}
           onBack={() => setShowArtistApply(false)}
         />
@@ -1364,6 +1395,8 @@ function App() {
           onShowAdminPowerUps={() => setShowAdminPowerUps(true)}
           artistApplication={artistApplication}
           onArtistApplicationUpdate={setArtistApplication}
+          onShowArtistApply={() => { setShowSettings(false); setShowArtistApply(true) }}
+          onShowAdminArtistSubmissions={() => setShowAdminArtistSubmissions(true)}
         />
         {showPalomasMenu && (
           <PalomasMenu

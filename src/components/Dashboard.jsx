@@ -1325,7 +1325,9 @@ function Dashboard({
   onShowTickets,
   onShowAdminPowerUps,
   artistApplication,
-  onArtistApplicationUpdate
+  onArtistApplicationUpdate,
+  onShowArtistApply,
+  onShowAdminArtistSubmissions
 }) {
   const [showProductManager, setShowProductManager] = useState(false);
   const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
@@ -1681,204 +1683,241 @@ function Dashboard({
                 {language === 'en' ? 'Cambiar a Español' : 'Switch to English'}
               </button>
 
-              {/* Artist Portal Box */}
-              {profile?.is_artist_applicant && artistApplication && (
-                <div style={{
-                  border: '2px solid rgba(210, 105, 30, 0.3)',
-                  borderRadius: '12px',
-                  padding: '1rem',
-                  marginBottom: '0.5rem',
-                  backgroundColor: 'rgba(255, 248, 220, 0.5)'
+              {/* Artist Portal Box - visible to all users */}
+              <div style={{
+                border: '2px solid rgba(210, 105, 30, 0.3)',
+                borderRadius: '12px',
+                padding: '1rem',
+                marginBottom: '0.5rem',
+                backgroundColor: 'rgba(255, 248, 220, 0.5)'
+              }}>
+                <h4 style={{
+                  margin: '0 0 0.75rem',
+                  color: '#8b4513',
+                  fontSize: '0.95rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
                 }}>
-                  <h4 style={{
-                    margin: '0 0 0.75rem',
-                    color: '#8b4513',
-                    fontSize: '0.95rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <Music size={16} />
-                    {t('artist.settingsTitle')}
-                  </h4>
+                  <Music size={16} />
+                  {t('artist.settingsTitle')}
+                </h4>
 
-                  {/* Application Status Badge */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '0.75rem'
-                  }}>
-                    <span style={{ fontSize: '0.8rem', color: '#8b4513' }}>
-                      {t('artist.settingsStatus')}
-                    </span>
-                    <span style={{
-                      padding: '0.25rem 0.75rem',
-                      borderRadius: '20px',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      backgroundColor: artistApplication.status === 'approved' ? 'rgba(16, 185, 129, 0.15)' :
-                        artistApplication.status === 'submitted' ? 'rgba(245, 158, 11, 0.15)' :
-                        artistApplication.status === 'rejected' ? 'rgba(239, 68, 68, 0.15)' :
-                        'rgba(107, 114, 128, 0.15)',
-                      color: artistApplication.status === 'approved' ? '#059669' :
-                        artistApplication.status === 'submitted' ? '#d97706' :
-                        artistApplication.status === 'rejected' ? '#dc2626' :
-                        '#6b7280'
+                {artistApplication ? (
+                  <>
+                    {/* Application Status Badge */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.75rem'
                     }}>
-                      {artistApplication.status === 'approved' ? t('artist.statusApproved') :
-                       artistApplication.status === 'submitted' ? t('artist.statusPending') :
-                       artistApplication.status === 'rejected' ? t('artist.statusRejected') :
-                       t('artist.statusDraft')}
-                    </span>
-                  </div>
+                      <span style={{ fontSize: '0.8rem', color: '#8b4513' }}>
+                        {t('artist.settingsStatus')}
+                      </span>
+                      <span style={{
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '20px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        backgroundColor: artistApplication.status === 'approved' ? 'rgba(16, 185, 129, 0.15)' :
+                          artistApplication.status === 'submitted' ? 'rgba(245, 158, 11, 0.15)' :
+                          artistApplication.status === 'rejected' ? 'rgba(239, 68, 68, 0.15)' :
+                          'rgba(107, 114, 128, 0.15)',
+                        color: artistApplication.status === 'approved' ? '#059669' :
+                          artistApplication.status === 'submitted' ? '#d97706' :
+                          artistApplication.status === 'rejected' ? '#dc2626' :
+                          '#6b7280'
+                      }}>
+                        {artistApplication.status === 'approved' ? t('artist.statusApproved') :
+                         artistApplication.status === 'submitted' ? t('artist.statusPending') :
+                         artistApplication.status === 'rejected' ? t('artist.statusRejected') :
+                         t('artist.statusDraft')}
+                      </span>
+                    </div>
 
-                  {/* Song Section */}
-                  <div style={{ marginBottom: '0.75rem' }}>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '0.8rem',
-                      fontWeight: '500',
-                      color: '#8b4513',
-                      marginBottom: '0.35rem'
-                    }}>
-                      {t('artist.currentSong')}
-                    </label>
-                    {artistApplication.track_url ? (
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.5rem',
-                        backgroundColor: 'rgba(210, 105, 30, 0.08)',
-                        borderRadius: '8px',
+                    {/* Song Section */}
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.8rem',
+                        fontWeight: '500',
+                        color: '#8b4513',
                         marginBottom: '0.35rem'
                       }}>
-                        <Music size={14} color="#d2691e" />
-                        <span style={{
-                          fontSize: '0.8rem',
-                          color: '#8b4513',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          flex: 1
+                        {t('artist.currentSong')}
+                      </label>
+                      {artistApplication.track_url ? (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          padding: '0.5rem',
+                          backgroundColor: 'rgba(210, 105, 30, 0.08)',
+                          borderRadius: '8px',
+                          marginBottom: '0.35rem'
                         }}>
-                          {decodeURIComponent(artistApplication.track_url.split('/').pop().split('?')[0])}
-                        </span>
-                      </div>
-                    ) : (
-                      <p style={{ fontSize: '0.8rem', color: '#a0522d', margin: '0 0 0.35rem', fontStyle: 'italic' }}>
-                        {t('artist.noSong')}
-                      </p>
-                    )}
-                    <label style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      padding: '0.4rem 0.8rem',
-                      backgroundColor: '#d2691e',
-                      color: 'white',
-                      borderRadius: '8px',
-                      cursor: isUploadingSong ? 'not-allowed' : 'pointer',
-                      fontSize: '0.8rem',
-                      opacity: isUploadingSong ? 0.6 : 1
-                    }}>
-                      <input
-                        type="file"
-                        accept="audio/*"
-                        onChange={handleArtistSongChange}
-                        disabled={isUploadingSong}
-                        style={{ display: 'none' }}
-                      />
-                      <Upload size={14} />
-                      {isUploadingSong ? t('artist.uploading') : t('artist.changeSong')}
-                    </label>
-                  </div>
+                          <Music size={14} color="#d2691e" />
+                          <span style={{
+                            fontSize: '0.8rem',
+                            color: '#8b4513',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            flex: 1
+                          }}>
+                            {decodeURIComponent(artistApplication.track_url.split('/').pop().split('?')[0])}
+                          </span>
+                        </div>
+                      ) : (
+                        <p style={{ fontSize: '0.8rem', color: '#a0522d', margin: '0 0 0.35rem', fontStyle: 'italic' }}>
+                          {t('artist.noSong')}
+                        </p>
+                      )}
+                      <label style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        padding: '0.4rem 0.8rem',
+                        backgroundColor: '#d2691e',
+                        color: 'white',
+                        borderRadius: '8px',
+                        cursor: isUploadingSong ? 'not-allowed' : 'pointer',
+                        fontSize: '0.8rem',
+                        opacity: isUploadingSong ? 0.6 : 1
+                      }}>
+                        <input
+                          type="file"
+                          accept="audio/*"
+                          onChange={handleArtistSongChange}
+                          disabled={isUploadingSong}
+                          style={{ display: 'none' }}
+                        />
+                        <Upload size={14} />
+                        {isUploadingSong ? t('artist.uploading') : t('artist.changeSong')}
+                      </label>
+                    </div>
 
-                  {/* Photo Section */}
-                  <div style={{ marginBottom: '0.75rem' }}>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '0.8rem',
-                      fontWeight: '500',
-                      color: '#8b4513',
-                      marginBottom: '0.35rem'
+                    {/* Photo Section */}
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '0.8rem',
+                        fontWeight: '500',
+                        color: '#8b4513',
+                        marginBottom: '0.35rem'
+                      }}>
+                        {t('artist.currentPhoto')}
+                      </label>
+                      {artistApplication.artist_photo_url ? (
+                        <div style={{
+                          width: '80px',
+                          height: '80px',
+                          borderRadius: '10px',
+                          backgroundImage: `url(${artistApplication.artist_photo_url})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          border: '2px solid rgba(210, 105, 30, 0.3)',
+                          marginBottom: '0.35rem'
+                        }} />
+                      ) : (
+                        <p style={{ fontSize: '0.8rem', color: '#a0522d', margin: '0 0 0.35rem', fontStyle: 'italic' }}>
+                          {t('artist.noPhoto')}
+                        </p>
+                      )}
+                      <label style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
+                        padding: '0.4rem 0.8rem',
+                        backgroundColor: '#d2691e',
+                        color: 'white',
+                        borderRadius: '8px',
+                        cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
+                        fontSize: '0.8rem',
+                        opacity: isUploadingPhoto ? 0.6 : 1
+                      }}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleArtistPhotoChange}
+                          disabled={isUploadingPhoto}
+                          style={{ display: 'none' }}
+                        />
+                        <Camera size={14} />
+                        {isUploadingPhoto ? t('artist.uploading') : t('artist.uploadPhoto')}
+                      </label>
+                    </div>
+
+                    {/* Artist Page Status */}
+                    {(() => {
+                      const status = getArtistPageStatus()
+                      return (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          padding: '0.5rem 0.75rem',
+                          borderRadius: '8px',
+                          backgroundColor: status === 'complete' ? 'rgba(16, 185, 129, 0.1)' :
+                            status === 'pending' ? 'rgba(245, 158, 11, 0.1)' :
+                            'rgba(107, 114, 128, 0.1)',
+                          borderTop: '1px solid rgba(210, 105, 30, 0.15)'
+                        }}>
+                          {status === 'complete' ? <CheckCircle size={16} color="#059669" /> :
+                           status === 'pending' ? <Clock size={16} color="#d97706" /> :
+                           <AlertCircle size={16} color="#6b7280" />}
+                          <span style={{
+                            fontSize: '0.8rem',
+                            fontWeight: '600',
+                            color: status === 'complete' ? '#059669' :
+                              status === 'pending' ? '#d97706' : '#6b7280'
+                          }}>
+                            {t('artist.pageStatus')}: {status === 'complete' ? t('artist.pageComplete') :
+                             status === 'pending' ? t('artist.pagePending') :
+                             t('artist.pageIncomplete')}
+                          </span>
+                        </div>
+                      )
+                    })()}
+                  </>
+                ) : (
+                  <>
+                    <p style={{
+                      fontSize: '0.85rem',
+                      color: '#a0522d',
+                      margin: '0 0 0.75rem',
+                      lineHeight: '1.4'
                     }}>
-                      {t('artist.currentPhoto')}
-                    </label>
-                    {artistApplication.artist_photo_url ? (
-                      <div style={{
-                        width: '80px',
-                        height: '80px',
+                      {t('artist.settingsApplyPrompt')}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setShowSettings(false)
+                        if (onShowArtistApply) onShowArtistApply()
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '0.65rem 1rem',
+                        background: 'linear-gradient(135deg, #d2691e, #cd853f)',
+                        color: 'white',
+                        border: 'none',
                         borderRadius: '10px',
-                        backgroundImage: `url(${artistApplication.artist_photo_url})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        border: '2px solid rgba(210, 105, 30, 0.3)',
-                        marginBottom: '0.35rem'
-                      }} />
-                    ) : (
-                      <p style={{ fontSize: '0.8rem', color: '#a0522d', margin: '0 0 0.35rem', fontStyle: 'italic' }}>
-                        {t('artist.noPhoto')}
-                      </p>
-                    )}
-                    <label style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      padding: '0.4rem 0.8rem',
-                      backgroundColor: '#d2691e',
-                      color: 'white',
-                      borderRadius: '8px',
-                      cursor: isUploadingPhoto ? 'not-allowed' : 'pointer',
-                      fontSize: '0.8rem',
-                      opacity: isUploadingPhoto ? 0.6 : 1
-                    }}>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleArtistPhotoChange}
-                        disabled={isUploadingPhoto}
-                        style={{ display: 'none' }}
-                      />
-                      <Camera size={14} />
-                      {isUploadingPhoto ? t('artist.uploading') : t('artist.uploadPhoto')}
-                    </label>
-                  </div>
-
-                  {/* Artist Page Status */}
-                  {(() => {
-                    const status = getArtistPageStatus()
-                    return (
-                      <div style={{
+                        cursor: 'pointer',
+                        fontWeight: '500',
+                        boxShadow: '0 2px 8px rgba(210, 105, 30, 0.3)',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: '8px',
-                        backgroundColor: status === 'complete' ? 'rgba(16, 185, 129, 0.1)' :
-                          status === 'pending' ? 'rgba(245, 158, 11, 0.1)' :
-                          'rgba(107, 114, 128, 0.1)',
-                        borderTop: '1px solid rgba(210, 105, 30, 0.15)'
-                      }}>
-                        {status === 'complete' ? <CheckCircle size={16} color="#059669" /> :
-                         status === 'pending' ? <Clock size={16} color="#d97706" /> :
-                         <AlertCircle size={16} color="#6b7280" />}
-                        <span style={{
-                          fontSize: '0.8rem',
-                          fontWeight: '600',
-                          color: status === 'complete' ? '#059669' :
-                            status === 'pending' ? '#d97706' : '#6b7280'
-                        }}>
-                          {t('artist.pageStatus')}: {status === 'complete' ? t('artist.pageComplete') :
-                           status === 'pending' ? t('artist.pagePending') :
-                           t('artist.pageIncomplete')}
-                        </span>
-                      </div>
-                    )
-                  })()}
-                </div>
-              )}
+                        justifyContent: 'center',
+                        gap: '0.5rem'
+                      }}
+                    >
+                      <Music size={16} />
+                      {t('artist.settingsApplyButton')}
+                    </button>
+                  </>
+                )}
+              </div>
 
               {/* Palomas History Button */}
               <button
@@ -1931,6 +1970,35 @@ function Dashboard({
                 </button>
               )}
               
+              {/* Admin Artist Submissions Button */}
+              {isAdmin && onShowAdminArtistSubmissions && (
+                <button
+                  onClick={() => {
+                    setShowSettings(false);
+                    onShowAdminArtistSubmissions();
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    background: 'linear-gradient(135deg, #d2691e, #cd853f)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                    marginBottom: '0.5rem',
+                    boxShadow: '0 2px 8px rgba(210, 105, 30, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <Music size={16} />
+                  Artist Submissions
+                </button>
+              )}
+
               {/* Logout Button */}
               <button
                 onClick={onLogout}
