@@ -26,6 +26,8 @@ function ArtistApply({ user, profile, supabase, existingApplication, onSubmitted
     artistName: existingApplication?.artist_name || '',
     country: existingApplication?.country || '',
     customCountry: '',
+    bio: existingApplication?.bio || '',
+    socialLinks: existingApplication?.social_links || '',
     confirmed18Plus: false,
     acceptedTerms: false
   })
@@ -139,6 +141,8 @@ function ArtistApply({ user, profile, supabase, existingApplication, onSubmitted
         user_id: user.id,
         artist_name: formData.artistName.trim(),
         country,
+        bio: formData.bio.trim() || null,
+        social_links: formData.socialLinks.trim() || null,
         track_url: trackUrl,
         confirmed_18plus: formData.confirmed18Plus,
         accepted_terms_at: new Date().toISOString(),
@@ -422,6 +426,66 @@ function ArtistApply({ user, profile, supabase, existingApplication, onSubmitted
                 </>
               )}
             </label>
+          </div>
+
+          {/* Bio / Artist Statement */}
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              color: '#8b4513',
+              marginBottom: '0.5rem'
+            }}>
+              {t('artist.bio')}
+            </label>
+            <textarea
+              value={formData.bio}
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              placeholder={t('artist.bioPlaceholder')}
+              rows="4"
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                border: '2px solid rgba(210, 105, 30, 0.3)',
+                borderRadius: '12px',
+                boxSizing: 'border-box',
+                fontSize: '1rem',
+                outline: 'none',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                resize: 'vertical',
+                fontFamily: 'inherit'
+              }}
+            />
+          </div>
+
+          {/* Social Links */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label style={{
+              display: 'block',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              color: '#8b4513',
+              marginBottom: '0.5rem'
+            }}>
+              {t('artist.socialLinks')}
+            </label>
+            <input
+              type="text"
+              value={formData.socialLinks}
+              onChange={(e) => setFormData({ ...formData, socialLinks: e.target.value })}
+              placeholder={t('artist.socialLinksPlaceholder')}
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                border: '2px solid rgba(210, 105, 30, 0.3)',
+                borderRadius: '12px',
+                boxSizing: 'border-box',
+                fontSize: '1rem',
+                outline: 'none',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)'
+              }}
+            />
           </div>
 
           {/* Age confirmation */}
