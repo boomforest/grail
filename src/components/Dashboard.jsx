@@ -1327,7 +1327,8 @@ function Dashboard({
   artistApplication,
   onArtistApplicationUpdate,
   onShowArtistApply,
-  onShowAdminArtistSubmissions
+  onShowAdminArtistSubmissions,
+  unreadAdminCount
 }) {
   const [showProductManager, setShowProductManager] = useState(false);
   const [showPurchaseHistory, setShowPurchaseHistory] = useState(false);
@@ -1996,6 +1997,22 @@ function Dashboard({
                 >
                   <Music size={16} />
                   Artist Submissions
+                  {unreadAdminCount > 0 && (
+                    <span style={{
+                      background: '#dc2626',
+                      color: 'white',
+                      borderRadius: '50%',
+                      width: '20px',
+                      height: '20px',
+                      fontSize: '0.7rem',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginLeft: '0.25rem'
+                    }}>
+                      {unreadAdminCount}
+                    </span>
+                  )}
                 </button>
               )}
 

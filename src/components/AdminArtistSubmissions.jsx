@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { ArrowLeft, Star, Play, Pause, User, MapPin, Calendar, ChevronDown } from 'lucide-react'
 
-function AdminArtistSubmissions({ profile, supabase, onBack }) {
+function AdminArtistSubmissions({ profile, supabase, onBack, onNotificationsRead }) {
   const [submissions, setSubmissions] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
@@ -15,8 +15,21 @@ function AdminArtistSubmissions({ profile, supabase, onBack }) {
   useEffect(() => {
     if (isAdmin) {
       fetchSubmissions()
+      markNotificationsRead()
     }
   }, [isAdmin])
+
+  const markNotificationsRead = async () => {
+    try {
+      await supabase
+        .from('admin_notifications')
+        .update({ is_read: true })
+        .eq('is_read', false)
+      if (onNotificationsRead) onNotificationsRead()
+    } catch (err) {
+      console.warn('Could not mark notifications as read:', err)
+    }
+  }
 
   // Cleanup audio on unmount
   useEffect(() => {
@@ -451,6 +464,59 @@ function AdminArtistSubmissions({ profile, supabase, onBack }) {
                     </span>
                   )}
                 </div>
+
+                {/* Agent Review */}
+                {submission.agent_reviewed_at && (
+                  <div style={{
+                    padding: '0.75rem',
+                    backgroundColor: 'rgba(59, 130, 246, 0.06)',
+                    borderRadius: '10px',
+                    marginBottom: '0.75rem',
+                    border: '1px solid rgba(59, 130, 246, 0.15)'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      marginBottom: '0.4rem'
+                    }}>
+                      <span style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: '600' }}>
+                        Agent Review
+                      </span>
+                      <div style={{ display: 'flex', gap: '0.1rem' }}>
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <Star
+                            key={`agent-${star}`}
+                            size={14}
+                            fill={submission.agent_rating >= star ? '#3b82f6' : 'none'}
+                            color={submission.agent_rating >= star ? '#3b82f6' : '#ccc'}
+                          />
+                        ))}
+                      </div>
+                      {submission.agent_rating && (
+                        <span style={{ fontSize: '0.75rem', color: '#3b82f6' }}>
+                          {submission.agent_rating}/5
+                        </span>
+                      )}
+                    </div>
+                    <p style={{
+                      margin: 0,
+                      fontSize: '0.8rem',
+                      color: '#4b5563',
+                      lineHeight: '1.4'
+                    }}>
+                      {submission.agent_notes}
+                    </p>
+                    <span style={{
+                      fontSize: '0.7rem',
+                      color: '#9ca3af',
+                      marginTop: '0.25rem',
+                      display: 'block'
+                    }}>
+                      Reviewed {new Date(submission.agent_reviewed_at).toLocaleString()}
+                    </span>
+                  </div>
+                )}
 
                 {/* Status Actions */}
                 <div style={{

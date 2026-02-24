@@ -56,6 +56,7 @@ function App() {
   const [showArtistPortal, setShowArtistPortal] = useState(false) // Artist portal (approved)
   const [artistApplication, setArtistApplication] = useState(null) // Artist application data
   const [showAdminArtistSubmissions, setShowAdminArtistSubmissions] = useState(false) // Admin artist submissions
+  const [unreadAdminCount, setUnreadAdminCount] = useState(0) // Unread admin notification count
 
   // Form state for transfers and releases
   const [transferData, setTransferData] = useState({
@@ -253,6 +254,25 @@ function App() {
             } catch (subscriptionError) {
               console.warn('Could not set up real-time notifications:', subscriptionError)
             }
+
+            // Admin notification subscription
+            const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            const userIsAdmin = isDev ? true : (restoredProfile?.username === 'JPR333' || session.user.email === 'jproney@gmail.com')
+            if (userIsAdmin) {
+              try {
+                await loadAdminNotifications(client)
+                const adminNotifSub = client
+                  .channel('admin_notifications')
+                  .on('postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'admin_notifications' },
+                    () => loadAdminNotifications(client)
+                  )
+                  .subscribe()
+                client.adminNotifSubscription = adminNotifSub
+              } catch (err) {
+                console.warn('Could not set up admin notifications:', err)
+              }
+            }
           }
         }
       } catch (error) {
@@ -261,10 +281,13 @@ function App() {
       }
     }
     initSupabase()
-    
+
     return () => {
       if (supabase?.notificationSubscription) {
         supabase.notificationSubscription.unsubscribe()
+      }
+      if (supabase?.adminNotifSubscription) {
+        supabase.adminNotifSubscription.unsubscribe()
       }
     }
   }, [])
@@ -393,6 +416,22 @@ function App() {
     } catch (error) {
       console.error('Catch block error:', error)
       setNotifications([])
+    }
+  }
+
+  const loadAdminNotifications = async (client = supabase) => {
+    if (!client) return
+    try {
+      const { data, error } = await client
+        .from('admin_notifications')
+        .select('*')
+        .eq('is_read', false)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      if (error) throw error
+      setUnreadAdminCount((data || []).length)
+    } catch (err) {
+      console.warn('Could not load admin notifications:', err)
     }
   }
 
@@ -564,6 +603,7 @@ function App() {
       setShowArtistPortal(false)
       setArtistApplication(null)
       setShowAdminArtistSubmissions(false)
+      setUnreadAdminCount(0)
       showMessage('Logged out successfully', 2000)
       setTransferData({ recipient: '', amount: '' })
       setReleaseData({ amount: '', reason: '' })
@@ -971,6 +1011,7 @@ function App() {
           onArtistApplicationUpdate={setArtistApplication}
           onShowArtistApply={() => { setShowSettings(false); setShowArtistApply(true) }}
           onShowAdminArtistSubmissions={() => setShowAdminArtistSubmissions(true)}
+          unreadAdminCount={unreadAdminCount}
         />
         {showPalomasMenu && (
           <PalomasMenu
@@ -1117,6 +1158,7 @@ function App() {
           profile={profile}
           supabase={supabase}
           onBack={() => setShowAdminArtistSubmissions(false)}
+          onNotificationsRead={() => setUnreadAdminCount(0)}
         />
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
@@ -1210,6 +1252,7 @@ function App() {
           onArtistApplicationUpdate={setArtistApplication}
           onShowArtistApply={() => { setShowSettings(false); setShowArtistApply(true) }}
           onShowAdminArtistSubmissions={() => setShowAdminArtistSubmissions(true)}
+          unreadAdminCount={unreadAdminCount}
         />
         {showPalomasMenu && (
           <PalomasMenu
@@ -1397,6 +1440,7 @@ function App() {
           onArtistApplicationUpdate={setArtistApplication}
           onShowArtistApply={() => { setShowSettings(false); setShowArtistApply(true) }}
           onShowAdminArtistSubmissions={() => setShowAdminArtistSubmissions(true)}
+          unreadAdminCount={unreadAdminCount}
         />
         {showPalomasMenu && (
           <PalomasMenu
