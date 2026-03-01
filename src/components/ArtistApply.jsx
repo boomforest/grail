@@ -27,7 +27,9 @@ function ArtistApply({ user, profile, supabase, existingApplication, onSubmitted
     country: existingApplication?.country || '',
     customCountry: '',
     bio: existingApplication?.bio || '',
-    socialLinks: existingApplication?.social_links || '',
+    spotify: existingApplication?.spotify_url || '',
+    instagram: existingApplication?.instagram_url || '',
+    tiktok: existingApplication?.tiktok_url || '',
     confirmed18Plus: false,
     acceptedTerms: false
   })
@@ -142,7 +144,9 @@ function ArtistApply({ user, profile, supabase, existingApplication, onSubmitted
         artist_name: formData.artistName.trim(),
         country,
         bio: formData.bio.trim() || null,
-        social_links: formData.socialLinks.trim() || null,
+        spotify_url: formData.spotify.trim() || null,
+        instagram_url: formData.instagram.trim() || null,
+        tiktok_url: formData.tiktok.trim() || null,
         track_url: trackUrl,
         confirmed_18plus: formData.confirmed18Plus,
         accepted_terms_at: new Date().toISOString(),
@@ -459,22 +463,86 @@ function ArtistApply({ user, profile, supabase, existingApplication, onSubmitted
             />
           </div>
 
-          {/* Social Links */}
-          <div style={{ marginBottom: '1.25rem' }}>
+          {/* Spotify */}
+          <div style={{ marginBottom: '0.75rem' }}>
             <label style={{
-              display: 'block',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
               fontSize: '0.9rem',
               fontWeight: '500',
               color: '#8b4513',
               marginBottom: '0.5rem'
             }}>
-              {t('artist.socialLinks')}
+              <span style={{ fontSize: '1.1rem' }}>🎵</span> Spotify
             </label>
             <input
               type="text"
-              value={formData.socialLinks}
-              onChange={(e) => setFormData({ ...formData, socialLinks: e.target.value })}
-              placeholder={t('artist.socialLinksPlaceholder')}
+              value={formData.spotify}
+              onChange={(e) => setFormData({ ...formData, spotify: e.target.value })}
+              placeholder="https://open.spotify.com/artist/..."
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                border: '2px solid rgba(210, 105, 30, 0.3)',
+                borderRadius: '12px',
+                boxSizing: 'border-box',
+                fontSize: '1rem',
+                outline: 'none',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)'
+              }}
+            />
+          </div>
+
+          {/* Instagram */}
+          <div style={{ marginBottom: '0.75rem' }}>
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              color: '#8b4513',
+              marginBottom: '0.5rem'
+            }}>
+              <span style={{ fontSize: '1.1rem' }}>📸</span> Instagram
+            </label>
+            <input
+              type="text"
+              value={formData.instagram}
+              onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
+              placeholder="https://instagram.com/..."
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                border: '2px solid rgba(210, 105, 30, 0.3)',
+                borderRadius: '12px',
+                boxSizing: 'border-box',
+                fontSize: '1rem',
+                outline: 'none',
+                backgroundColor: 'rgba(255, 255, 255, 0.8)'
+              }}
+            />
+          </div>
+
+          {/* TikTok */}
+          <div style={{ marginBottom: '1.25rem' }}>
+            <label style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              color: '#8b4513',
+              marginBottom: '0.5rem'
+            }}>
+              <span style={{ fontSize: '1.1rem' }}>🎬</span> TikTok
+            </label>
+            <input
+              type="text"
+              value={formData.tiktok}
+              onChange={(e) => setFormData({ ...formData, tiktok: e.target.value })}
+              placeholder="https://tiktok.com/@..."
               style={{
                 width: '100%',
                 padding: '0.75rem 1rem',
