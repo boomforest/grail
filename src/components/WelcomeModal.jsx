@@ -58,7 +58,6 @@ const WelcomeModal = ({ onClose, onBuyPalomas }) => {
 
         {/* Content */}
         <div style={{
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
           lineHeight: '1.6',
           color: '#1e293b'
         }}>

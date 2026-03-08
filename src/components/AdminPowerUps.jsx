@@ -140,6 +140,26 @@ function AdminPowerUps({ profile, supabase, onBack }) {
     }
 
     try {
+      // Auto-translate if Spanish fields are empty
+      let titleEs = formData.title_es
+      let descEs = formData.description_es
+      if ((!titleEs || !descEs) && (formData.title || formData.description)) {
+        try {
+          const res = await fetch('/.netlify/functions/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: formData.title, description: formData.description })
+          })
+          if (res.ok) {
+            const translated = await res.json()
+            if (!titleEs) titleEs = translated.title_es || ''
+            if (!descEs) descEs = translated.description_es || ''
+          }
+        } catch (err) {
+          console.error('Auto-translate failed, saving without Spanish:', err)
+        }
+      }
+
       if (editingPowerUp) {
         // Update existing power-up
         let imagePath = editingPowerUp.image_path
@@ -154,8 +174,8 @@ function AdminPowerUps({ profile, supabase, onBack }) {
           category: formData.category,
           title: formData.title,
           description: formData.description,
-          title_es: formData.title_es || null,
-          description_es: formData.description_es || null,
+          title_es: titleEs || null,
+          description_es: descEs || null,
           price_doves: parseInt(formData.price_doves),
           sort_order: parseInt(formData.sort_order),
           is_active: formData.is_active,
@@ -169,8 +189,8 @@ function AdminPowerUps({ profile, supabase, onBack }) {
           category: formData.category,
           title: formData.title,
           description: formData.description,
-          title_es: formData.title_es || null,
-          description_es: formData.description_es || null,
+          title_es: titleEs || null,
+          description_es: descEs || null,
           price_doves: parseInt(formData.price_doves),
           sort_order: parseInt(formData.sort_order),
           is_active: formData.is_active,

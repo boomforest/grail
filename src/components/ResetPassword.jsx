@@ -167,7 +167,6 @@ function ResetPassword({ supabase, onPasswordReset }) {
       <div style={{
         minHeight: '100vh',
         backgroundColor: '#f5f5dc',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -201,7 +200,6 @@ function ResetPassword({ supabase, onPasswordReset }) {
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#f5f5dc',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

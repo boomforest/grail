@@ -267,7 +267,6 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
     backgroundAttachment: 'fixed',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
     padding: '1rem',
     color: '#92400e',
     position: 'relative'

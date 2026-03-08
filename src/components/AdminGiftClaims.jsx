@@ -43,7 +43,7 @@ const AdminGiftClaims = ({ supabase, onBack }) => {
   if (loading) return <div style={{ padding: '20px' }}>Loading claims...</div>
 
   return (
-    <div style={{ padding: '20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+    <div style={{ padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <button onClick={onBack} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #ccc' }}>
           ← Back

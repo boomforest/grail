@@ -200,7 +200,6 @@ function SendMeritsForm({ onBack, message, supabase, user, allProfiles }) {
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#f5f1e8',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       padding: '2rem 1rem',
       color: '#8b5a3c'
     }}>

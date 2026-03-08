@@ -24,6 +24,7 @@ import ArtistApply from './components/ArtistApply'
 import ArtistPending from './components/ArtistPending'
 import ArtistPortal from './components/ArtistPortal'
 import AdminArtistSubmissions from './components/AdminArtistSubmissions'
+import CompetitionPage from './components/CompetitionPage'
 
 function App() {
   // Core state
@@ -56,6 +57,7 @@ function App() {
   const [showArtistPortal, setShowArtistPortal] = useState(false) // Artist portal (approved)
   const [artistApplication, setArtistApplication] = useState(null) // Artist application data
   const [showAdminArtistSubmissions, setShowAdminArtistSubmissions] = useState(false) // Admin artist submissions
+  const [showCompetition, setShowCompetition] = useState(false) // Public competition page
   const [unreadAdminCount, setUnreadAdminCount] = useState(0) // Unread admin notification count
 
   // Form state for transfers and releases
@@ -603,6 +605,7 @@ function App() {
       setShowArtistPortal(false)
       setArtistApplication(null)
       setShowAdminArtistSubmissions(false)
+      setShowCompetition(false)
       setUnreadAdminCount(0)
       showMessage('Logged out successfully', 2000)
       setTransferData({ recipient: '', amount: '' })
@@ -1011,6 +1014,7 @@ function App() {
           onArtistApplicationUpdate={setArtistApplication}
           onShowArtistApply={() => { setShowSettings(false); setShowArtistApply(true) }}
           onShowAdminArtistSubmissions={() => setShowAdminArtistSubmissions(true)}
+          onShowCompetition={() => setShowCompetition(true)}
           unreadAdminCount={unreadAdminCount}
         />
         {showPalomasMenu && (
@@ -1252,6 +1256,7 @@ function App() {
           onArtistApplicationUpdate={setArtistApplication}
           onShowArtistApply={() => { setShowSettings(false); setShowArtistApply(true) }}
           onShowAdminArtistSubmissions={() => setShowAdminArtistSubmissions(true)}
+          onShowCompetition={() => setShowCompetition(true)}
           unreadAdminCount={unreadAdminCount}
         />
         {showPalomasMenu && (
@@ -1339,6 +1344,23 @@ function App() {
             ensureProfileExists(user)
           }}
         />
+      </>
+    )
+  }
+
+  // Competition page (public)
+  if (user && showCompetition) {
+    return (
+      <>
+        <CompetitionPage
+          user={user}
+          profile={profile}
+          supabase={supabase}
+          onBack={() => setShowCompetition(false)}
+          onApply={() => { setShowCompetition(false); setShowArtistApply(true) }}
+        />
+        <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
+        {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
       </>
     )
   }
@@ -1440,6 +1462,7 @@ function App() {
           onArtistApplicationUpdate={setArtistApplication}
           onShowArtistApply={() => { setShowSettings(false); setShowArtistApply(true) }}
           onShowAdminArtistSubmissions={() => setShowAdminArtistSubmissions(true)}
+          onShowCompetition={() => setShowCompetition(true)}
           unreadAdminCount={unreadAdminCount}
         />
         {showPalomasMenu && (

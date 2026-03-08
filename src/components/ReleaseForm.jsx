@@ -397,7 +397,6 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
         minHeight: '100vh',
         backgroundColor: '#f5f1e8',
         padding: '2rem 1rem',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
       }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <button
@@ -675,7 +674,6 @@ function ReleaseForm({ tokenType, onBack, message, releaseData, setReleaseData, 
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#f5f1e8',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       padding: '2rem 1rem',
       color: '#8b5a3c'
     }}>

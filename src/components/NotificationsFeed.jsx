@@ -23,7 +23,6 @@ function NotificationsFeed({ onBack, notifications, onRefresh }) {
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#f5f5dc',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
       padding: '2rem 1rem'
     }}>
       <div style={{

@@ -339,7 +339,6 @@ function LoginForm({ supabase, onLogin, onRegister }) {
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundColor: '#fef7ed',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

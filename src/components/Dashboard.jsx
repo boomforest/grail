@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Upload, Plus, Edit, Trash2, Save, X, Coffee, ArrowLeft, Receipt, Calendar, Package, Music, Camera, CheckCircle, Clock, AlertCircle } from 'lucide-react'
+import { Upload, Plus, Edit, Trash2, Save, X, Coffee, ArrowLeft, Receipt, Calendar, Package, Music, Camera, CheckCircle, Clock, AlertCircle, Trophy } from 'lucide-react'
 import WalletInput from './WalletInput'
 import ProfilePicture from './ProfilePicture'
 import SendPalomas from './SendPalomas'
@@ -1326,8 +1326,8 @@ function Dashboard({
   onShowAdminPowerUps,
   artistApplication,
   onArtistApplicationUpdate,
-  onShowArtistApply,
   onShowAdminArtistSubmissions,
+  onShowCompetition,
   unreadAdminCount
 }) {
   const [showProductManager, setShowProductManager] = useState(false);
@@ -1520,7 +1520,6 @@ function Dashboard({
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       backgroundAttachment: 'fixed',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
       padding: '1rem',
       position: 'relative',
       maxWidth: '100vw',
@@ -1895,25 +1894,25 @@ function Dashboard({
                     <button
                       onClick={() => {
                         setShowSettings(false)
-                        if (onShowArtistApply) onShowArtistApply()
+                        if (onShowCompetition) onShowCompetition()
                       }}
                       style={{
                         width: '100%',
                         padding: '0.65rem 1rem',
-                        background: 'linear-gradient(135deg, #d2691e, #cd853f)',
+                        background: 'linear-gradient(135deg, #f59e0b, #d97706)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '10px',
                         cursor: 'pointer',
                         fontWeight: '500',
-                        boxShadow: '0 2px 8px rgba(210, 105, 30, 0.3)',
+                        boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: '0.5rem'
                       }}
                     >
-                      <Music size={16} />
+                      <Trophy size={16} />
                       {t('artist.settingsApplyButton')}
                     </button>
                   </>

@@ -136,7 +136,6 @@ function TarotCupsPage({ profile, onBack, supabase, user, onProfileUpdate }) {
   const containerStyle = {
     minHeight: '100vh',
     background: 'linear-gradient(135deg, #fef7ed, #fed7aa)',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
     padding: '1rem',
     color: '#92400e',
     position: 'relative'

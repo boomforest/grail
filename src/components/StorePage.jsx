@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { listPowerUps, getPowerUpImageUrl } from '../utils/powerUpsUtils'
+import { listPowerUps, updatePowerUp, getPowerUpImageUrl } from '../utils/powerUpsUtils'
 import { useLanguage } from '../contexts/LanguageContext'
 
 /**
@@ -18,6 +18,44 @@ function StorePage({ supabase, onClose }) {
     loadPowerUps()
   }, [activeTab, supabase])
 
+  // Auto-translate a single power-up and save to DB
+  async function translateAndSave(powerUp) {
+    try {
+      const res = await fetch('/.netlify/functions/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: powerUp.title, description: powerUp.description })
+      })
+      if (!res.ok) return null
+      const translated = await res.json()
+      const updates = {}
+      if (!powerUp.title_es && translated.title_es) updates.title_es = translated.title_es
+      if (!powerUp.description_es && translated.description_es) updates.description_es = translated.description_es
+      if (Object.keys(updates).length > 0) {
+        await updatePowerUp(supabase, powerUp.id, updates)
+        return updates
+      }
+    } catch (err) {
+      console.error('Auto-translate failed for', powerUp.title, err)
+    }
+    return null
+  }
+
+  // After loading, backfill any missing translations in background
+  function backfillTranslations(items) {
+    const needsTranslation = items.filter(p => p.title && (!p.title_es || !p.description_es))
+    if (needsTranslation.length === 0) return
+
+    needsTranslation.forEach(async (powerUp) => {
+      const updates = await translateAndSave(powerUp)
+      if (updates) {
+        setPowerUps(prev => prev.map(p =>
+          p.id === powerUp.id ? { ...p, ...updates } : p
+        ))
+      }
+    })
+  }
+
   async function loadPowerUps() {
     if (!supabase) return
 
@@ -27,10 +65,12 @@ function StorePage({ supabase, onClose }) {
     try {
       const data = await listPowerUps(supabase, activeTab)
       setPowerUps(data)
+      setLoading(false)
+      // Backfill translations after render — cards show immediately
+      backfillTranslations(data)
     } catch (err) {
       console.error('Error loading power-ups:', err)
       setError(t('store.error'))
-    } finally {
       setLoading(false)
     }
   }
@@ -414,7 +454,6 @@ function TarotCard({ powerUp, supabase, isSelected, onClick, index, total }) {
                   color: '#ffe4c4',
                   fontSize: '0.8rem',
                   fontWeight: '600',
-                  fontFamily: 'system-ui, sans-serif',
                   letterSpacing: '0.3px'
                 }}>
                   {line.trim()}

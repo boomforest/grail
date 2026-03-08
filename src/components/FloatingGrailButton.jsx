@@ -15,7 +15,6 @@ function FloatingGrailButton({ onGrailClick }) {
         fontSize: '0.55rem',
         color: 'rgba(139, 69, 19, 0.25)',
         cursor: 'default',
-        fontFamily: 'system-ui, -apple-system, sans-serif',
         fontWeight: '400',
         letterSpacing: '0.5px',
         zIndex: 100,
