@@ -561,26 +561,16 @@ function App() {
   }
 
   const handleLogout = async () => {
-    console.log('🚪 Logout initiated...')
-
     try {
       if (supabase?.notificationSubscription) {
-        console.log('📡 Unsubscribing from notifications...')
         await supabase.notificationSubscription.unsubscribe()
       }
-
       if (supabase) {
-        console.log('🔐 Signing out from Supabase...')
-        const { error } = await supabase.auth.signOut()
-        if (error) {
-          console.error('❌ Logout error:', error)
-          throw error
-        }
-        console.log('✅ Signed out successfully')
+        await supabase.auth.signOut()
       }
-
-      // Reset all state
-      console.log('🧹 Clearing app state...')
+    } catch (error) {
+      console.error('❌ Logout error:', error)
+    } finally {
       setUser(null)
       setProfile(null)
       setAllProfiles([])
@@ -607,14 +597,8 @@ function App() {
       setShowAdminArtistSubmissions(false)
       setShowCompetition(false)
       setUnreadAdminCount(0)
-      showMessage('Logged out successfully', 2000)
       setTransferData({ recipient: '', amount: '' })
       setReleaseData({ amount: '', reason: '' })
-
-      console.log('✅ Logout complete!')
-    } catch (error) {
-      console.error('❌ Error during logout:', error)
-      showMessage('Logout error - please refresh the page')
     }
   }
 
