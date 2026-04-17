@@ -217,7 +217,8 @@ function LoginForm({ supabase, onLogin, onRegister }) {
     password: '',
     name: '',
     username: '',
-    isArtistApplicant: false
+    isArtistApplicant: false,
+    role: '' // 'fan' | 'artist' | 'promoter'
   });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -296,6 +297,7 @@ function LoginForm({ supabase, onLogin, onRegister }) {
     setMessage('');
 
     try {
+      const role = formData.role || 'fan'
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -303,7 +305,8 @@ function LoginForm({ supabase, onLogin, onRegister }) {
           data: {
             display_name: formData.name || null,
             username: formData.username,
-            is_artist_applicant: formData.isArtistApplicant,
+            is_artist_applicant: role === 'artist',
+            is_promoter: role === 'promoter',
             primary_language: language
           }
         }
@@ -312,7 +315,7 @@ function LoginForm({ supabase, onLogin, onRegister }) {
       if (error) {
         setMessage(t('login.registrationFailed', { error: error.message }));
       } else {
-        if (onRegister) onRegister(data);
+        if (onRegister) onRegister(data)
       }
     } catch (error) {
       setMessage(t('login.unexpectedError'));
@@ -743,47 +746,41 @@ function LoginForm({ supabase, onLogin, onRegister }) {
               </div>
             </div>
 
-            {/* Artist Applicant Checkbox */}
+            {/* Role Selection */}
             <div style={{ marginBottom: '1rem' }}>
-              <label style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '0.75rem',
-                cursor: 'pointer',
-                padding: '0.75rem 1rem',
-                borderRadius: '12px',
-                backgroundColor: formData.isArtistApplicant
-                  ? 'rgba(210, 105, 30, 0.15)'
-                  : 'rgba(255, 255, 255, 0.1)',
-                border: formData.isArtistApplicant
-                  ? '2px solid rgba(210, 105, 30, 0.5)'
-                  : '1px solid rgba(255, 255, 255, 0.3)',
-                transition: 'all 0.3s ease'
-              }}>
-                <input
-                  type="checkbox"
-                  checked={formData.isArtistApplicant}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    isArtistApplicant: e.target.checked
-                  })}
-                  style={{
-                    width: '20px',
-                    height: '20px',
-                    accentColor: '#d2691e',
-                    marginTop: '2px',
-                    flexShrink: 0
-                  }}
-                />
-                <span style={{
-                  fontSize: '0.9rem',
-                  color: '#8b4513',
-                  fontWeight: '500',
-                  lineHeight: '1.4'
-                }}>
-                  {dualText('login.iAmArtist')}
-                </span>
-              </label>
+              <div style={{ fontSize: '0.85rem', color: '#8b4513', marginBottom: '0.5rem', textAlign: 'left', fontWeight: '500' }}>
+                I am a... / Soy...
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {[
+                  { value: 'fan',      label: 'Fan',      sub: 'Buy tickets, collect Palomas' },
+                  { value: 'artist',   label: 'Artist',   sub: 'Apply to perform at Casa de Copas' },
+                  { value: 'promoter', label: 'Promoter', sub: 'Upload flyers, set show details' },
+                ].map(({ value, label, sub }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: value, isArtistApplicant: value === 'artist' })}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem 1rem',
+                      borderRadius: '12px',
+                      border: formData.role === value
+                        ? '2px solid rgba(210, 105, 30, 0.8)'
+                        : '1px solid rgba(255, 255, 255, 0.3)',
+                      backgroundColor: formData.role === value
+                        ? 'rgba(210, 105, 30, 0.15)'
+                        : 'rgba(255, 255, 255, 0.1)',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <div style={{ fontWeight: '700', color: '#8b4513', fontSize: '0.95rem' }}>{label}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'rgba(139, 69, 19, 0.7)', marginTop: '0.15rem' }}>{sub}</div>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <button

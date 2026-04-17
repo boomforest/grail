@@ -25,6 +25,7 @@ import ArtistPending from './components/ArtistPending'
 import ArtistPortal from './components/ArtistPortal'
 import AdminArtistSubmissions from './components/AdminArtistSubmissions'
 import CompetitionPage from './components/CompetitionPage'
+import PromoterDashboard from './components/PromoterDashboard'
 
 function App() {
   // Core state
@@ -55,6 +56,7 @@ function App() {
   const [showArtistApply, setShowArtistApply] = useState(false) // Artist application form
   const [showArtistPending, setShowArtistPending] = useState(false) // Artist pending review
   const [showArtistPortal, setShowArtistPortal] = useState(false) // Artist portal (approved)
+  const [showPromoterDashboard, setShowPromoterDashboard] = useState(false)
   const [artistApplication, setArtistApplication] = useState(null) // Artist application data
   const [showAdminArtistSubmissions, setShowAdminArtistSubmissions] = useState(false) // Admin artist submissions
   const [showCompetition, setShowCompetition] = useState(false) // Public competition page
@@ -364,6 +366,7 @@ function App() {
         merit_count: 0,
         total_palomas_collected: isAdmin ? 1000000 : 0,
         is_artist_applicant: authUser.user_metadata?.is_artist_applicant || false,
+        is_promoter: authUser.user_metadata?.is_promoter || false,
         primary_language: authUser.user_metadata?.primary_language || localStorage.getItem('language') || 'en'
       }
 
@@ -516,13 +519,15 @@ function App() {
 
   // Success handlers for LoginForm
   const handleSuccessfulLogin = async (data) => {
-    console.log('Login successful:', data.user)
     setUser(data.user)
     const loginProfile = await ensureProfileExists(data.user)
     await loadAllProfiles()
     await loadNotifications()
 
-    // Fetch artist application for all users
+    if (loginProfile?.is_promoter) {
+      setShowPromoterDashboard(true)
+      return
+    }
     const app = await fetchArtistApplication(data.user.id)
     if (loginProfile?.is_artist_applicant && app) {
       routeArtistView(app)
@@ -530,14 +535,16 @@ function App() {
   }
 
   const handleSuccessfulRegister = async (data) => {
-    console.log('Registration successful:', data.user)
     setUser(data.user)
     showMessage('Registration successful!')
     const regProfile = await ensureProfileExists(data.user)
     await loadAllProfiles()
     await loadNotifications()
 
-    // Fetch artist application for all users
+    if (regProfile?.is_promoter || data.user?.user_metadata?.is_promoter) {
+      setShowPromoterDashboard(true)
+      return
+    }
     const app = await fetchArtistApplication(data.user.id)
     if (regProfile?.is_artist_applicant && app) {
       routeArtistView(app)
@@ -593,6 +600,7 @@ function App() {
       setShowArtistApply(false)
       setShowArtistPending(false)
       setShowArtistPortal(false)
+      setShowPromoterDashboard(false)
       setArtistApplication(null)
       setShowAdminArtistSubmissions(false)
       setShowCompetition(false)
@@ -1392,6 +1400,19 @@ function App() {
         <FloatingGrailButton onGrailClick={() => setShowManifesto(true)} />
         {showManifesto && <ManifestoPopup onClose={() => setShowManifesto(false)} />}
       </>
+    )
+  }
+
+  // Promoter Dashboard
+  if (user && showPromoterDashboard) {
+    return (
+      <PromoterDashboard
+        user={user}
+        profile={profile}
+        supabase={supabase}
+        onBack={() => setShowPromoterDashboard(false)}
+        onLogout={handleLogout}
+      />
     )
   }
 
